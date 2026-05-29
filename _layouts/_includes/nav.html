@@ -1,0 +1,26 @@
+cat > _includes/nav.html << 'EOF'
+<nav class="top-nav">
+  <div class="nav-container">
+    <div class="nav-brand">
+      <a href="{{ '/' | relative_url }}">📁 Plebware</a>
+    </div>
+    
+    <button id="theme-toggle" class="theme-toggle" aria-label="Switch dark/light mode">🌙</button>
+    
+    <ul class="nav-links">
+      <li><a href="{{ '/' | relative_url }}">Home</a></li>
+      <li><a href="{{ '/fiction/' | relative_url }}">Fiction</a></li>
+      <li><a href="{{ '/devotions/' | relative_url }}">Devotionals</a></li>
+      <li><a href="{{ '/journals/' | relative_url }}">Journals</a></li>
+      <li><a href="{{ '/creative/' | relative_url }}">Creative</a></li>
+    </ul>
+
+    <div class="nav-separator"></div>
+    <ul class="nav-links secondary">
+      <li><span class="nav-label">⚙️ Systems</span></li>
+      <li><a href="https://Plebware.github.io/PlebMachine/">PlebMachine</a></li>
+      <li><a href="https://Plebware.github.io/Plebware/">Plebware Core</a></li>
+    </ul>
+  </div>
+</nav>
+EOF
