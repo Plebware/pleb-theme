@@ -18,7 +18,7 @@
   --secondary-nav-bg: #e9ecef;
 }
 
-/* Dark theme (applied via JavaScript toggling .dark-theme on body) */
+/* Dark theme */
 body.dark-theme {
   --bg: #0a0f0a;
   --text: #b3e0b3;
@@ -50,7 +50,7 @@ body {
 }
 
 /* ========================
-   Top Navigation (shared)
+   Top Navigation Container
    ======================== */
 .top-nav {
   background: var(--nav-bg);
@@ -95,25 +95,42 @@ body {
 }
 
 /* ========================
-   PRIMARY ROW (12 modes) - WRAP OVER MULTIPLE LINES
+   PRIMARY ROW (12 modes) – HORIZONTAL WITH WRAP
    ======================== */
-ul.modes-list {
-    display:flex !important;
-    flex-direction:row !important;
-    flex-wrap:wrap !important;
-    justify-content:center !important;
-    list-style:none !important;
-    padding:0 !important;
-    margin:0 !important;
-}
-ul.modes-list {
-    border: 3px solid red !important;
+.modes-list {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 0.5rem 1rem !important;
+  list-style: none !important;
+  width: 100% !important;
+  padding: 0.5rem 0 !important;
+  margin: 0 !important;
 }
 
-ul.modes-list > li {
-    display:inline-flex !important;
-    margin:0 0.5rem !important;
+.modes-list li {
+  display: inline-block !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
+
+.modes-list li a {
+  color: var(--nav-text);
+  text-decoration: none;
+  padding: 0.2rem 0.4rem;
+  border-bottom: 2px solid transparent;
+  transition: 0.2s;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.modes-list li a:hover {
+  border-bottom-color: var(--brand);
+  color: var(--brand);
+}
+
 /* ========================
    SECONDARY ROW (mode-specific sub-navigation)
    ======================== */
@@ -121,6 +138,7 @@ ul.modes-list > li {
   display: flex !important;
   flex-direction: row !important;
   flex-wrap: wrap !important;
+  justify-content: center !important;
   gap: 1rem;
   list-style: none !important;
   width: 100%;
@@ -158,6 +176,7 @@ ul.modes-list > li {
   display: flex !important;
   flex-direction: row !important;
   flex-wrap: wrap !important;
+  justify-content: center !important;
   gap: 1rem;
   list-style: none !important;
   width: 100%;
@@ -321,32 +340,25 @@ footer {
   }
   
   .modes-list {
-    gap: 0.5rem;
-    justify-content: center;
+    gap: 0.3rem 0.6rem;
   }
   
   .modes-list li a {
     font-size: 0.75rem;
-    white-space: normal; /* Allow wrapping on mobile */
+    white-space: nowrap; /* keep on one line on mobile but allow wrap of container */
   }
   
   .secondary-nav {
     gap: 0.5rem;
-    justify-content: center;
   }
   
   .secondary-nav li a {
     font-size: 0.75rem;
-    white-space: normal;
+    white-space: nowrap;
   }
   
   .systems-links {
-    justify-content: center;
     gap: 0.5rem;
-  }
-  
-  .systems-links li a {
-    white-space: normal;
   }
   
   .nav-brand a {
@@ -369,21 +381,4 @@ footer {
   .excerpt {
     font-size: 0.85rem;
   }
-  
-  main {
-    padding: 0;
-  }
-}
-/* FORCE horizontal navigation – emergency fix */
-.modes-list {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: wrap !important;
-  justify-content: center !important;
-  gap: 0.5rem 1rem !important;
-  width: 100% !important;
-}
-.modes-list li {
-  display: block !important;  /* block inside flex row works fine */
-  width: auto !important;
 }
