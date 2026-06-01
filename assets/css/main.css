@@ -132,38 +132,47 @@ body {
 }
 
 /* ========================
-   SECONDARY ROW (mode-specific sub-navigation)
+   SECONDARY ROW (mode-specific sub-navigation) – HORIZONTAL
    ======================== */
+.top-nav .secondary-nav,
 .secondary-nav {
   display: flex !important;
   flex-direction: row !important;
   flex-wrap: wrap !important;
   justify-content: center !important;
-  gap: 1rem;
+  align-items: center !important;
+  gap: 1rem !important;
+  width: 100% !important;
+  margin: 0.5rem 0 !important;
+  padding: 0.5rem 0 !important;
   list-style: none !important;
-  width: 100%;
-  margin: 0.5rem 0;
-  padding: 0.5rem 0;
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   background: var(--secondary-nav-bg);
   border-radius: 4px;
 }
 
+.top-nav .secondary-nav li,
 .secondary-nav li {
   display: inline-block !important;
+  width: auto !important;
   margin: 0 !important;
   padding: 0 !important;
+  float: none !important;
+  clear: none !important;
 }
 
+.top-nav .secondary-nav li a,
 .secondary-nav li a {
+  white-space: nowrap !important;
+  display: inline-block !important;
+  padding: 0.2rem 0.4rem !important;
   color: var(--link);
   text-decoration: none;
   font-size: 0.9rem;
-  padding: 0.2rem 0.4rem;
-  white-space: nowrap;
 }
 
+.top-nav .secondary-nav li a:hover,
 .secondary-nav li a:hover {
   color: var(--link-hover);
   text-decoration: underline;
@@ -334,109 +343,41 @@ footer {
     font-size: 1rem;
     padding: 0 0.5rem;
   }
-  
   .top-nav {
     margin: -1rem -0.5rem 1.5rem -0.5rem;
   }
-  
   .modes-list {
     gap: 0.3rem 0.6rem;
   }
-  
   .modes-list li a {
     font-size: 0.75rem;
-    white-space: nowrap; /* keep on one line on mobile but allow wrap of container */
+    white-space: nowrap;
   }
-  
+  .top-nav .secondary-nav,
   .secondary-nav {
     gap: 0.5rem;
   }
-  
   .secondary-nav li a {
     font-size: 0.75rem;
     white-space: nowrap;
   }
-  
   .systems-links {
     gap: 0.5rem;
   }
-  
   .nav-brand a {
     font-size: 1rem;
   }
-  
   .theme-toggle {
     font-size: 0.9rem;
     padding: 0.2rem 0.5rem;
   }
-  
   h1 {
     font-size: 1.6rem;
   }
-  
   .recent-list li {
     padding: 0.8rem;
   }
-  
   .excerpt {
     font-size: 0.85rem;
   }
-}
-/* Force secondary navigation items to be horizontal */
-.secondary-nav {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: wrap !important;
-  justify-content: center !important;
-  gap: 1rem !important;
-  list-style: none !important;
-  width: 100% !important;
-  padding: 0.5rem 0 !important;
-  margin: 0.5rem 0 !important;
-}
-
-.secondary-nav li {
-  display: inline-block !important;
-  width: auto !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-.secondary-nav li a {
-  white-space: nowrap !important;
-  display: inline-block !important;
-  padding: 0.2rem 0.4rem !important;
-}
-/* ========================
-   FINAL FIX: Force secondary navigation horizontal
-   ======================== */
-.top-nav .secondary-nav,
-.secondary-nav {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: wrap !important;
-  justify-content: center !important;
-  align-items: center !important;
-  gap: 1rem !important;
-  width: 100% !important;
-  margin: 0.5rem 0 !important;
-  padding: 0.5rem 0 !important;
-  list-style: none !important;
-}
-
-.top-nav .secondary-nav li,
-.secondary-nav li {
-  display: inline-block !important;
-  width: auto !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  float: none !important;
-  clear: none !important;
-}
-
-.top-nav .secondary-nav li a,
-.secondary-nav li a {
-  white-space: nowrap !important;
-  display: inline-block !important;
-  padding: 0.2rem 0.4rem !important;
 }
