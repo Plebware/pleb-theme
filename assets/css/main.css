@@ -7,15 +7,15 @@
 :root {
   --bg: #f2f2f2;
   --text: #1e1e1e;
-  --nav-bg: #2c2c2c;
-  --nav-text: #f2f2f2;
+  --nav-bg: #e0e0e0;       /* lighter gray for light mode header */
+  --nav-text: #1e1e1e;     /* dark text on light header */
   --brand: #1e6bb8;
   --border: #ddd;
   --card-bg: #fff;
   --code-bg: #f8f8f8;
   --link: #1e6bb8;
   --link-hover: #0d3b66;
-  --secondary-nav-bg: #e9ecef;
+  --secondary-nav-bg: #f4f4f4;
 }
 
 /* Dark theme */
