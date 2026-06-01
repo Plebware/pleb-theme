@@ -86,7 +86,7 @@ body {
   color: var(--brand);
   background: var(--nav-bg);
   transition: 0.2s;
-  font-family: monospace;https://github.com/Plebware/pleb-theme/edit/main/assets/css/main.css
+  font-family: monospace;
 }
 
 .theme-toggle:hover {
