@@ -5,7 +5,7 @@
 
 /* Light theme (default) */
 :root {
-  --bg: #f2f2f2;
+  --bg: #e0e0e0;
   --text: #1e1e1e;
   --nav-bg: #e0e0e0;       /* lighter gray for light mode header */
   --nav-text: #1e1e1e;     /* dark text on light header */
