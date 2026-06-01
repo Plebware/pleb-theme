@@ -106,6 +106,9 @@ ul.modes-list {
     padding:0 !important;
     margin:0 !important;
 }
+ul.modes-list {
+    border: 3px solid red !important;
+}
 
 ul.modes-list > li {
     display:inline-flex !important;
