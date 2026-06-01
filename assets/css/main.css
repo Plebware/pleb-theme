@@ -94,6 +94,9 @@ body {
   color: var(--nav-bg);
 }
 
+/* ========================
+   PRIMARY ROW (12 modes) - WRAP OVER MULTIPLE LINES
+   ======================== */
 .modes-list {
   display: flex !important;
   flex-direction: row !important;
@@ -104,6 +107,27 @@ body {
   margin: 0.5rem 0;
   padding: 0;
   justify-content: center;  /* centers the wrapped rows */
+}
+
+.modes-list li {
+  display: inline-block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.modes-list li a {
+  color: var(--nav-text);
+  text-decoration: none;
+  padding: 0.2rem 0.4rem;  /* added horizontal padding for better spacing */
+  border-bottom: 2px solid transparent;
+  transition: 0.2s;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.modes-list li a:hover {
+  border-bottom-color: var(--brand);
+  color: var(--brand);
 }
 
 /* ========================
