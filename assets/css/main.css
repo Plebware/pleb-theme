@@ -86,7 +86,7 @@ body {
   color: var(--brand);
   background: var(--nav-bg);
   transition: 0.2s;
-  font-family: monospace;
+  font-family: monospace;https://github.com/Plebware/pleb-theme/edit/main/assets/css/main.css
 }
 
 .theme-toggle:hover {
@@ -389,4 +389,17 @@ footer {
   main {
     padding: 0;
   }
+}
+/* FORCE horizontal navigation – emergency fix */
+.modes-list {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 0.5rem 1rem !important;
+  width: 100% !important;
+}
+.modes-list li {
+  display: block !important;  /* block inside flex row works fine */
+  width: auto !important;
 }
