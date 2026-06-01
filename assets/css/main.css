@@ -7,8 +7,8 @@
 :root {
   --bg: #f5f5f5;
   --text: #1e1e1e;
-  --nav-bg: #e0e0e0;       /* lighter gray for light mode header */
-  --nav-text: #1e1e1e;     /* dark text on light header */
+  --nav-bg: #f8f6f0;       /* lighter gray for light mode header */
+  --nav-text: #222222;     /* dark text on light header */
   --brand: #1e6bb8;
   --border: #ddd;
   --card-bg: #fff;
