@@ -24,9 +24,10 @@
     </ul>
 
     <!-- ======================= -->
-    <!-- SECONDARY ROW (mode‑specific sub‑navigation) -->
+    <!-- SECONDARY ROW (mode-specific sub-navigation) -->
     <!-- ======================= -->
-    {% if page.url contains '/author/' and page.url != '/author/' %}
+
+    {% if page.url contains '/author/' %}
     <ul class="secondary-nav">
       <li><a href="/author/">Author Home</a></li>
       <li><a href="/author/fiction/">Fiction</a></li>
@@ -38,7 +39,7 @@
     </ul>
     {% endif %}
 
-    {% if page.url contains '/study/' and page.url != '/study/' %}
+    {% if page.url contains '/study/' %}
     <ul class="secondary-nav">
       <li><a href="/study/">Study Home</a></li>
       <li><a href="/study/pleb-tuition/">Pleb‑Tuition</a></li>
@@ -46,7 +47,7 @@
     </ul>
     {% endif %}
 
-    {% if page.url contains '/research/' and page.url != '/research/' %}
+    {% if page.url contains '/research/' %}
     <ul class="secondary-nav">
       <li><a href="/research/">Research Home</a></li>
       <li><a href="/research/christian-research/">Christian Research</a></li>
@@ -55,7 +56,7 @@
     </ul>
     {% endif %}
 
-    {% if page.url contains '/graphics/' and page.url != '/graphics/' %}
+    {% if page.url contains '/graphics/' %}
     <ul class="secondary-nav">
       <li><a href="/graphics/">Graphics Home</a></li>
       <li><a href="/graphics/gimp-tricks/">GIMP Tricks</a></li>
@@ -64,7 +65,7 @@
     </ul>
     {% endif %}
 
-    {% if page.url contains '/music/' and page.url != '/music/' %}
+    {% if page.url contains '/music/' %}
     <ul class="secondary-nav">
       <li><a href="/music/">Music Home</a></li>
       <li><a href="/music/song-lyrics/">Song Lyrics</a></li>
@@ -73,7 +74,7 @@
     </ul>
     {% endif %}
 
-    {% if page.url contains '/video/' and page.url != '/video/' %}
+    {% if page.url contains '/video/' %}
     <ul class="secondary-nav">
       <li><a href="/video/">Video Home</a></li>
       <li><a href="/video/shot-cut/">Shotcut</a></li>
@@ -82,7 +83,7 @@
     </ul>
     {% endif %}
 
-    {% if page.url contains '/broadcast/' and page.url != '/broadcast/' %}
+    {% if page.url contains '/broadcast/' %}
     <ul class="secondary-nav">
       <li><a href="/broadcast/">Broadcast Home</a></li>
       <li><a href="/broadcast/videocast-schedule/">Videocast Schedule</a></li>
@@ -90,7 +91,7 @@
     </ul>
     {% endif %}
 
-    {% if page.url contains '/ai-helpers/' and page.url != '/ai-helpers/' %}
+    {% if page.url contains '/ai-helpers/' %}
     <ul class="secondary-nav">
       <li><a href="/ai-helpers/">AI Helpers Home</a></li>
       <li><a href="/ai-helpers/ai-reviews/">AI Reviews</a></li>
@@ -99,7 +100,7 @@
     </ul>
     {% endif %}
 
-    {% if page.url contains '/developer/' and page.url != '/developer/' %}
+    {% if page.url contains '/developer/' %}
     <ul class="secondary-nav">
       <li><a href="/developer/">Developer Home</a></li>
       <li><a href="/developer/plebmachine-tech-papers/">Tech Papers</a></li>
@@ -108,7 +109,7 @@
     </ul>
     {% endif %}
 
-    {% if page.url contains '/accounting/' and page.url != '/accounting/' %}
+    {% if page.url contains '/accounting/' %}
     <ul class="secondary-nav">
       <li><a href="/accounting/">Accounting Home</a></li>
       <li><a href="/accounting/spreadsheet-accounting/">Spreadsheet Accounting</a></li>
@@ -116,7 +117,7 @@
     </ul>
     {% endif %}
 
-    {% if page.url contains '/leisure/' and page.url != '/leisure/' %}
+    {% if page.url contains '/leisure/' %}
     <ul class="secondary-nav">
       <li><a href="/leisure/">Leisure Home</a></li>
       <li><a href="/leisure/game-reviews/">Game Reviews</a></li>
@@ -127,8 +128,7 @@
       <li><a href="/leisure/the-joy-of-cooking/">The Joy of Cooking</a></li>
     </ul>
     {% endif %}
- 
-    
+
     <!-- Legacy systems links -->
     <div class="nav-separator"></div>
     <ul class="systems-links">
