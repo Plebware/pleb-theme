@@ -411,3 +411,32 @@ footer {
 .top-nav {
   background-color: var(--nav-bg) !important;
 }
+
+/* ========================
+   Primary navigation: 4 items per row (3 rows of 4)
+   ======================== */
+.modes-list.primary-nav {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(auto, 140px));
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  list-style: none;
+  width: 100%;
+  margin: 0.5rem 0;
+  padding: 0;
+}
+
+/* On very small phones, use 2 columns */
+@media (max-width: 500px) {
+  .modes-list.primary-nav {
+    grid-template-columns: repeat(2, minmax(auto, 140px));
+  }
+}
+
+/* Double H2 font size on phones for easier reading */
+@media (max-width: 600px) {
+  h2 {
+    font-size: 1.8rem !important;
+    line-height: 1.2 !important;
+  }
+}
