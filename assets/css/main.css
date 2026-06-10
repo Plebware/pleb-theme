@@ -7,8 +7,8 @@
 :root {
   --bg: #f5f5f5;
   --text: #1e1e1e;
-  --nav-bg: #f8f6f0;       /* lighter gray for light mode header */
-  --nav-text: #222222;     /* dark text on light header */
+  --nav-bg: #f8f6f0;
+  --nav-text: #222222;
   --brand: #1e6bb8;
   --border: #ddd;
   --card-bg: #fff;
@@ -95,25 +95,25 @@ body {
 }
 
 /* ========================
-   PRIMARY ROW (12 modes) – HORIZONTAL WITH WRAP
+   PRIMARY ROW (12 modes) – Grid: 4 items per row
    ======================== */
+.modes-list.primary-nav,
 .modes-list {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: wrap !important;
-  justify-content: center !important;
-  align-items: center !important;
-  gap: 0.5rem 1rem !important;
-  list-style: none !important;
-  width: 100% !important;
-  padding: 0.5rem 0 !important;
-  margin: 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(auto, 140px));
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  list-style: none;
+  width: 100%;
+  margin: 0.5rem 0;
+  padding: 0;
 }
 
 .modes-list li {
-  display: inline-block !important;
-  margin: 0 !important;
-  padding: 0 !important;
+  display: block;
+  margin: 0;
+  padding: 0;
+  text-align: center;
 }
 
 .modes-list li a {
@@ -132,7 +132,7 @@ body {
 }
 
 /* ========================
-   SECONDARY ROW (mode-specific sub-navigation) – HORIZONTAL
+   SECONDARY ROW (mode-specific sub-navigation)
    ======================== */
 .top-nav .secondary-nav,
 .secondary-nav {
@@ -336,54 +336,72 @@ footer {
 }
 
 /* ========================
-   Mobile responsiveness
+   Responsive Design
    ======================== */
 @media (max-width: 600px) {
   body {
     font-size: 1rem;
     padding: 0 0.5rem;
   }
+
   .top-nav {
     margin: -1rem -0.5rem 1.5rem -0.5rem;
   }
+
+  /* Grid switches to 2 columns on small phones */
+  .modes-list.primary-nav,
   .modes-list {
+    grid-template-columns: repeat(2, minmax(auto, 140px));
     gap: 0.3rem 0.6rem;
   }
+
   .modes-list li a {
     font-size: 0.75rem;
     white-space: nowrap;
   }
-  .top-nav .secondary-nav,
+
   .secondary-nav {
     gap: 0.5rem;
   }
+
   .secondary-nav li a {
     font-size: 0.75rem;
     white-space: nowrap;
   }
+
   .systems-links {
     gap: 0.5rem;
   }
+
   .nav-brand a {
     font-size: 1rem;
   }
+
   .theme-toggle {
     font-size: 0.9rem;
     padding: 0.2rem 0.5rem;
   }
+
   h1 {
     font-size: 1.6rem;
   }
+
+  /* Double H2 font size for readability on phones */
+  h2 {
+    font-size: 1.8rem !important;
+    line-height: 1.2 !important;
+  }
+
   .recent-list li {
     padding: 0.8rem;
   }
+
   .excerpt {
     font-size: 0.85rem;
   }
 }
-/* ========================
-   FIX: Ensure header uses theme colors (no black)
-   ======================== */
+
+/* Force header background consistency */
 .top-nav,
 .top-nav .nav-container,
 .top-nav .nav-brand,
@@ -393,50 +411,19 @@ footer {
   background-color: var(--nav-bg) !important;
 }
 
-/* Keep brand link text color */
 .nav-brand a {
   background-color: transparent !important;
 }
 
-/* Toggle button hover – uses brand color */
 .theme-toggle:hover {
   background: var(--brand) !important;
   color: var(--nav-bg) !important;
 }
 
-/* Ensure any residual black is removed */
 .top-nav * {
   background-color: transparent !important;
 }
+
 .top-nav {
   background-color: var(--nav-bg) !important;
-}
-
-/* ========================
-   Primary navigation: 4 items per row (3 rows of 4)
-   ======================== */
-.modes-list.primary-nav {
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(auto, 140px));
-  justify-content: center;
-  gap: 0.5rem 1rem;
-  list-style: none;
-  width: 100%;
-  margin: 0.5rem 0;
-  padding: 0;
-}
-
-/* On very small phones, use 2 columns */
-@media (max-width: 500px) {
-  .modes-list.primary-nav {
-    grid-template-columns: repeat(2, minmax(auto, 140px));
-  }
-}
-
-/* Double H2 font size on phones for easier reading */
-@media (max-width: 600px) {
-  h2 {
-    font-size: 1.8rem !important;
-    line-height: 1.2 !important;
-  }
 }
