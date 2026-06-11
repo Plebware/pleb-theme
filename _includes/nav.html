@@ -27,11 +27,27 @@
     <!-- SECONDARY ROW (mode-specific sub-navigation) -->
     <!-- ======================= -->
 
+    <!-- Everyday sub‑categories (shown on root page) -->
+    {% if page.url == '/' or page.url contains '/everyday/' %}
+    <ul class="secondary-nav">
+      <li><a href="/">Everyday Home</a></li>
+      <li><a href="/everyday/housekeeping/">Housekeeping</a></li>
+      <li><a href="/everyday/handyman/">Handyman</a></li>
+      <li><a href="/everyday/moonlighting/">Moonlighting</a></li>
+      <li><a href="/everyday/home-cooking/">Home Cooking</a></li>
+      <li><a href="/everyday/personal-care/">Personal Care</a></li>
+      <li><a href="/everyday/fitness-training/">Fitness Training</a></li>
+      <li><a href="/everyday/daily-prayer/">Daily Prayer</a></li>
+      <li><a href="/everyday/daily-budget/">Daily Budget</a></li>
+    </ul>
+    {% endif %}
+
+    <!-- Author sub‑navigation -->
     {% if page.url contains '/author/' %}
     <ul class="secondary-nav">
       <li><a href="/author/">Author Home</a></li>
       <li><a href="/author/fiction/">Fiction</a></li>
-      <li><a href="/author/non-fiction/">Non‑Fiction</a></li>   <!-- new -->
+      <li><a href="/author/non-fiction/">Non‑Fiction</a></li>
       <li><a href="/author/devotions/">Devotionals</a></li>
       <li><a href="/author/journalistic/">Journalistic</a></li>
       <li><a href="/author/poetry/">Poetry</a></li>
@@ -40,6 +56,7 @@
     </ul>
     {% endif %}
  
+    <!-- Study sub‑navigation -->
     {% if page.url contains '/study/' %}
     <ul class="secondary-nav">
       <li><a href="/study/">Study Home</a></li>
@@ -48,6 +65,7 @@
     </ul>
     {% endif %}
 
+    <!-- Research sub‑navigation -->
     {% if page.url contains '/research/' %}
     <ul class="secondary-nav">
       <li><a href="/research/">Research Home</a></li>
@@ -57,6 +75,7 @@
     </ul>
     {% endif %}
 
+    <!-- Graphics sub‑navigation -->
     {% if page.url contains '/graphics/' %}
     <ul class="secondary-nav">
       <li><a href="/graphics/">Graphics Home</a></li>
@@ -66,6 +85,7 @@
     </ul>
     {% endif %}
 
+    <!-- Music sub‑navigation -->
     {% if page.url contains '/music/' %}
     <ul class="secondary-nav">
       <li><a href="/music/">Music Home</a></li>
@@ -75,6 +95,7 @@
     </ul>
     {% endif %}
 
+    <!-- Video sub‑navigation -->
     {% if page.url contains '/video/' %}
     <ul class="secondary-nav">
       <li><a href="/video/">Video Home</a></li>
@@ -84,15 +105,17 @@
     </ul>
     {% endif %}
 
+    <!-- Broadcast sub‑navigation -->
     {% if page.url contains '/broadcast/' %}
     <ul class="secondary-nav">
       <li><a href="/broadcast/">Broadcast Home</a></li>
       <li><a href="/broadcast/videocast-schedule/">Videocast Schedule</a></li>
       <li><a href="/broadcast/podcast-schedule/">Podcast Schedule</a></li>
-       <li><a href="/broadcast/facebook-broadcasts/">Facebook Broadcasts</a></li>   <!-- new -->
+      <li><a href="/broadcast/facebook-broadcasts/">Facebook Broadcasts</a></li>
     </ul>
     {% endif %}
 
+    <!-- AI Helpers sub‑navigation -->
     {% if page.url contains '/ai-helpers/' %}
     <ul class="secondary-nav">
       <li><a href="/ai-helpers/">AI Helpers Home</a></li>
@@ -102,6 +125,7 @@
     </ul>
     {% endif %}
 
+    <!-- Developer sub‑navigation -->
     {% if page.url contains '/developer/' %}
     <ul class="secondary-nav">
       <li><a href="/developer/">Developer Home</a></li>
@@ -111,6 +135,7 @@
     </ul>
     {% endif %}
 
+    <!-- Accounting sub‑navigation -->
     {% if page.url contains '/accounting/' %}
     <ul class="secondary-nav">
       <li><a href="/accounting/">Accounting Home</a></li>
@@ -119,6 +144,7 @@
     </ul>
     {% endif %}
 
+    <!-- Leisure sub‑navigation -->
     {% if page.url contains '/leisure/' %}
     <ul class="secondary-nav">
       <li><a href="/leisure/">Leisure Home</a></li>
@@ -128,7 +154,7 @@
       <li><a href="/leisure/crunchyroll-guides/">Crunchyroll Guides</a></li>
       <li><a href="/leisure/netflix-guide/">Netflix Guide</a></li>
       <li><a href="/leisure/the-joy-of-cooking/">The Joy of Cooking</a></li>
-      <li><a href="/leisure/gardening/">Gardening</a></li>   <!-- new -->
+      <li><a href="/leisure/gardening/">Gardening</a></li>
     </ul>
     {% endif %}
 
