@@ -95,12 +95,13 @@ body {
 }
 
 /* ========================
-   PRIMARY ROW (12 modes) – Grid: 4 items per row
+   PRIMARY NAVIGATION (12 modes)
+   Grid: 4 items per row on desktop
    ======================== */
 .modes-list.primary-nav,
 .modes-list {
   display: grid !important;
-  grid-template-columns: repeat(4, minmax(auto, 140px));
+  grid-template-columns: repeat(4, minmax(100px, 140px));
   justify-content: center;
   gap: 0.5rem 1rem;
   list-style: none;
@@ -132,20 +133,19 @@ body {
 }
 
 /* ========================
-   SECONDARY ROW (mode-specific sub-navigation)
+   SECONDARY NAVIGATION (sub‑categories)
+   Also grid: 4 items per row on desktop
    ======================== */
 .top-nav .secondary-nav,
 .secondary-nav {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: wrap !important;
-  justify-content: center !important;
-  align-items: center !important;
-  gap: 1rem !important;
-  width: 100% !important;
-  margin: 0.5rem 0 !important;
-  padding: 0.5rem 0 !important;
-  list-style: none !important;
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(100px, auto));
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  width: 100%;
+  margin: 0.5rem 0;
+  padding: 0.5rem 0;
+  list-style: none;
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   background: var(--secondary-nav-bg);
@@ -154,19 +154,17 @@ body {
 
 .top-nav .secondary-nav li,
 .secondary-nav li {
-  display: inline-block !important;
-  width: auto !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  float: none !important;
-  clear: none !important;
+  display: block;
+  margin: 0;
+  padding: 0;
+  text-align: center;
 }
 
 .top-nav .secondary-nav li a,
 .secondary-nav li a {
-  white-space: nowrap !important;
-  display: inline-block !important;
-  padding: 0.2rem 0.4rem !important;
+  white-space: nowrap;
+  display: inline-block;
+  padding: 0.2rem 0.4rem;
   color: var(--link);
   text-decoration: none;
   font-size: 0.9rem;
@@ -179,7 +177,7 @@ body {
 }
 
 /* ========================
-   LEGACY SYSTEMS LINKS
+   LEGACY SYSTEMS LINKS (optional – keep as flex)
    ======================== */
 .systems-links {
   display: flex !important;
@@ -348,25 +346,26 @@ footer {
     margin: -1rem -0.5rem 1.5rem -0.5rem;
   }
 
-  /* Grid switches to 2 columns on small phones */
+  /* Primary nav: 2 columns on small phones */
   .modes-list.primary-nav,
   .modes-list {
-    grid-template-columns: repeat(2, minmax(auto, 140px));
+    grid-template-columns: repeat(2, minmax(80px, 120px));
     gap: 0.3rem 0.6rem;
   }
 
   .modes-list li a {
     font-size: 0.75rem;
-    white-space: nowrap;
   }
 
+  /* Secondary nav: 2 columns on small phones */
   .secondary-nav {
-    gap: 0.5rem;
+    grid-template-columns: repeat(2, minmax(80px, auto));
+    gap: 0.3rem 0.6rem;
   }
 
   .secondary-nav li a {
     font-size: 0.75rem;
-    white-space: nowrap;
+    white-space: normal;
   }
 
   .systems-links {
@@ -386,7 +385,7 @@ footer {
     font-size: 1.6rem;
   }
 
-  /* Double H2 font size for readability on phones */
+  /* Double H2 size for readability */
   h2 {
     font-size: 1.8rem !important;
     line-height: 1.2 !important;
@@ -398,6 +397,18 @@ footer {
 
   .excerpt {
     font-size: 0.85rem;
+  }
+}
+
+/* Extra small devices (under 400px) */
+@media (max-width: 400px) {
+  .modes-list.primary-nav,
+  .modes-list {
+    grid-template-columns: repeat(2, minmax(70px, 100px));
+  }
+
+  .secondary-nav {
+    grid-template-columns: repeat(2, minmax(70px, auto));
   }
 }
 
