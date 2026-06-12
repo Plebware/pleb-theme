@@ -139,7 +139,7 @@ body {
   padding: 0.2rem 0.4rem;
   border-bottom: 2px solid transparent;
   transition: 0.2s;
-  font-size: 1.1rem;
+  font-size: 1rem;        /* increased from 0.9rem */
   white-space: nowrap;
 }
 
@@ -150,7 +150,7 @@ body {
 
 /* ========================
    SECONDARY NAVIGATION (sub‑categories)
-   Also grid: 4 items per row on desktop
+   Grid: 4 items per row on desktop
    ======================== */
 .top-nav .secondary-nav,
 .secondary-nav {
@@ -183,7 +183,7 @@ body {
   padding: 0.2rem 0.4rem;
   color: var(--link);
   text-decoration: none;
-  font-size: 1.1rem;
+  font-size: 1rem;        /* increased from 0.9rem */
 }
 
 .top-nav .secondary-nav li a:hover,
@@ -350,8 +350,28 @@ footer {
 }
 
 /* ========================
-   Responsive Design
+   Responsive Design (Tablets & Phones)
    ======================== */
+@media (max-width: 768px) {
+  /* Primary nav: 2 columns on tablets */
+  .modes-list.primary-nav,
+  .modes-list {
+    grid-template-columns: repeat(2, minmax(100px, 140px));
+    gap: 0.5rem;
+  }
+
+  /* Secondary nav: 2 columns on tablets */
+  .secondary-nav {
+    grid-template-columns: repeat(2, minmax(100px, auto));
+    gap: 0.5rem;
+  }
+
+  .modes-list li a,
+  .secondary-nav li a {
+    font-size: 0.9rem;    /* slightly smaller on tablet but still readable */
+  }
+}
+
 @media (max-width: 600px) {
   body {
     font-size: 1rem;
@@ -366,7 +386,7 @@ footer {
     padding: 0.5rem 0;
   }
 
-  /* Primary nav: 2 columns on small phones */
+  /* Primary nav: 2 columns, smaller gap */
   .modes-list.primary-nav,
   .modes-list {
     grid-template-columns: repeat(2, minmax(80px, 120px));
@@ -374,18 +394,20 @@ footer {
   }
 
   .modes-list li a {
-    font-size: 0.75rem;
+    font-size: 0.85rem;   /* larger than before, was 0.75rem */
+    padding: 0.3rem 0.2rem;
   }
 
-  /* Secondary nav: 2 columns on small phones */
+  /* Secondary nav: 2 columns, allow text wrap */
   .secondary-nav {
     grid-template-columns: repeat(2, minmax(80px, auto));
     gap: 0.3rem 0.6rem;
   }
 
   .secondary-nav li a {
-    font-size: 0.75rem;
-    white-space: normal;
+    font-size: 0.85rem;   /* larger than before */
+    white-space: normal;   /* allow wrapping on very small screens */
+    padding: 0.3rem 0.2rem;
   }
 
   .systems-links {
@@ -405,7 +427,6 @@ footer {
     font-size: 1.6rem;
   }
 
-  /* Double H2 size for readability */
   h2 {
     font-size: 1.8rem !important;
     line-height: 1.2 !important;
@@ -426,9 +447,12 @@ footer {
   .modes-list {
     grid-template-columns: repeat(2, minmax(70px, 100px));
   }
-
   .secondary-nav {
     grid-template-columns: repeat(2, minmax(70px, auto));
+  }
+  .modes-list li a,
+  .secondary-nav li a {
+    font-size: 0.8rem;
   }
 }
 
