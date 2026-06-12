@@ -139,7 +139,7 @@ body {
   padding: 0.2rem 0.4rem;
   border-bottom: 2px solid transparent;
   transition: 0.2s;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   white-space: nowrap;
 }
 
@@ -183,7 +183,7 @@ body {
   padding: 0.2rem 0.4rem;
   color: var(--link);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
 }
 
 .top-nav .secondary-nav li a:hover,
