@@ -41,112 +41,157 @@
     </ul>
     {% endif %}
 
-    <!-- Author sub‑navigation -->
-    {% if page.url contains '/author/' %}
-    <ul class="secondary-nav">
-      <li><a href="/author/">Author Home</a></li>
-      <li><a href="/author/fiction/">Fiction</a></li>
-      <li><a href="/author/non-fiction/">Non‑Fiction</a></li>
-      <li><a href="/author/devotions/">Devotionals</a></li>
-      <li><a href="/author/journalistic/">Journalistic</a></li>
-      <li><a href="/author/poetry/">Poetry</a></li>
-      <li><a href="/author/cook-books/">Cook Books</a></li>
-      <li><a href="/author/news/">News</a></li>
-    </ul>
-    {% endif %}
- 
-    <!-- Study sub‑navigation -->
-    {% if page.url contains '/study/' %}
-    <ul class="secondary-nav">
-      <li><a href="/study/">Study Home</a></li>
-      <li><a href="/study/pleb-tuition/">Pleb‑Tuition</a></li>
-      <li><a href="/study/how-to-cook/">How to Cook</a></li>
-    </ul>
-    {% endif %}
+   <!-- Author -->
+{% if page.url contains '/author/' %}
+<ul class="secondary-nav">
+  <li><a href="/author/">Author Home</a></li>
+  <li><a href="/author/comics/">Comics</a></li>
+  <li><a href="/author/fiction/">Fiction</a></li>
+  <li><a href="/author/non-fiction/">Non‑Fiction</a></li>
+  <li><a href="/author/devotions/">Devotionals</a></li>
+  <li><a href="/author/journalistic/">Journalistic</a></li>
+  <li><a href="/author/poetry/">Poetry</a></li>
+  <li><a href="/author/cook-books/">Cook Books</a></li>
+  <li><a href="/author/news/">News</a></li>
+</ul>
+{% endif %}
 
-    <!-- Research sub‑navigation -->
-    {% if page.url contains '/research/' %}
-    <ul class="secondary-nav">
-      <li><a href="/research/">Research Home</a></li>
-      <li><a href="/research/christian-research/">Christian Research</a></li>
-      <li><a href="/research/linux-research/">Linux Research</a></li>
-      <li><a href="/research/plebmachine-research/">PlebMachine Research</a></li>
-    </ul>
-    {% endif %}
+<!-- Study -->
+{% if page.url contains '/study/' %}
+<ul class="secondary-nav">
+  <li><a href="/study/">Study Home</a></li>
+  <li><a href="/study/pleb-tuition/">Pleb‑Tuition</a></li>
+  <li><a href="/study/how-to-cook/">How to Cook</a></li>
+  <li><a href="/study/theology/">Theology</a></li>
+  <li><a href="/study/web-design/">Web Design</a></li>
+  <li><a href="/study/graphic-design/">Graphic Design</a></li>
+  <li><a href="/study/writing/">Writing</a></li>
+  <li><a href="/study/marketing/">Marketing</a></li>
+  <li><a href="/study/life-skills/">Life Skills</a></li>
+</ul>
+{% endif %}
 
-    <!-- Graphics sub‑navigation -->
-    {% if page.url contains '/graphics/' %}
-    <ul class="secondary-nav">
-      <li><a href="/graphics/">Graphics Home</a></li>
-      <li><a href="/graphics/gimp-tricks/">GIMP Tricks</a></li>
-      <li><a href="/graphics/ai-graphics/">AI Graphics</a></li>
-      <li><a href="/graphics/inkscape-tricks/">Inkscape Tricks</a></li>
-    </ul>
-    {% endif %}
+<!-- Research -->
+{% if page.url contains '/research/' %}
+<ul class="secondary-nav">
+  <li><a href="/research/">Research Home</a></li>
+  <li><a href="/research/christian-research/">Christian</a></li>
+  <li><a href="/research/linux-research/">Linux</a></li>
+  <li><a href="/research/plebmachine-research/">PlebMachine</a></li>
+  <li><a href="/research/web-browser/">Web Browser</a></li>
+  <li><a href="/research/notebook-lm/">Notebook LM</a></li>
+  <li><a href="/research/tech-research/">Tech Research</a></li>
+  <li><a href="/research/well-being/">Well Being</a></li>
+  <li><a href="/research/sustainability/">Sustainability</a></li>
+</ul>
+{% endif %}
 
-    <!-- Music sub‑navigation -->
-    {% if page.url contains '/music/' %}
-    <ul class="secondary-nav">
-      <li><a href="/music/">Music Home</a></li>
-      <li><a href="/music/song-lyrics/">Song Lyrics</a></li>
-      <li><a href="/music/fl-studio-tips/">FL Studio Tips</a></li>
-      <li><a href="/music/sample-packs/">Sample Packs</a></li>
-    </ul>
-    {% endif %}
+<!-- Graphics -->
+{% if page.url contains '/graphics/' %}
+<ul class="secondary-nav">
+  <li><a href="/graphics/">Graphics Home</a></li>
+  <li><a href="/graphics/gimp-tricks/">GIMP Tricks</a></li>
+  <li><a href="/graphics/inkscape-tricks/">Inkscape Tricks</a></li>
+  <li><a href="/graphics/logo-design/">Logo Design</a></li>
+  <li><a href="/graphics/cover-art/">Cover Art</a></li>
+  <li><a href="/graphics/web-graphics/">Web Graphics</a></li>
+  <li><a href="/graphics/ai-graphics/">AI Art</a></li>
+  <li><a href="/graphics/cartoons/">Cartoons</a></li>
+  <li><a href="/graphics/diagrams/">Diagrams</a></li>
+</ul>
+{% endif %}
 
-    <!-- Video sub‑navigation -->
-    {% if page.url contains '/video/' %}
-    <ul class="secondary-nav">
-      <li><a href="/video/">Video Home</a></li>
-      <li><a href="/video/shot-cut/">Shotcut</a></li>
-      <li><a href="/video/open-shot/">OpenShot</a></li>
-      <li><a href="/video/youtube-links/">YouTube Links</a></li>
-    </ul>
-    {% endif %}
+<!-- Music -->
+{% if page.url contains '/music/' %}
+<ul class="secondary-nav">
+  <li><a href="/music/">Music Home</a></li>
+  <li><a href="/music/fl-studio-tips/">FL Studio</a></li>
+  <li><a href="/music/audacity/">Audacity</a></li>
+  <li><a href="/music/mixxx/">MIXXX</a></li>
+  <li><a href="/music/song-lyrics/">Song Lyrics</a></li>
+  <li><a href="/music/sample-packs/">Sample Packs</a></li>
+  <li><a href="/music/sounds/">Sounds</a></li>
+  <li><a href="/music/hypeedit/">HypeEdit</a></li>
+  <li><a href="/music/sound-cloud/">Sound Cloud</a></li>
+</ul>
+{% endif %}
 
-    <!-- Broadcast sub‑navigation -->
-    {% if page.url contains '/broadcast/' %}
-    <ul class="secondary-nav">
-      <li><a href="/broadcast/">Broadcast Home</a></li>
-      <li><a href="/broadcast/videocast-schedule/">Videocast Schedule</a></li>
-      <li><a href="/broadcast/podcast-schedule/">Podcast Schedule</a></li>
-      <li><a href="/broadcast/facebook-broadcasts/">Facebook Broadcasts</a></li>
-    </ul>
-    {% endif %}
+<!-- Video -->
+{% if page.url contains '/video/' %}
+<ul class="secondary-nav">
+  <li><a href="/video/">Video Home</a></li>
+  <li><a href="/video/shot-cut/">ShotCut</a></li>
+  <li><a href="/video/open-shot/">OpenShot</a></li>
+  <li><a href="/video/youtube-links/">YouTube</a></li>
+  <li><a href="/video/subtitles/">Subtitles</a></li>
+  <li><a href="/video/ai-generated/">AI Generated</a></li>
+  <li><a href="/video/android/">Android</a></li>
+  <li><a href="/video/cam-recorder/">Cam Recorder</a></li>
+  <li><a href="/video/notebook-lm/">Notebook LM</a></li>
+</ul>
+{% endif %}
 
-    <!-- AI Helpers sub‑navigation -->
-    {% if page.url contains '/ai-helpers/' %}
-    <ul class="secondary-nav">
-      <li><a href="/ai-helpers/">AI Helpers Home</a></li>
-      <li><a href="/ai-helpers/ai-reviews/">AI Reviews</a></li>
-      <li><a href="/ai-helpers/ai-prompts/">AI Prompts</a></li>
-      <li><a href="/ai-helpers/ai-use/">AI Use</a></li>
-    </ul>
-    {% endif %}
+<!-- Broadcast -->
+{% if page.url contains '/broadcast/' %}
+<ul class="secondary-nav">
+  <li><a href="/broadcast/">Broadcast Home</a></li>
+  <li><a href="/broadcast/obs-studio/">OBS Studio</a></li>
+  <li><a href="/broadcast/videocast-schedule/">Videocast</a></li>
+  <li><a href="/broadcast/podcast-schedule/">Podcast</a></li>
+  <li><a href="/broadcast/facebook-broadcasts/">Facebook</a></li>
+  <li><a href="/broadcast/plebcasts/">PlebCasts</a></li>
+  <li><a href="/broadcast/youtube/">YouTube</a></li>
+  <li><a href="/broadcast/twitch-tv/">Twitch TV</a></li>
+  <li><a href="/broadcast/kick/">Kick</a></li>
+</ul>
+{% endif %}
 
-    <!-- Developer sub‑navigation -->
-    {% if page.url contains '/developer/' %}
+<!-- AI Helpers -->
+{% if page.url contains '/ai-helpers/' %}
+<ul class="secondary-nav">
+  <li><a href="/ai-helpers/">AI Helpers Home</a></li>
+  <li><a href="/ai-helpers/ai-reviews/">AI Reviews</a></li>
+  <li><a href="/ai-helpers/ai-prompts/">AI Prompts</a></li>
+  <li><a href="/ai-helpers/ai-use/">AI Use</a></li>
+  <li><a href="/ai-helpers/ai-writing/">AI Writing</a></li>
+  <li><a href="/ai-helpers/ai-coding/">AI Coding</a></li>
+  <li><a href="/ai-helpers/ai-research/">AI Research</a></li>
+  <li><a href="/ai-helpers/local-ai/">Local AI</a></li>
+  <li><a href="/ai-helpers/ai-android/">AI Android</a></li>
+</ul>
+{% endif %}
+
+<!-- Developer -->
+{% if page.url contains '/developer/' %}
 <ul class="secondary-nav">
   <li><a href="/developer/">Developer Home</a></li>
   <li><a href="/developer/plebware/">PlebWare</a></li>
+  <li><a href="/developer/plebmachine-tech-papers/">PlebMachine</a></li>
   <li><a href="/developer/rainmeter/">Rainmeter</a></li>
   <li><a href="/developer/github-pages/">GitHub Pages</a></li>
   <li><a href="/developer/automation-scripting/">Automation & Scripting</a></li>
   <li><a href="/developer/plebmachine-tech-papers/">Tech Papers</a></li>
-  <li><a href="/developer/plebmachine-guides/">PlebMachine Guides</a></li>
-  <li><a href="/developer/plebmachine-manuals/">PlebMachine Manuals</a></li>
+  <li><a href="/developer/plebmachine-guides/">Guides</a></li>
+  <li><a href="/developer/plebmachine-manuals/">Manuals</a></li>
+  <li><a href="/developer/total-launcher/">Total Launcher</a></li>
 </ul>
 {% endif %}
 
-    <!-- Accounting sub‑navigation -->
-    {% if page.url contains '/accounting/' %}
-    <ul class="secondary-nav">
-      <li><a href="/accounting/">Accounting Home</a></li>
-      <li><a href="/accounting/spreadsheet-accounting/">Spreadsheet Accounting</a></li>
-      <li><a href="/accounting/gnucash-tips/">GnuCash Tips</a></li>
-    </ul>
-    {% endif %}
-
+<!-- Accounting -->
+{% if page.url contains '/accounting/' %}
+<ul class="secondary-nav">
+  <li><a href="/accounting/">Accounting Home</a></li>
+  <li><a href="/accounting/spreadsheet-accounting/">Spreadsheet</a></li>
+  <li><a href="/accounting/gnucash-tips/">GNU Cash</a></li>
+  <li><a href="/accounting/budgeting/">Budgeting</a></li>
+  <li><a href="/accounting/invoicing/">Invoicing</a></li>
+  <li><a href="/accounting/tax/">Tax</a></li>
+  <li><a href="/accounting/payroll/">Payroll</a></li>
+  <li><a href="/accounting/reports/">Reports</a></li>
+  <li><a href="/accounting/investments/">Investments</a></li>
+</ul>
+{% endif %}
+    
     <!-- Leisure sub‑navigation -->
     {% if page.url contains '/leisure/' %}
     <ul class="secondary-nav">
