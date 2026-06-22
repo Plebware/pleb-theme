@@ -60,7 +60,7 @@ body {
 }
 .site-banner img {
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   max-width: 100%;
   height: auto;
 }
@@ -139,7 +139,7 @@ body {
   padding: 0.2rem 0.4rem;
   border-bottom: 2px solid transparent;
   transition: 0.2s;
-  font-size: 1rem;        /* increased from 0.9rem */
+  font-size: 1rem;
   white-space: nowrap;
 }
 
@@ -183,7 +183,7 @@ body {
   padding: 0.2rem 0.4rem;
   color: var(--link);
   text-decoration: none;
-  font-size: 1rem;        /* increased from 0.9rem */
+  font-size: 1rem;
 }
 
 .top-nav .secondary-nav li a:hover,
@@ -294,7 +294,9 @@ main {
 }
 
 /* Headings */
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   margin-top: 1.5em;
   margin-bottom: 0.5em;
   line-height: 1.2;
@@ -326,14 +328,16 @@ table {
   background: var(--card-bg);
 }
 
-th, td {
+th,
+td {
   border: 1px solid var(--border);
   padding: 0.5rem;
   text-align: left;
 }
 
 /* Code blocks */
-pre, code {
+pre,
+code {
   background: var(--code-bg);
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
@@ -350,28 +354,27 @@ footer {
 }
 
 /* ========================
-   Responsive Design (Tablets & Phones)
+   Responsive Design
    ======================== */
+
+/* Tablets and smaller laptops (≤ 768px) */
 @media (max-width: 768px) {
-  /* Primary nav: 2 columns on tablets */
   .modes-list.primary-nav,
   .modes-list {
     grid-template-columns: repeat(2, minmax(100px, 140px));
     gap: 0.5rem;
   }
-
-  /* Secondary nav: 2 columns on tablets */
   .secondary-nav {
     grid-template-columns: repeat(2, minmax(100px, auto));
     gap: 0.5rem;
   }
-
   .modes-list li a,
   .secondary-nav li a {
-    font-size: 0.9rem;    /* slightly smaller on tablet but still readable */
+    font-size: 0.9rem;
   }
 }
 
+/* Mobile phones (≤ 600px) */
 @media (max-width: 600px) {
   body {
     font-size: 1rem;
@@ -386,28 +389,37 @@ footer {
     padding: 0.5rem 0;
   }
 
-  /* Primary nav: 2 columns, smaller gap */
+  /* Primary nav: 2 columns */
   .modes-list.primary-nav,
   .modes-list {
     grid-template-columns: repeat(2, minmax(80px, 120px));
     gap: 0.3rem 0.6rem;
   }
-
   .modes-list li a {
-    font-size: 0.85rem;   /* larger than before, was 0.75rem */
+    font-size: 0.85rem;
     padding: 0.3rem 0.2rem;
   }
 
-  /* Secondary nav: 2 columns, allow text wrap */
+  /* Secondary nav: 2 columns (with !important to override) */
+  .top-nav .secondary-nav,
   .secondary-nav {
-    grid-template-columns: repeat(2, minmax(80px, auto));
-    gap: 0.3rem 0.6rem;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(80px, auto)) !important;
+    gap: 0.3rem 0.6rem !important;
+    justify-content: center !important;
+    padding: 0.5rem !important;
   }
-
+  .top-nav .secondary-nav li,
+  .secondary-nav li {
+    display: block !important;
+    text-align: center !important;
+    width: auto !important;
+  }
+  .top-nav .secondary-nav li a,
   .secondary-nav li a {
-    font-size: 0.85rem;   /* larger than before */
-    white-space: normal;   /* allow wrapping on very small screens */
-    padding: 0.3rem 0.2rem;
+    font-size: 0.8rem !important;
+    white-space: normal !important;
+    padding: 0.3rem 0.2rem !important;
   }
 
   .systems-links {
@@ -417,7 +429,6 @@ footer {
   .nav-brand a {
     font-size: 1rem;
   }
-
   .theme-toggle {
     font-size: 0.9rem;
     padding: 0.2rem 0.5rem;
@@ -426,7 +437,7 @@ footer {
   h1 {
     font-size: 1.6rem;
   }
-
+  /* Double H2 size for readability */
   h2 {
     font-size: 1.8rem !important;
     line-height: 1.2 !important;
@@ -435,13 +446,12 @@ footer {
   .recent-list li {
     padding: 0.8rem;
   }
-
   .excerpt {
     font-size: 0.85rem;
   }
 }
 
-/* Extra small devices (under 400px) */
+/* Extra small devices (≤ 400px) */
 @media (max-width: 400px) {
   .modes-list.primary-nav,
   .modes-list {
@@ -452,7 +462,7 @@ footer {
   }
   .modes-list li a,
   .secondary-nav li a {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
 }
 
