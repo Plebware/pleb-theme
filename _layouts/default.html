@@ -2,27 +2,90 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>{{ page.title | default: site.title }} – {{ site.title }}</title>
   <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
+  <link rel="alternate" type="application/rss+xml" title="{{ site.title }}" href="{{ '/feed.xml' | relative_url }}">
 </head>
 <body>
 
-  <!-- Banner image -->
+  <!-- ============================================================ -->
+  <!-- DYNAMIC BANNER IMAGE                                           -->
+  <!-- ============================================================ -->
   <div class="site-banner">
-    <img src="{{ '/assets/images/plebwarebanner.png' | relative_url }}" alt="Plebware Banner">
+    {% comment %}
+      First, check if this is a legacy project site (baseurl is set).
+      Then fall back to mode-based banners for the main site.
+    {% endcomment %}
+
+    {% if site.baseurl == '/PlebMachine' %}
+      {% assign banner_name = 'plebmachine-banner.png' %}
+    {% elsif site.baseurl == '/PlebWaveFrontier' %}
+      {% assign banner_name = 'plebwavefrontier-banner.png' %}
+    {% elsif site.baseurl == '/otto' %}
+      {% assign banner_name = 'otto-banner.png' %}
+    {% elsif site.baseurl == '/juelz-plebcore' %}
+      {% assign banner_name = 'juelz-plebcore-banner.png' %}
+    {% else %}
+      {# --- Main site: mode-based banners --- #}
+      {% assign page_path = page.url | split: '/' %}
+      {% assign mode = page_path[1] %}
+
+      {% if mode == '' or mode == 'everyday' %}
+        {% assign banner_name = 'everyday-banner.png' %}
+      {% elsif mode == 'author' %}
+        {% assign banner_name = 'author-banner.png' %}
+      {% elsif mode == 'study' %}
+        {% assign banner_name = 'study-banner.png' %}
+      {% elsif mode == 'research' %}
+        {% assign banner_name = 'research-banner.png' %}
+      {% elsif mode == 'graphics' %}
+        {% assign banner_name = 'graphics-banner.png' %}
+      {% elsif mode == 'music' %}
+        {% assign banner_name = 'music-banner.png' %}
+      {% elsif mode == 'video' %}
+        {% assign banner_name = 'video-banner.png' %}
+      {% elsif mode == 'broadcast' %}
+        {% assign banner_name = 'broadcast-banner.png' %}
+      {% elsif mode == 'ai-helpers' %}
+        {% assign banner_name = 'ai-helpers-banner.png' %}
+      {% elsif mode == 'developer' %}
+        {% assign banner_name = 'developer-banner.png' %}
+      {% elsif mode == 'accounting' %}
+        {% assign banner_name = 'accounting-banner.png' %}
+      {% elsif mode == 'leisure' %}
+        {% assign banner_name = 'leisure-banner.png' %}
+      {% else %}
+        {% assign banner_name = 'plebwarebanner.png' %}
+      {% endif %}
+    {% endif %}
+
+    <img src="{{ '/assets/images/' | append: banner_name | relative_url }}" alt="{{ site.title }} Banner">
   </div>
 
+  <!-- ============================================================ -->
+  <!-- NAVIGATION                                                    -->
+  <!-- ============================================================ -->
   {% include nav.html %}
+
+  <!-- ============================================================ -->
+  <!-- MAIN CONTENT                                                  -->
+  <!-- ============================================================ -->
   <main>
     {{ content }}
   </main>
+
+  <!-- ============================================================ -->
+  <!-- FOOTER                                                        -->
+  <!-- ============================================================ -->
   <footer>
     <p>Plebware · Technology should remain connected to humanity.</p>
     <p>Otto · The Keyboard Is Mightier Than The Pen.</p>
   </footer>
+
+  <!-- ============================================================ -->
+  <!-- SCRIPTS                                                       -->
+  <!-- ============================================================ -->
   <script src="{{ '/assets/js/theme.js' | relative_url }}"></script>
-</body>
-</html>
 </body>
 </html>
