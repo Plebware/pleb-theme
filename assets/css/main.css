@@ -495,7 +495,7 @@ footer {
 
 /* ===== PLEBWARE CONSOLE ===== */
 .pleb-console {
-    max-width: 720px;
+    max-width: 780px;
     margin: 0 auto;
     padding: 20px 12px;
 }
@@ -503,7 +503,7 @@ footer {
 .console-header {
     text-align: center;
     margin-bottom: 28px;
-    border-bottom: 1px solid #2e3642;
+    border-bottom: 1px solid var(--border);
     padding-bottom: 12px;
 }
 
@@ -511,13 +511,14 @@ footer {
     font-size: 2rem;
     font-weight: 400;
     letter-spacing: 2px;
-    color: #d0d8e0;
+    color: var(--text);
     margin: 0;
 }
 
 .console-header .console-sub {
     font-size: 0.85rem;
-    color: #6a7a8a;
+    color: var(--text);
+    opacity: 0.7;
     letter-spacing: 3px;
     margin: 4px 0 0;
     font-weight: 300;
@@ -526,7 +527,7 @@ footer {
 .console-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    gap: 14px;
 }
 
 .console-btn {
@@ -535,12 +536,13 @@ footer {
     align-items: center;
     justify-content: center;
     text-decoration: none;
-    background: #161c24;
-    border: 1px solid #2a323e;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
     border-radius: 10px;
     padding: 18px 8px;
     transition: all 0.15s ease;
     min-height: 110px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .console-btn .icon {
@@ -551,38 +553,48 @@ footer {
 .console-btn .label {
     font-size: 0.8rem;
     font-weight: 500;
-    color: #b0bcc8;
+    color: var(--text);
     letter-spacing: 0.5px;
     margin-top: 6px;
     text-align: center;
 }
 
-/* Calm hover – subtle lift & border lightening */
+/* ---- Hover & Active (works in both themes) ---- */
 .console-btn:hover {
-    background: #1e2630;
-    border-color: #4a5a6a;
+    background: var(--secondary-nav-bg);
+    border-color: var(--brand);
     transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
 }
 
 .console-btn:active {
     transform: translateY(2px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-/* Mobile: reduce spacing and icon size */
+/* ---- Mobile Responsive ---- */
 @media (max-width: 550px) {
+    .pleb-console {
+        padding: 12px 4px;
+    }
+
     .console-grid {
         gap: 10px;
     }
+
     .console-btn {
         min-height: 90px;
         padding: 12px 4px;
     }
+
     .console-btn .icon {
         font-size: 1.8rem;
     }
+
     .console-btn .label {
         font-size: 0.7rem;
     }
+
     .console-header h2 {
         font-size: 1.6rem;
     }
