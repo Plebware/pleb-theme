@@ -492,3 +492,98 @@ footer {
 .top-nav {
   background-color: var(--nav-bg) !important;
 }
+
+/* ===== PLEBWARE CONSOLE ===== */
+.pleb-console {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 20px 12px;
+}
+
+.console-header {
+    text-align: center;
+    margin-bottom: 28px;
+    border-bottom: 1px solid #2e3642;
+    padding-bottom: 12px;
+}
+
+.console-header h2 {
+    font-size: 2rem;
+    font-weight: 400;
+    letter-spacing: 2px;
+    color: #d0d8e0;
+    margin: 0;
+}
+
+.console-header .console-sub {
+    font-size: 0.85rem;
+    color: #6a7a8a;
+    letter-spacing: 3px;
+    margin: 4px 0 0;
+    font-weight: 300;
+}
+
+.console-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.console-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    background: #161c24;
+    border: 1px solid #2a323e;
+    border-radius: 10px;
+    padding: 18px 8px;
+    transition: all 0.15s ease;
+    min-height: 110px;
+}
+
+.console-btn .icon {
+    font-size: 2.2rem;
+    line-height: 1.4;
+}
+
+.console-btn .label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #b0bcc8;
+    letter-spacing: 0.5px;
+    margin-top: 6px;
+    text-align: center;
+}
+
+/* Calm hover – subtle lift & border lightening */
+.console-btn:hover {
+    background: #1e2630;
+    border-color: #4a5a6a;
+    transform: translateY(-2px);
+}
+
+.console-btn:active {
+    transform: translateY(2px);
+}
+
+/* Mobile: reduce spacing and icon size */
+@media (max-width: 550px) {
+    .console-grid {
+        gap: 10px;
+    }
+    .console-btn {
+        min-height: 90px;
+        padding: 12px 4px;
+    }
+    .console-btn .icon {
+        font-size: 1.8rem;
+    }
+    .console-btn .label {
+        font-size: 0.7rem;
+    }
+    .console-header h2 {
+        font-size: 1.6rem;
+    }
+}
