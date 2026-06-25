@@ -27,7 +27,7 @@
     {% elsif site.baseurl == '/juelz-plebcore' %}
       {% assign banner_name = 'juelz-plebcore-banner.png' %}
     {% else %}
-      {# --- Main site: mode-based banners --- #}
+      {% comment %}--- Main site: mode-based banners ---{% endcomment %}
       {% assign page_path = page.url | split: '/' %}
       {% assign mode = page_path[1] %}
 
