@@ -599,3 +599,61 @@ footer {
         font-size: 1.6rem;
     }
 }
+/* ========================
+   FOOTER
+   ======================== */
+footer {
+  text-align: center;
+  margin-top: 3rem;
+  padding: 2rem 0;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+
+.footer-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.footer-btn {
+  display: inline-block;
+  padding: 0.5rem 1.2rem;
+  background: var(--brand);
+  color: #fff !important;
+  text-decoration: none;
+  border-radius: 4px;
+  border-bottom: none !important;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.footer-btn:hover {
+  background: var(--link-hover);
+  color: #fff !important;
+  transform: scale(1.02);
+}
+
+.footer-text p {
+  margin: 0.2rem 0;
+  color: var(--text);
+  opacity: 0.8;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .footer-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .footer-btn {
+    width: 80%;
+    max-width: 280px;
+    text-align: center;
+    padding: 0.6rem 1rem;
+  }
+}
