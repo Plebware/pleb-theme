@@ -6,6 +6,13 @@
   <title>{{ page.title | default: site.title }} – {{ site.title }}</title>
   <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
   <link rel="alternate" type="application/rss+xml" title="{{ site.title }}" href="{{ '/feed.xml' | relative_url }}">
+  <!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ page.title | default: site.title }}">
+<meta name="twitter:description" content="{{ page.excerpt | default: site.description | strip_html | truncate: 160 }}">
+<meta name="twitter:image" content="{{ '/assets/images/twitter-card.png' | absolute_url }}">
+<meta name="twitter:site" content="@plebware">
+<meta name="twitter:creator" content="@plebware">
 </head>
 <body>
 
