@@ -4,11 +4,9 @@ layout: default
 <article>
   <h1>{{ page.title }}</h1>
   <p class="post-date">{{ page.date | date: "%Y-%m-%d" }}</p>
-  
   {{ content }}
-  
   <div class="post-navigation">
-    <p><a href="javascript:history.back()">← Back</a></p>
+    <p><a href="javascript:history.back()">← Back to archive</a></p>
     {% if page.previous.url %}
       <p>Previous: <a href="{{ page.previous.url }}">{{ page.previous.title }}</a></p>
     {% endif %}
