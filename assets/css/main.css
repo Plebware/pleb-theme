@@ -685,36 +685,114 @@ pre:has(code) {
     }
 }
 
-/* The copy button itself */
-.copy-code-btn {
-    position: absolute;
-    top: 0.3em;
-    right: 0.3em;
-    padding: 0.2em 0.6em;
-    font-size: 0.75rem;
-    line-height: 1.6;
-    color: #24292f;
-    background-color: #ffffff;
-    border: 1px solid #d0d7de;
-    border-radius: 6px;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.2s ease-in-out, background-color 0.2s, color 0.2s;
-    z-index: 10;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    white-space: nowrap;
+/* ============================================
+   CODE COPY BUTTON - Integrated with Plebware Theme
+   ============================================ */
+
+/* Override existing pre styles while preserving theme variables */
+pre {
+    position: relative !important;
+    padding: 2.5em 1em 1em 1em !important;
+    background: var(--code-bg) !important;
+    border-radius: 6px !important;
+    overflow: auto !important;
+    margin: 1.5em 0 !important;
 }
 
-/* Show the button on hover of the pre block */
-pre:has(code):hover .copy-code-btn,
-.copy-code-btn:focus {
-    opacity: 1;
+/* Code elements inside pre should maintain theme */
+pre code {
+    background: transparent !important;
+    padding: 0 !important;
+    font-family: monospace;
 }
 
-/* Button state when copied */
-.copy-code-btn.copied {
-    background-color: #2da44e;
-    color: #ffffff;
-    border-color: #2da44e;
-    opacity: 1;
+/* The copy button - uses theme variables */
+.copy-btn {
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    padding: 4px 12px !important;
+    font-size: 12px !important;
+    font-family: inherit !important;
+    line-height: 1.5 !important;
+    background: var(--card-bg) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    opacity: 0 !important;
+    transition: all 0.2s ease !important;
+    z-index: 10 !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+}
+
+/* Show button on hover */
+pre:hover .copy-btn,
+.copy-btn:focus {
+    opacity: 1 !important;
+}
+
+/* Button hover state */
+.copy-btn:hover {
+    background: var(--secondary-nav-bg) !important;
+    border-color: var(--brand) !important;
+}
+
+/* Button when copying */
+.copy-btn:active {
+    transform: scale(0.95) !important;
+}
+
+/* Success state - uses theme brand color */
+.copy-btn.copied {
+    background: #2da44e !important;
+    color: #ffffff !important;
+    border-color: #2da44e !important;
+    opacity: 1 !important;
+}
+
+/* Error state */
+.copy-btn.error {
+    background: #cf222e !important;
+    color: #ffffff !important;
+    border-color: #cf222e !important;
+    opacity: 1 !important;
+}
+
+/* Dark theme overrides */
+body.dark-theme .copy-btn {
+    background: var(--card-bg) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+
+body.dark-theme .copy-btn:hover {
+    background: var(--secondary-nav-bg) !important;
+    border-color: var(--brand) !important;
+}
+
+body.dark-theme .copy-btn.copied {
+    background: #2da44e !important;
+    color: #ffffff !important;
+    border-color: #2da44e !important;
+}
+
+body.dark-theme .copy-btn.error {
+    background: #cf222e !important;
+    color: #ffffff !important;
+    border-color: #cf222e !important;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+    .copy-btn {
+        font-size: 10px !important;
+        padding: 3px 10px !important;
+        top: 4px !important;
+        right: 4px !important;
+    }
+    
+    pre {
+        padding: 2.5em 0.8em 0.8em 0.8em !important;
+    }
 }
