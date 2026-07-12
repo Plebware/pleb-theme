@@ -1,105 +1,132 @@
-// assets/js/code-copy.js
+// ============================================
+// SIMPLE CODE COPY - Works everywhere
+// ============================================
 
 (function() {
     'use strict';
-
-    // Function to create and add a copy button to each code block
-    function addCopyButtons() {
-        // Select all <pre> elements that contain <code> (common markdown output)
-        const codeBlocks = document.querySelectorAll('pre:has(code)');
-
-        codeBlocks.forEach((preElement) => {
-            // Check if button already exists to avoid duplicates
-            if (preElement.querySelector('.copy-code-btn')) {
+    
+    // Wait for the page to fully load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCopyButtons);
+    } else {
+        initCopyButtons();
+    }
+    
+    function initCopyButtons() {
+        console.log('🔍 Looking for code blocks...');
+        
+        // Find ALL pre elements
+        const allPres = document.querySelectorAll('pre');
+        console.log(`📦 Found ${allPres.length} pre elements`);
+        
+        allPres.forEach((preElement, index) => {
+            // Check if this pre contains a code element
+            const codeElement = preElement.querySelector('code');
+            if (!codeElement) {
+                console.log(`⏭️ Pre #${index} has no code element, skipping`);
                 return;
             }
-
-            // Create the copy button
-            const button = document.createElement('button');
-            button.className = 'copy-code-btn';
-            button.setAttribute('aria-label', 'Copy code to clipboard');
-            button.innerHTML = '📋 Copy';
-
-            // Position the button absolutely within the pre element
+            
+            // Skip if already has a copy button
+            if (preElement.querySelector('.copy-btn')) {
+                console.log(`⏭️ Pre #${index} already has a copy button`);
+                return;
+            }
+            
+            console.log(`✅ Adding copy button to pre #${index}`);
+            
+            // Make sure pre is positioned relative
             preElement.style.position = 'relative';
+            
+            // Create the button
+            const button = document.createElement('button');
+            button.className = 'copy-btn';
+            button.textContent = '📋 Copy';
+            button.setAttribute('aria-label', 'Copy code to clipboard');
+            
+            // Add button to the pre element
             preElement.appendChild(button);
-
-            // Add click event listener
-            button.addEventListener('click', handleCopyClick);
+            
+            // Add click handler
+            button.addEventListener('click', function(e) {
+                e.stopPropagation();
+                copyCode(this, codeElement);
+            });
         });
     }
-
-    // Handle the copy action
-    function handleCopyClick(event) {
-        const button = event.currentTarget;
-        // Find the parent <pre> element and get the text from its <code> child
-        const preElement = button.closest('pre');
-        const codeElement = preElement.querySelector('code');
+    
+    function copyCode(button, codeElement) {
+        // Get the text content
+        let textToCopy = codeElement.innerText;
         
-        if (!codeElement) return;
-
-        // Get the text to copy. Using innerText preserves formatting.
-        const textToCopy = codeElement.innerText;
-
-        // Use the Clipboard API
+        // Use Clipboard API
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(textToCopy)
                 .then(() => {
-                    // Success feedback
-                    button.innerHTML = '✅ Copied!';
-                    button.classList.add('copied');
-                    setTimeout(() => {
-                        button.innerHTML = '📋 Copy';
-                        button.classList.remove('copied');
-                    }, 2000);
+                    showSuccess(button);
                 })
                 .catch(err => {
-                    console.error('Failed to copy: ', err);
-                    button.innerHTML = '❌ Error';
-                    setTimeout(() => {
-                        button.innerHTML = '📋 Copy';
-                    }, 2000);
+                    console.error('Clipboard API failed:', err);
+                    // Fallback to textarea method
+                    fallbackCopy(textToCopy, button);
                 });
         } else {
             // Fallback for older browsers
-            fallbackCopyText(textToCopy, button);
+            fallbackCopy(textToCopy, button);
         }
     }
-
-    // Fallback copy method using a temporary textarea
-    function fallbackCopyText(text, button) {
+    
+    function fallbackCopy(text, button) {
         const textarea = document.createElement('textarea');
         textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        textarea.style.top = '-9999px';
         document.body.appendChild(textarea);
         textarea.select();
+        
         try {
             const successful = document.execCommand('copy');
             if (successful) {
-                button.innerHTML = '✅ Copied!';
-                setTimeout(() => {
-                    button.innerHTML = '📋 Copy';
-                }, 2000);
+                showSuccess(button);
             } else {
-                button.innerHTML = '❌ Error';
-                setTimeout(() => {
-                    button.innerHTML = '📋 Copy';
-                }, 2000);
+                showError(button);
             }
         } catch (err) {
-            console.error('Fallback copy failed: ', err);
-            button.innerHTML = '❌ Error';
-            setTimeout(() => {
-                button.innerHTML = '📋 Copy';
-            }, 2000);
+            console.error('Fallback copy failed:', err);
+            showError(button);
         }
+        
         document.body.removeChild(textarea);
     }
-
-    // Run when the DOM is fully loaded
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', addCopyButtons);
-    } else {
-        // DOM is already ready
-        addCopyButtons();
+    
+    function showSuccess(button) {
+        const originalText = button.textContent;
+        button.textContent = '✅ Copied!';
+        button.style.backgroundColor = '#2da44e';
+        button.style.color = '#ffffff';
+        button.style.borderColor = '#2da44e';
+        
+        setTimeout(() => {
+            button.textContent = originalText;
+            button.style.backgroundColor = '';
+            button.style.color = '';
+            button.style.borderColor = '';
+        }, 2000);
+    }
+    
+    function showError(button) {
+        const originalText = button.textContent;
+        button.textContent = '❌ Error';
+        button.style.backgroundColor = '#cf222e';
+        button.style.color = '#ffffff';
+        button.style.borderColor = '#cf222e';
+        
+        setTimeout(() => {
+            button.textContent = originalText;
+            button.style.backgroundColor = '';
+            button.style.color = '';
+            button.style.borderColor = '';
+        }, 2000);
     }
 })();
