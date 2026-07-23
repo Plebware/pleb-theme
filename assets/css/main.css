@@ -599,6 +599,7 @@ footer {
         font-size: 1.6rem;
     }
 }
+
 /* ========================
    FOOTER
    ======================== */
@@ -656,33 +657,6 @@ footer {
     text-align: center;
     padding: 0.6rem 1rem;
   }
-}
-/* assets/css/code-copy.css */
-
-/* Ensure the pre element is positioned relative for the button */
-pre:has(code) {
-    position: relative;
-    padding: 1.5em 1em 1em 1em; /* Add top padding to avoid button overlap */
-    background-color: #f6f8fa;
-    border-radius: 6px;
-    overflow: auto;
-    margin: 1.5em 0;
-}
-
-/* Style for the dark theme (if you have one) */
-@media (prefers-color-scheme: dark) {
-    pre:has(code) {
-        background-color: #1e1e1e;
-    }
-    .copy-code-btn {
-        background-color: #2d2d2d;
-        color: #cccccc;
-        border-color: #444;
-    }
-    .copy-code-btn:hover {
-        background-color: #3d3d3d;
-        color: #fff;
-    }
 }
 
 /* ============================================
@@ -795,4 +769,21 @@ body.dark-theme .copy-btn.error {
     pre {
         padding: 2.5em 0.8em 0.8em 0.8em !important;
     }
+}
+
+/* ========================
+   READ ALOUD – WORD HIGHLIGHT
+   ======================== */
+.read-aloud-highlight {
+    background-color: #ffeb3b !important;
+    color: #000 !important;
+    padding: 0 2px !important;
+    border-radius: 2px !important;
+    transition: background-color 0.3s ease !important;
+}
+
+/* Dark theme override for read-aloud highlight */
+body.dark-theme .read-aloud-highlight {
+    background-color: #f9a825 !important;
+    color: #000 !important;
 }
