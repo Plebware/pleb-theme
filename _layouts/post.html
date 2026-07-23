@@ -4,7 +4,12 @@ layout: default
 <article>
   <h1>{{ page.title }}</h1>
   <p class="post-date">{{ page.date | date: "%Y-%m-%d" }}</p>
+  
+  <!-- Read Aloud buttons will be inserted here by the script -->
+  <div id="read-aloud-container"></div>
+  
   {{ content }}
+  
   <div class="post-navigation">
     <p><a href="javascript:history.back()">← Back to archive</a></p>
     {% if page.previous.url %}
@@ -15,3 +20,6 @@ layout: default
     {% endif %}
   </div>
 </article>
+
+<!-- Read Aloud Script (loads after content) -->
+<script src="{{ '/assets/js/read-aloud.js' | relative_url }}"></script>
