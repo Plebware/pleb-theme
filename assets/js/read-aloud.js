@@ -1,4 +1,4 @@
-// Read Aloud with Word Highlighting - UK English Male Voice
+// Read Aloud with Word Highlighting - Multi-Voice Support
 (function() {
     'use strict';
 
@@ -8,7 +8,7 @@
     let lastHighlightedIndex = -1;
     let availableVoices = [];
     let selectedVoice = null;
-    let voiceLoaded = false;
+    let preferredVoiceName = null;
 
     // ==========================================
     // 1. GET CONTENT FROM PAGE
@@ -168,20 +168,17 @@
     // ==========================================
     function loadVoices() {
         return new Promise(function(resolve) {
-            // Get voices immediately if available
             let voices = window.speechSynthesis.getVoices();
             if (voices.length > 0) {
                 resolve(voices);
                 return;
             }
             
-            // Otherwise wait for them to load
             window.speechSynthesis.onvoiceschanged = function() {
                 voices = window.speechSynthesis.getVoices();
                 resolve(voices);
             };
             
-            // Fallback: check again after 1 second
             setTimeout(function() {
                 voices = window.speechSynthesis.getVoices();
                 if (voices.length > 0) {
@@ -191,55 +188,133 @@
         });
     }
 
-    function findBestVoice(voices) {
-        // First try: Google UK English Male
-        let found = voices.find(function(v) {
-            return v.name === 'Google UK English Male' && v.lang === 'en-GB';
-        });
-        if (found) return found;
+    // ==========================================
+    // 6. FIND VOICE BY PREFERENCE
+    // ==========================================
+    function findVoiceByPreference(voices, preference) {
+        // If we have a stored preference, try that first
+        if (preferredVoiceName) {
+            const found = voices.find(function(v) {
+                return v.name === preferredVoiceName;
+            });
+            if (found) return found;
+        }
         
-        // Second try: Any Google UK English
-        found = voices.find(function(v) {
-            return v.name && v.name.includes('Google') && v.lang === 'en-GB';
-        });
-        if (found) return found;
-        
-        // Third try: Any UK English Male
-        found = voices.find(function(v) {
-            return v.lang === 'en-GB' && v.name && v.name.toLowerCase().includes('male');
-        });
-        if (found) return found;
-        
-        // Fourth try: Any UK English
-        found = voices.find(function(v) {
-            return v.lang === 'en-GB';
-        });
-        if (found) return found;
-        
-        // Fifth try: Any English voice
-        found = voices.find(function(v) {
+        // If no preference, try default order
+        const voicePriority = [
+            // Google Voices
+            { name: 'Google UK English Male', lang: 'en-GB' },
+            { name: 'Google US English', lang: 'en-US' },
+            { name: 'Google UK English Female', lang: 'en-GB' },
+            { name: 'Google Australian English', lang: 'en-AU' },
+            { name: 'Google South African English', lang: 'en-ZA' },
+            
+            // Microsoft Voices
+            { name: 'Microsoft George - English (United Kingdom)', lang: 'en-GB' },
+            { name: 'Microsoft David - English (United States)', lang: 'en-US' },
+            { name: 'Microsoft James - English (United States)', lang: 'en-US' },
+            { name: 'Microsoft Susan - English (United Kingdom)', lang: 'en-GB' },
+            { name: 'Microsoft Catherine - English (Australia)', lang: 'en-AU' },
+            
+            // macOS Voices
+            { name: 'Daniel', lang: 'en-GB' },
+            { name: 'Alex', lang: 'en-US' },
+            { name: 'Samantha', lang: 'en-US' },
+            { name: 'Karen', lang: 'en-AU' },
+            { name: 'Tessa', lang: 'en-ZA' },
+            { name: 'Lee', lang: 'en-AU' },
+            
+            // Any by language (fallback)
+            { lang: 'en-GB' },
+            { lang: 'en-US' },
+            { lang: 'en-AU' },
+            { lang: 'en-ZA' }
+        ];
+
+        // Try to find a match based on preference
+        if (preference) {
+            // Try exact name match first
+            let found = voices.find(function(v) {
+                return v.name && v.name.toLowerCase().includes(preference.toLowerCase());
+            });
+            if (found) return found;
+            
+            // Try language match
+            const langMap = {
+                'uk': 'en-GB',
+                'us': 'en-US',
+                'australian': 'en-AU',
+                'south african': 'en-ZA'
+            };
+            
+            for (let key in langMap) {
+                if (preference.toLowerCase().includes(key)) {
+                    found = voices.find(function(v) {
+                        return v.lang === langMap[key];
+                    });
+                    if (found) return found;
+                    break;
+                }
+            }
+        }
+
+        // Try priority list
+        for (let pattern of voicePriority) {
+            const found = voices.find(function(voice) {
+                if (pattern.name && pattern.lang) {
+                    return voice.name === pattern.name && voice.lang === pattern.lang;
+                } else if (pattern.name) {
+                    return voice.name === pattern.name;
+                } else if (pattern.lang) {
+                    return voice.lang === pattern.lang;
+                }
+                return false;
+            });
+            
+            if (found) {
+                return found;
+            }
+        }
+
+        // Ultimate fallback: any English voice
+        return voices.find(function(v) {
             return v.lang && v.lang.startsWith('en');
-        });
-        if (found) return found;
-        
-        // Last resort: first available voice
-        return voices[0] || null;
+        }) || voices[0] || null;
     }
 
     // ==========================================
-    // 6. POPULATE VOICE SELECTOR
+    // 7. POPULATE VOICE SELECTOR
     // ==========================================
     function populateVoiceSelector(selectElement) {
-        // Clear existing options
         selectElement.innerHTML = '';
         
         // Add default option
         const defaultOption = document.createElement('option');
         defaultOption.value = '';
-        defaultOption.textContent = 'Default Voice';
+        defaultOption.textContent = '🌐 Auto-detect Best Voice';
         selectElement.appendChild(defaultOption);
         
-        // Group voices by language
+        // Add quick presets
+        const presets = [
+            { label: '🇬🇧 UK English', value: 'uk' },
+            { label: '🇺🇸 US English', value: 'us' },
+            { label: '🇦🇺 Australian English', value: 'australian' },
+            { label: '🇿🇦 South African English', value: 'south african' }
+        ];
+        
+        const presetGroup = document.createElement('optgroup');
+        presetGroup.label = '⭐ Quick Presets';
+        
+        presets.forEach(function(preset) {
+            const option = document.createElement('option');
+            option.value = 'preset:' + preset.value;
+            option.textContent = preset.label;
+            presetGroup.appendChild(option);
+        });
+        
+        selectElement.appendChild(presetGroup);
+        
+        // Group all voices by language
         const grouped = {};
         availableVoices.forEach(function(voice) {
             const lang = voice.lang || 'unknown';
@@ -249,12 +324,21 @@
             grouped[lang].push(voice);
         });
         
-        // Sort languages
         const sortedLangs = Object.keys(grouped).sort();
         
         sortedLangs.forEach(function(lang) {
             const optgroup = document.createElement('optgroup');
-            optgroup.label = lang;
+            const langName = lang.replace('en-', '');
+            const flags = {
+                'GB': '🇬🇧',
+                'US': '🇺🇸',
+                'AU': '🇦🇺',
+                'ZA': '🇿🇦',
+                'CA': '🇨🇦',
+                'IN': '🇮🇳'
+            };
+            const flag = flags[langName] || '🌐';
+            optgroup.label = flag + ' ' + lang;
             
             grouped[lang].sort(function(a, b) {
                 return a.name.localeCompare(b.name);
@@ -263,7 +347,8 @@
             grouped[lang].forEach(function(voice) {
                 const option = document.createElement('option');
                 option.value = voice.name;
-                option.textContent = voice.name + (voice.localService ? ' (local)' : ' (network)');
+                const isLocal = voice.localService ? '🔵' : '☁️';
+                option.textContent = voice.name + ' ' + isLocal;
                 if (selectedVoice && selectedVoice.name === voice.name) {
                     option.selected = true;
                 }
@@ -275,7 +360,7 @@
     }
 
     // ==========================================
-    // 7. SPEAK TEXT
+    // 8. SPEAK TEXT
     // ==========================================
     function speakText(text, button, stopButton, speedControl, speedDisplay, voiceSelect) {
         if (!window.speechSynthesis) {
@@ -293,17 +378,35 @@
 
         utterance = new SpeechSynthesisUtterance(text);
         
-        // Set voice from selector
-        const voiceName = voiceSelect.value;
-        if (voiceName) {
-            const voice = availableVoices.find(function(v) {
-                return v.name === voiceName;
-            });
-            if (voice) {
-                utterance.voice = voice;
+        // Handle voice selection
+        const voiceValue = voiceSelect.value;
+        let voiceToUse = null;
+        
+        if (voiceValue.startsWith('preset:')) {
+            // Use preset
+            const preset = voiceValue.replace('preset:', '');
+            voiceToUse = findVoiceByPreference(availableVoices, preset);
+            if (voiceToUse) {
+                preferredVoiceName = voiceToUse.name;
             }
-        } else if (selectedVoice) {
-            utterance.voice = selectedVoice;
+        } else if (voiceValue) {
+            // Use specific voice
+            voiceToUse = availableVoices.find(function(v) {
+                return v.name === voiceValue;
+            });
+            if (voiceToUse) {
+                preferredVoiceName = voiceToUse.name;
+            }
+        }
+        
+        // If no voice found, use default selection
+        if (!voiceToUse && selectedVoice) {
+            voiceToUse = selectedVoice;
+        }
+        
+        if (voiceToUse) {
+            utterance.voice = voiceToUse;
+            console.log('Using voice:', voiceToUse.name, voiceToUse.lang);
         }
         
         const speed = parseFloat(speedControl.value) || 0.8;
@@ -364,7 +467,7 @@
     }
 
     // ==========================================
-    // 8. STOP READING
+    // 9. STOP READING
     // ==========================================
     function stopReading(button, stopButton, speedControl, voiceSelect) {
         if (window.speechSynthesis.speaking) {
@@ -381,7 +484,7 @@
     }
 
     // ==========================================
-    // 9. CREATE UI CONTROLS
+    // 10. CREATE UI CONTROLS
     // ==========================================
     function createControls(content) {
         const main = document.querySelector('main');
@@ -451,7 +554,7 @@
         speedLabel.style.color = '#495057';
         speedLabel.style.whiteSpace = 'nowrap';
 
-        // Speed Slider - This will definitely show
+        // Speed Slider
         const speedControl = document.createElement('input');
         speedControl.type = 'range';
         speedControl.min = '0.5';
@@ -479,13 +582,14 @@
         voiceSelect.style.fontSize = '0.85rem';
         voiceSelect.style.backgroundColor = '#ffffff';
         voiceSelect.style.cursor = 'pointer';
-        voiceSelect.style.maxWidth = '250px';
+        voiceSelect.style.maxWidth = '280px';
         voiceSelect.style.display = 'inline-block';
+        voiceSelect.style.minHeight = '2rem';
         
         // Add loading option
         const loadingOption = document.createElement('option');
         loadingOption.value = '';
-        loadingOption.textContent = 'Loading voices...';
+        loadingOption.textContent = '⏳ Loading voices...';
         voiceSelect.appendChild(loadingOption);
 
         // Update speed display
@@ -513,22 +617,31 @@
         // Load voices
         loadVoices().then(function(voices) {
             availableVoices = voices;
-            selectedVoice = findBestVoice(voices);
-            populateVoiceSelector(voiceSelect);
             
-            // Show selected voice
-            if (selectedVoice) {
-                voiceSelect.value = selectedVoice.name;
+            // Auto-select best voice (try UK first, then US, etc.)
+            selectedVoice = findVoiceByPreference(voices, 'uk');
+            if (!selectedVoice) {
+                selectedVoice = findVoiceByPreference(voices, 'us');
             }
             
-            console.log('Voices loaded:', voices.length);
-            console.log('Selected voice:', selectedVoice ? selectedVoice.name : 'None');
+            populateVoiceSelector(voiceSelect);
+            
+            // Select the voice in dropdown
+            if (selectedVoice) {
+                voiceSelect.value = selectedVoice.name;
+                console.log('Selected voice:', selectedVoice.name, selectedVoice.lang);
+            } else {
+                voiceSelect.value = '';
+                console.log('No English voice found, using default');
+            }
+            
+            console.log('Total voices loaded:', voices.length);
         }).catch(function(error) {
             console.error('Error loading voices:', error);
             voiceSelect.innerHTML = '';
             const errorOption = document.createElement('option');
             errorOption.value = '';
-            errorOption.textContent = 'No voices available';
+            errorOption.textContent = '❌ No voices available';
             voiceSelect.appendChild(errorOption);
         });
 
@@ -536,7 +649,7 @@
     }
 
     // ==========================================
-    // 10. INITIALIZE
+    // 11. INITIALIZE
     // ==========================================
     function initReadAloud() {
         console.log('Read Aloud initializing...');
@@ -570,11 +683,10 @@
     }
 
     // ==========================================
-    // 11. RUN ON PAGE LOAD
+    // 12. RUN ON PAGE LOAD
     // ==========================================
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
-            // Small delay to ensure everything is ready
             setTimeout(initReadAloud, 100);
         });
     } else {
