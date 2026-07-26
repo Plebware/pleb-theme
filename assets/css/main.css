@@ -771,18 +771,40 @@ body.dark-theme .copy-btn.error {
     }
 }
 
-/* ========================
-   READ ALOUD – WORD HIGHLIGHT
-   ======================== */
+/* Read Aloud Controls */
+#read-aloud-voice-select {
+    padding: 0.3rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid var(--border, #ddd);
+    background-color: var(--bg, #fff);
+    color: var(--text, #000);
+    font-family: inherit;
+    font-size: 0.9rem;
+    max-width: 250px;
+}
+
+#read-aloud-voice-select:focus {
+    outline: none;
+    border-color: var(--brand, #1e6bb8);
+}
+
+.read-aloud-container {
+    background-color: var(--secondary-nav-bg, #f4f4f4);
+    border: 1px solid var(--border, #ddd);
+    border-radius: 8px;
+    padding: 0.5rem;
+    margin: 1rem 0 1.5rem 0;
+}
+
+/* Highlight style */
 .read-aloud-highlight {
     background-color: #ffeb3b !important;
     color: #000 !important;
     padding: 0 2px !important;
     border-radius: 2px !important;
-    transition: background-color 0.3s ease !important;
+    transition: background-color 0.1s ease !important;
 }
 
-/* Dark theme override for read-aloud highlight */
 body.dark-theme .read-aloud-highlight {
     background-color: #f9a825 !important;
     color: #000 !important;
