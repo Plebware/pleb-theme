@@ -1,4 +1,4 @@
-// Read Aloud with Timed Highlighting (Improved)
+// Read Aloud with Calibrated Highlighting (Aggressive)
 (function() {
     'use strict';
 
@@ -6,8 +6,10 @@
     let highlightTimer = null;
     let words = [];
     let currentWordIndex = 0;
-    const SPEECH_RATE = 0.9; // Matches the utterance rate
-    const AVG_WORD_DURATION = 180; // Milliseconds per word (adjust as needed)
+
+    // Faster default timing – decreased by 50ms
+    let avgWordDuration = 100; // Was 150, reduced to 100 for faster highlighting
+    let speechRate = 0.9;
 
     function getContentText() {
         const main = document.querySelector('main');
@@ -33,7 +35,6 @@
     }
 
     function highlightWord(index) {
-        // Remove all existing highlights
         clearHighlights();
 
         if (index < 0 || index >= words.length) return;
@@ -41,7 +42,6 @@
         const targetWord = words[index];
         if (!targetWord) return;
 
-        // Find the text node containing this word
         const walker = document.createTreeWalker(
             document.querySelector('main'),
             NodeFilter.SHOW_TEXT,
@@ -95,8 +95,7 @@
         highlightWord(index);
         currentWordIndex = index;
 
-        // Calculate timing based on speech rate
-        const wordDuration = AVG_WORD_DURATION / SPEECH_RATE;
+        const wordDuration = avgWordDuration / speechRate;
 
         highlightTimer = setInterval(() => {
             index++;
@@ -120,6 +119,15 @@
         currentWordIndex = 0;
     }
 
+    // Aggressive calibration – adjust faster
+    function calibrateTiming(text, durationMs) {
+        const wordCount = getWords(text).length;
+        const actualDurationPerWord = durationMs / wordCount;
+        // Weighted average: 70% new value, 30% old value (faster adjustment)
+        avgWordDuration = (avgWordDuration * 0.3) + (actualDurationPerWord * 0.7);
+        console.log('Calibrated word duration:', avgWordDuration.toFixed(0), 'ms');
+    }
+
     function speakText(text, button) {
         if (!window.speechSynthesis) {
             alert('Your browser does not support speech synthesis. Please try Chrome, Edge, or Safari.');
@@ -134,7 +142,6 @@
             return;
         }
 
-        // Cancel any ongoing speech
         if (window.speechSynthesis.speaking) {
             window.speechSynthesis.cancel();
         }
@@ -143,25 +150,22 @@
         currentWordIndex = 0;
 
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = SPEECH_RATE;
+        utterance.rate = speechRate;
         utterance.pitch = 1;
         utterance.volume = 1;
 
-        // Use onboundary as a backup, but timer handles the main highlighting
-        utterance.onboundary = function(event) {
-            if (event.name === 'word') {
-                // Optional: Use this to correct the timer if it drifts
-                // We keep it for compatibility
-            }
-        };
+        let startTime = Date.now();
 
         utterance.onstart = function() {
             isReading = true;
             button.textContent = '⏹ Stop';
+            startTime = Date.now();
             startHighlighting();
         };
 
         utterance.onend = function() {
+            const duration = Date.now() - startTime;
+            calibrateTiming(text, duration);
             isReading = false;
             button.textContent = '🔊 Listen';
             stopHighlighting();
