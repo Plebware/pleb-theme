@@ -1,4 +1,4 @@
-// Read Aloud with Word Highlighting using Web Speech API
+// Read Aloud with Word Highlighting using Web Speech API - UK English Male Voice
 (function() {
     'use strict';
 
@@ -6,6 +6,7 @@
     let isReading = false;
     let wordOffsets = [];
     let lastHighlightedIndex = -1;
+    let selectedVoice = null;
 
     // ==========================================
     // 1. GET CONTENT FROM PAGE
@@ -177,7 +178,61 @@
     }
 
     // ==========================================
-    // 5. SPEAK TEXT
+    // 5. SELECT VOICE - UK ENGLISH MALE
+    // ==========================================
+    function selectUKMaleVoice() {
+        return new Promise(function(resolve) {
+            // Wait for voices to load
+            function getVoices() {
+                const voices = window.speechSynthesis.getVoices();
+                if (voices.length > 0) {
+                    resolve(voices);
+                } else {
+                    // Some browsers need a moment to load voices
+                    setTimeout(getVoices, 100);
+                }
+            }
+            getVoices();
+        });
+    }
+
+    function findUKMaleVoice(voices) {
+        // Priority order for UK English Male voices
+        const voicePatterns = [
+            // Google UK English Male
+            { name: 'Google UK English Male', lang: 'en-GB' },
+            // Other UK English Male variants
+            { name: 'Microsoft George - English (United Kingdom)', lang: 'en-GB' },
+            { name: 'Daniel', lang: 'en-GB' },
+            // Fallback to any UK English voice
+            { lang: 'en-GB' }
+        ];
+
+        for (let pattern of voicePatterns) {
+            const found = voices.find(function(voice) {
+                if (pattern.name && pattern.lang) {
+                    return voice.name === pattern.name && voice.lang === pattern.lang;
+                } else if (pattern.name) {
+                    return voice.name === pattern.name;
+                } else if (pattern.lang) {
+                    return voice.lang === pattern.lang;
+                }
+                return false;
+            });
+            
+            if (found) {
+                return found;
+            }
+        }
+
+        // Ultimate fallback: any English voice
+        return voices.find(function(voice) {
+            return voice.lang && voice.lang.startsWith('en');
+        }) || null;
+    }
+
+    // ==========================================
+    // 6. SPEAK TEXT
     // ==========================================
     function speakText(text, button, stopButton, speedControl, speedDisplay) {
         // Check browser support
@@ -200,6 +255,11 @@
 
         // Create utterance
         utterance = new SpeechSynthesisUtterance(text);
+        
+        // Set voice if available
+        if (selectedVoice) {
+            utterance.voice = selectedVoice;
+        }
         
         // Set speed from slider
         const speed = parseFloat(speedControl.value) || 0.8;
@@ -265,7 +325,7 @@
     }
 
     // ==========================================
-    // 6. STOP READING
+    // 7. STOP READING
     // ==========================================
     function stopReading(button, stopButton, speedControl) {
         if (window.speechSynthesis.speaking) {
@@ -281,7 +341,20 @@
     }
 
     // ==========================================
-    // 7. CREATE UI CONTROLS
+    // 8. GET AVAILABLE VOICES AND UPDATE UI
+    // ==========================================
+    function updateVoiceInfo(voiceDisplay) {
+        if (selectedVoice) {
+            voiceDisplay.textContent = 'Voice: ' + selectedVoice.name;
+            voiceDisplay.style.color = '#28a745';
+        } else {
+            voiceDisplay.textContent = 'Voice: Default (UK)';
+            voiceDisplay.style.color = '#ffc107';
+        }
+    }
+
+    // ==========================================
+    // 9. CREATE UI CONTROLS
     // ==========================================
     function createControls(content) {
         const main = document.querySelector('main');
@@ -367,6 +440,16 @@
         speedDisplay.style.minWidth = '40px';
         speedDisplay.style.textAlign = 'center';
 
+        // Voice Info Display
+        const voiceDisplay = document.createElement('span');
+        voiceDisplay.style.fontSize = '0.8rem';
+        voiceDisplay.style.marginLeft = '0.5rem';
+        voiceDisplay.style.padding = '0.25rem 0.5rem';
+        voiceDisplay.style.backgroundColor = '#e9ecef';
+        voiceDisplay.style.borderRadius = '4px';
+        voiceDisplay.style.whiteSpace = 'nowrap';
+        voiceDisplay.textContent = 'Loading voice...';
+
         // Update speed display when slider changes
         speedControl.addEventListener('input', function() {
             speedDisplay.textContent = parseFloat(this.value).toFixed(2) + 'x';
@@ -387,12 +470,22 @@
         container.appendChild(speedLabel);
         container.appendChild(speedControl);
         container.appendChild(speedDisplay);
+        container.appendChild(voiceDisplay);
+
+        // Load voices and select UK Male
+        selectUKMaleVoice().then(function(voices) {
+            selectedVoice = findUKMaleVoice(voices);
+            updateVoiceInfo(voiceDisplay);
+        }).catch(function() {
+            voiceDisplay.textContent = 'Voice: Default';
+            voiceDisplay.style.color = '#dc3545';
+        });
 
         return container;
     }
 
     // ==========================================
-    // 8. INITIALIZE
+    // 10. INITIALIZE
     // ==========================================
     function initReadAloud() {
         // Get content
@@ -425,7 +518,7 @@
     }
 
     // ==========================================
-    // 9. RUN ON PAGE LOAD
+    // 11. RUN ON PAGE LOAD
     // ==========================================
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initReadAloud);
