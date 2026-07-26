@@ -16,14 +16,14 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{{ page.title | default: site.title }}">
   <meta name="twitter:description" content="{{ page.excerpt | default: site.description | strip_html | truncate: 160 }}">
-  <meta name="twitter:image" content="https://plebware.github.io/assets/images/twitter-card.png">
+  <meta name="twitter:image" content="https://plebware.github.io/assets/images/twitter-card.webp">
   <meta name="twitter:site" content="@plebware">
   <meta name="twitter:creator" content="@plebware">
 
   <!-- Open Graph (Facebook, LinkedIn) -->
   <meta property="og:title" content="{{ page.title | default: site.title }}">
   <meta property="og:description" content="{{ page.excerpt | default: site.description | strip_html | truncate: 160 }}">
-  <meta property="og:image" content="https://plebware.github.io/assets/images/twitter-card.png">
+  <meta property="og:image" content="https://plebware.github.io/assets/images/twitter-card.webp">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Plebware – Accessible · Repairable · Understandable Technology">
@@ -43,44 +43,44 @@
     {% endcomment %}
 
     {% if site.baseurl == '/PlebMachine' %}
-      {% assign banner_name = 'plebmachine-banner.png' %}
+      {% assign banner_name = 'plebmachine-banner.webp' %}
     {% elsif site.baseurl == '/PlebWaveFrontier' %}
-      {% assign banner_name = 'plebwavefrontier-banner.png' %}
+      {% assign banner_name = 'plebwavefrontier-banner.webp' %}
     {% elsif site.baseurl == '/otto' %}
-      {% assign banner_name = 'otto-banner.png' %}
+      {% assign banner_name = 'otto-banner.webp' %}
     {% elsif site.baseurl == '/juelz-plebcore' %}
-      {% assign banner_name = 'juelz-plebcore-banner.png' %}
+      {% assign banner_name = 'juelz-plebcore-banner.webp' %}
     {% else %}
       {% comment %}--- Main site: mode-based banners ---{% endcomment %}
       {% assign page_path = page.url | split: '/' %}
       {% assign mode = page_path[1] %}
 
       {% if mode == '' or mode == 'everyday' %}
-        {% assign banner_name = 'everyday-banner.png' %}
+        {% assign banner_name = 'everyday-banner.webp' %}
       {% elsif mode == 'author' %}
         {% assign banner_name = 'author-banner.webp' %}
       {% elsif mode == 'study' %}
-        {% assign banner_name = 'study-banner.png' %}
+        {% assign banner_name = 'study-banner.webp' %}
       {% elsif mode == 'research' %}
-        {% assign banner_name = 'research-banner.png' %}
+        {% assign banner_name = 'research-banner.webp' %}
       {% elsif mode == 'graphics' %}
-        {% assign banner_name = 'graphics-banner.png' %}
+        {% assign banner_name = 'graphics-banner.webp' %}
       {% elsif mode == 'music' %}
-        {% assign banner_name = 'music-banner.png' %}
+        {% assign banner_name = 'music-banner.webp' %}
       {% elsif mode == 'video' %}
-        {% assign banner_name = 'video-banner.png' %}
+        {% assign banner_name = 'video-banner.webp' %}
       {% elsif mode == 'broadcast' %}
-        {% assign banner_name = 'broadcast-banner.png' %}
+        {% assign banner_name = 'broadcast-banner.webp' %}
       {% elsif mode == 'ai-helpers' %}
-        {% assign banner_name = 'ai-helpers-banner.png' %}
+        {% assign banner_name = 'ai-helpers-banner.webp' %}
       {% elsif mode == 'developer' %}
-        {% assign banner_name = 'developer-banner.png' %}
+        {% assign banner_name = 'developer-banner.webp' %}
       {% elsif mode == 'accounting' %}
-        {% assign banner_name = 'accounting-banner.png' %}
+        {% assign banner_name = 'accounting-banner.webp' %}
       {% elsif mode == 'leisure' %}
-        {% assign banner_name = 'leisure-banner.png' %}
+        {% assign banner_name = 'leisure-banner.webp' %}
       {% else %}
-        {% assign banner_name = 'plebwarebanner.png' %}
+        {% assign banner_name = 'plebwarebanner.webp' %}
       {% endif %}
     {% endif %}
 
