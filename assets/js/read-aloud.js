@@ -1,4 +1,4 @@
-// Read Aloud – Full Feature Version (Tweaked)
+// Read Aloud – Full Feature Version (Fixed)
 (function() {
     'use strict';
 
@@ -9,16 +9,16 @@
     let currentWordIndex = 0;
     let availableVoices = [];
     let selectedVoice = null;
-    let speechRate = 0.7; // CHANGED: Slower default (was 0.9)
-    let avgWordDuration = 200; // CHANGED: Slower default (was 150)
+    let speechRate = 0.7;
+    let avgWordDuration = 200;
     let isInitialized = false;
     let content = '';
+    let voiceLoadAttempts = 0;
 
     // ==========================================
-    // NEW: Clean text - remove emojis & symbols
+    // Clean text - remove emojis & symbols
     // ==========================================
     function cleanText(text) {
-        // Remove emojis
         text = text.replace(/[\u{1F600}-\u{1F9FF}]/gu, '');
         text = text.replace(/[\u{2600}-\u{27BF}]/gu, '');
         text = text.replace(/[\u{1F300}-\u{1F5FF}]/gu, '');
@@ -29,18 +29,10 @@
         text = text.replace(/[\u{1F900}-\u{1F9FF}]/gu, '');
         text = text.replace(/[\u{1FA00}-\u{1FA6F}]/gu, '');
         text = text.replace(/[\u{1FA70}-\u{1FAFF}]/gu, '');
-        
-        // Remove special symbols
         text = text.replace(/[™®©†‡°§¶•·…′″‽¿¡]/g, '');
-        
-        // Keep only basic punctuation and letters
         text = text.replace(/[^\w\s.,!?;:'"()\-]/g, ' ');
-        
-        // Normalize spaces
         text = text.replace(/\s+/g, ' ');
-        text = text.trim();
-        
-        return text;
+        return text.trim();
     }
 
     // Get main content text
@@ -49,7 +41,6 @@
         if (!main) return '';
         let text = main.textContent || '';
         text = text.replace(/\s+/g, ' ').trim();
-        // NEW: Clean the text
         return cleanText(text);
     }
 
@@ -95,11 +86,8 @@
             }
         );
 
-        let currentOffset = 0;
         let node = walker.nextNode();
-        let targetFound = false;
-        
-        while (node && !targetFound) {
+        while (node) {
             const text = node.textContent;
             const normalizedText = text.toLowerCase();
             const normalizedTarget = targetWord.toLowerCase();
@@ -125,7 +113,6 @@
                 parent.insertBefore(span, node);
                 parent.insertBefore(after, node);
                 parent.removeChild(node);
-                targetFound = true;
                 break;
             }
             node = walker.nextNode();
@@ -172,24 +159,30 @@
     }
 
     // ==========================================
-    // IMPROVED: Voice selection with UK Male preference
+    // FIXED: Voice loading with retry
     // ==========================================
     function loadVoices() {
+        // Get voices
         availableVoices = window.speechSynthesis.getVoices();
+        
         if (availableVoices.length === 0) {
-            setTimeout(loadVoices, 200);
+            voiceLoadAttempts++;
+            if (voiceLoadAttempts < 10) {
+                setTimeout(loadVoices, 300);
+            }
             return;
         }
         
-        // NEW: Prefer UK English Male voice
+        // Prefer UK English Male voice
         const ukMale = availableVoices.find(v => 
-            v.name && v.name.includes('Google UK English Male') && v.lang === 'en-GB'
+            v.name && v.name.toLowerCase().includes('uk') && 
+            (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('daniel'))
         );
         if (ukMale) {
             selectedVoice = ukMale;
         } else {
             // Fallback: any UK English voice
-            const ukVoice = availableVoices.find(v => v.lang === 'en-GB');
+            const ukVoice = availableVoices.find(v => v.lang === 'en-GB' || v.lang === 'en_GB');
             if (ukVoice) {
                 selectedVoice = ukVoice;
             } else {
@@ -205,6 +198,9 @@
         updateVoiceSelector();
     }
 
+    // ==========================================
+    // FIXED: speakText with fallback
+    // ==========================================
     function speakText(text, button) {
         if (!window.speechSynthesis) {
             alert('Your browser does not support speech synthesis.');
@@ -223,8 +219,15 @@
             window.speechSynthesis.cancel();
         }
 
-        // NEW: Clean text before speaking
+        // Clean text
         text = cleanText(text);
+        
+        // If no text, exit
+        if (!text || text.length < 2) {
+            alert('No readable content found.');
+            return;
+        }
+        
         words = getWords(text);
         currentWordIndex = 0;
         content = text;
@@ -234,8 +237,17 @@
         utterance.pitch = 1;
         utterance.volume = 1;
 
+        // Use selected voice or any available voice
         if (selectedVoice) {
             utterance.voice = selectedVoice;
+        } else {
+            // Try to find any voice
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length > 0) {
+                const englishVoice = voices.find(v => v.lang.startsWith('en'));
+                utterance.voice = englishVoice || voices[0];
+                selectedVoice = utterance.voice;
+            }
         }
 
         let startTime = Date.now();
@@ -255,13 +267,20 @@
             stopHighlighting();
         };
 
-        utterance.onerror = function() {
+        utterance.onerror = function(e) {
+            console.error('Speech error:', e);
             isReading = false;
             button.textContent = '🔊 Listen';
             stopHighlighting();
         };
 
-        window.speechSynthesis.speak(utterance);
+        try {
+            window.speechSynthesis.speak(utterance);
+        } catch (e) {
+            console.error('Failed to speak:', e);
+            alert('Speech synthesis failed. Please try again.');
+            button.textContent = '🔊 Listen';
+        }
     }
 
     function updateVoiceSelector() {
@@ -270,22 +289,34 @@
 
         const currentVoice = voiceSelect.value;
         voiceSelect.innerHTML = '';
+        
+        if (availableVoices.length === 0) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'No voices available';
+            voiceSelect.appendChild(option);
+            return;
+        }
+        
         availableVoices.forEach(voice => {
             const option = document.createElement('option');
             option.value = voice.name;
-            // NEW: Add flag emojis for languages
             let flag = '🌐';
-            if (voice.lang === 'en-GB') flag = '🇬🇧';
-            else if (voice.lang === 'en-US') flag = '🇺🇸';
-            else if (voice.lang === 'en-AU') flag = '🇦🇺';
-            else if (voice.lang === 'en-ZA') flag = '🇿🇦';
-            else if (voice.lang === 'en-CA') flag = '🇨🇦';
+            if (voice.lang === 'en-GB' || voice.lang === 'en_GB') flag = '🇬🇧';
+            else if (voice.lang === 'en-US' || voice.lang === 'en_US') flag = '🇺🇸';
+            else if (voice.lang === 'en-AU' || voice.lang === 'en_AU') flag = '🇦🇺';
+            else if (voice.lang === 'en-ZA' || voice.lang === 'en_ZA') flag = '🇿🇦';
+            else if (voice.lang === 'en-CA' || voice.lang === 'en_CA') flag = '🇨🇦';
             
             option.textContent = `${flag} ${voice.name} (${voice.lang})`;
             voiceSelect.appendChild(option);
         });
+        
         if (selectedVoice) {
             voiceSelect.value = selectedVoice.name;
+        } else if (availableVoices.length > 0) {
+            voiceSelect.selectedIndex = 0;
+            selectedVoice = availableVoices[0];
         }
     }
 
@@ -306,22 +337,22 @@
         speedLabel.style.fontWeight = '600';
 
         const speedDisplay = document.createElement('span');
-        speedDisplay.textContent = '0.7x'; // CHANGED: Show slower default
+        speedDisplay.textContent = '0.70x';
         speedDisplay.style.fontSize = '0.9rem';
-        speedDisplay.style.minWidth = '3rem';
+        speedDisplay.style.minWidth = '3.5rem';
 
         const speedSlider = document.createElement('input');
         speedSlider.type = 'range';
-        speedSlider.min = 0.3; // NEW: Slower minimum
+        speedSlider.min = 0.3;
         speedSlider.max = 1.8;
-        speedSlider.step = 0.05; // NEW: Finer control
+        speedSlider.step = 0.05;
         speedSlider.value = speechRate;
-        speedSlider.style.width = '150px'; // NEW: Wider for better control
+        speedSlider.style.width = '150px';
         speedSlider.style.cursor = 'pointer';
 
         speedSlider.addEventListener('input', function() {
             speechRate = parseFloat(this.value);
-            speedDisplay.textContent = speechRate.toFixed(2) + 'x'; // NEW: Show 2 decimals
+            speedDisplay.textContent = speechRate.toFixed(2) + 'x';
         });
 
         speedContainer.appendChild(speedLabel);
@@ -348,8 +379,15 @@
         voiceSelect.style.border = '1px solid var(--border, #ddd)';
         voiceSelect.style.backgroundColor = 'var(--bg, #fff)';
         voiceSelect.style.color = 'var(--text, #000)';
-        voiceSelect.style.maxWidth = '300px'; // NEW: Wider for longer names
+        voiceSelect.style.maxWidth = '350px';
         voiceSelect.style.fontSize = '0.85rem';
+        voiceSelect.style.minHeight = '2rem';
+
+        // Add loading option
+        const loadingOption = document.createElement('option');
+        loadingOption.value = '';
+        loadingOption.textContent = '⏳ Loading voices...';
+        voiceSelect.appendChild(loadingOption);
 
         voiceSelect.addEventListener('change', function() {
             const selected = availableVoices.find(v => v.name === this.value);
@@ -371,8 +409,22 @@
         } else {
             window.speechSynthesis.onvoiceschanged = function() {
                 availableVoices = window.speechSynthesis.getVoices();
-                updateVoiceSelector();
+                if (availableVoices.length > 0) {
+                    updateVoiceSelector();
+                    // Select a voice if not selected
+                    if (!selectedVoice) {
+                        const ukVoice = availableVoices.find(v => v.lang === 'en-GB' || v.lang === 'en_GB');
+                        selectedVoice = ukVoice || availableVoices.find(v => v.lang.startsWith('en')) || availableVoices[0];
+                    }
+                }
             };
+            // Also try with timeout
+            setTimeout(() => {
+                availableVoices = window.speechSynthesis.getVoices();
+                if (availableVoices.length > 0) {
+                    updateVoiceSelector();
+                }
+            }, 1000);
         }
     }
 
@@ -392,6 +444,7 @@
         container.style.borderRadius = '8px';
         container.style.backgroundColor = 'var(--secondary-nav-bg, #f4f4f4)';
         container.style.border = '1px solid var(--border, #ddd)';
+        container.id = 'read-aloud-container';
 
         const btn = document.createElement('button');
         btn.textContent = '🔊 Listen';
