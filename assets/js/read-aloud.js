@@ -1,6 +1,6 @@
 // Read Aloud – Full Feature Version (Fixed)
 (function() {
-    'use strict';
+    'use strict'; 
 
     let isReading = false;
     let utterance = null;
