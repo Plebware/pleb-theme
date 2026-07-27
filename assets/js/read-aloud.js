@@ -1,4 +1,4 @@
-// Read Aloud – Full Feature Version
+// Read Aloud – Full Feature Version (Tweaked)
 (function() {
     'use strict';
 
@@ -9,10 +9,39 @@
     let currentWordIndex = 0;
     let availableVoices = [];
     let selectedVoice = null;
-    let speechRate = 0.9;
-    let avgWordDuration = 150;
+    let speechRate = 0.7; // CHANGED: Slower default (was 0.9)
+    let avgWordDuration = 200; // CHANGED: Slower default (was 150)
     let isInitialized = false;
     let content = '';
+
+    // ==========================================
+    // NEW: Clean text - remove emojis & symbols
+    // ==========================================
+    function cleanText(text) {
+        // Remove emojis
+        text = text.replace(/[\u{1F600}-\u{1F9FF}]/gu, '');
+        text = text.replace(/[\u{2600}-\u{27BF}]/gu, '');
+        text = text.replace(/[\u{1F300}-\u{1F5FF}]/gu, '');
+        text = text.replace(/[\u{1F680}-\u{1F6FF}]/gu, '');
+        text = text.replace(/[\u{1F700}-\u{1F77F}]/gu, '');
+        text = text.replace(/[\u{1F780}-\u{1F7FF}]/gu, '');
+        text = text.replace(/[\u{1F800}-\u{1F8FF}]/gu, '');
+        text = text.replace(/[\u{1F900}-\u{1F9FF}]/gu, '');
+        text = text.replace(/[\u{1FA00}-\u{1FA6F}]/gu, '');
+        text = text.replace(/[\u{1FA70}-\u{1FAFF}]/gu, '');
+        
+        // Remove special symbols
+        text = text.replace(/[™®©†‡°§¶•·…′″‽¿¡]/g, '');
+        
+        // Keep only basic punctuation and letters
+        text = text.replace(/[^\w\s.,!?;:'"()\-]/g, ' ');
+        
+        // Normalize spaces
+        text = text.replace(/\s+/g, ' ');
+        text = text.trim();
+        
+        return text;
+    }
 
     // Get main content text
     function getContentText() {
@@ -20,7 +49,8 @@
         if (!main) return '';
         let text = main.textContent || '';
         text = text.replace(/\s+/g, ' ').trim();
-        return text;
+        // NEW: Clean the text
+        return cleanText(text);
     }
 
     function getWords(text) {
@@ -38,6 +68,9 @@
         });
     }
 
+    // ==========================================
+    // IMPROVED: Better word highlighting
+    // ==========================================
     function highlightWord(index) {
         clearHighlights();
         if (index < 0 || index >= words.length) return;
@@ -62,10 +95,16 @@
             }
         );
 
+        let currentOffset = 0;
         let node = walker.nextNode();
-        while (node) {
+        let targetFound = false;
+        
+        while (node && !targetFound) {
             const text = node.textContent;
-            const indexOfWord = text.indexOf(targetWord);
+            const normalizedText = text.toLowerCase();
+            const normalizedTarget = targetWord.toLowerCase();
+            const indexOfWord = normalizedText.indexOf(normalizedTarget);
+            
             if (indexOfWord !== -1) {
                 const parent = node.parentNode;
                 const before = document.createTextNode(text.substring(0, indexOfWord));
@@ -78,6 +117,7 @@
                 span.style.color = '#000';
                 span.style.padding = '0 2px';
                 span.style.borderRadius = '2px';
+                span.style.boxShadow = '0 0 0 2px #f57c00';
                 span.style.transition = 'background-color 0.1s ease';
                 span.appendChild(wordNode);
 
@@ -85,6 +125,7 @@
                 parent.insertBefore(span, node);
                 parent.insertBefore(after, node);
                 parent.removeChild(node);
+                targetFound = true;
                 break;
             }
             node = walker.nextNode();
@@ -130,19 +171,36 @@
         avgWordDuration = (avgWordDuration * 0.3) + (actualDurationPerWord * 0.7);
     }
 
+    // ==========================================
+    // IMPROVED: Voice selection with UK Male preference
+    // ==========================================
     function loadVoices() {
         availableVoices = window.speechSynthesis.getVoices();
         if (availableVoices.length === 0) {
-            // Try again after a delay
             setTimeout(loadVoices, 200);
             return;
         }
-        // Select first English voice by default
-        const englishVoice = availableVoices.find(v => v.lang.startsWith('en'));
-        if (englishVoice) {
-            selectedVoice = englishVoice;
-        } else if (availableVoices.length > 0) {
-            selectedVoice = availableVoices[0];
+        
+        // NEW: Prefer UK English Male voice
+        const ukMale = availableVoices.find(v => 
+            v.name && v.name.includes('Google UK English Male') && v.lang === 'en-GB'
+        );
+        if (ukMale) {
+            selectedVoice = ukMale;
+        } else {
+            // Fallback: any UK English voice
+            const ukVoice = availableVoices.find(v => v.lang === 'en-GB');
+            if (ukVoice) {
+                selectedVoice = ukVoice;
+            } else {
+                // Fallback: any English voice
+                const englishVoice = availableVoices.find(v => v.lang.startsWith('en'));
+                if (englishVoice) {
+                    selectedVoice = englishVoice;
+                } else if (availableVoices.length > 0) {
+                    selectedVoice = availableVoices[0];
+                }
+            }
         }
         updateVoiceSelector();
     }
@@ -165,6 +223,8 @@
             window.speechSynthesis.cancel();
         }
 
+        // NEW: Clean text before speaking
+        text = cleanText(text);
         words = getWords(text);
         currentWordIndex = 0;
         content = text;
@@ -213,7 +273,15 @@
         availableVoices.forEach(voice => {
             const option = document.createElement('option');
             option.value = voice.name;
-            option.textContent = `${voice.name} (${voice.lang})`;
+            // NEW: Add flag emojis for languages
+            let flag = '🌐';
+            if (voice.lang === 'en-GB') flag = '🇬🇧';
+            else if (voice.lang === 'en-US') flag = '🇺🇸';
+            else if (voice.lang === 'en-AU') flag = '🇦🇺';
+            else if (voice.lang === 'en-ZA') flag = '🇿🇦';
+            else if (voice.lang === 'en-CA') flag = '🇨🇦';
+            
+            option.textContent = `${flag} ${voice.name} (${voice.lang})`;
             voiceSelect.appendChild(option);
         });
         if (selectedVoice) {
@@ -238,22 +306,22 @@
         speedLabel.style.fontWeight = '600';
 
         const speedDisplay = document.createElement('span');
-        speedDisplay.textContent = '0.9x';
+        speedDisplay.textContent = '0.7x'; // CHANGED: Show slower default
         speedDisplay.style.fontSize = '0.9rem';
         speedDisplay.style.minWidth = '3rem';
 
         const speedSlider = document.createElement('input');
         speedSlider.type = 'range';
-        speedSlider.min = 0.5;
+        speedSlider.min = 0.3; // NEW: Slower minimum
         speedSlider.max = 1.8;
-        speedSlider.step = 0.1;
+        speedSlider.step = 0.05; // NEW: Finer control
         speedSlider.value = speechRate;
-        speedSlider.style.width = '120px';
+        speedSlider.style.width = '150px'; // NEW: Wider for better control
         speedSlider.style.cursor = 'pointer';
 
         speedSlider.addEventListener('input', function() {
             speechRate = parseFloat(this.value);
-            speedDisplay.textContent = speechRate.toFixed(1) + 'x';
+            speedDisplay.textContent = speechRate.toFixed(2) + 'x'; // NEW: Show 2 decimals
         });
 
         speedContainer.appendChild(speedLabel);
@@ -280,7 +348,8 @@
         voiceSelect.style.border = '1px solid var(--border, #ddd)';
         voiceSelect.style.backgroundColor = 'var(--bg, #fff)';
         voiceSelect.style.color = 'var(--text, #000)';
-        voiceSelect.style.maxWidth = '250px';
+        voiceSelect.style.maxWidth = '300px'; // NEW: Wider for longer names
+        voiceSelect.style.fontSize = '0.85rem';
 
         voiceSelect.addEventListener('change', function() {
             const selected = availableVoices.find(v => v.name === this.value);
