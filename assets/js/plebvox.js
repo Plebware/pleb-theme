@@ -1,11 +1,7 @@
-// assets/js/plebvox.js - Production Ready v2.4
-// Fixed: Images and non-text elements now handled properly
+// assets/js/plebvox.js - v2.5 (Image Safe)
 (function() {
     'use strict';
 
-    // ==========================================
-    // STATE VARIABLES
-    // ==========================================
     let isReading = false;
     let isPaused = false;
     let utterance = null;
@@ -20,17 +16,18 @@
     let voiceLoadAttempts = 0;
 
     // ==========================================
-    // BUILD TEXT MAPPING - Handles Images & Non-Text Elements
+    // BUILD TEXT MAPPING - Image Safe
     // ==========================================
     function buildTextMapping(contentNodes) {
         let speechText = '';
         let mapping = [];
+        let hasTextContent = false;
 
-        // Elements that should be treated as block elements with spacing
-        const blockTags = ['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE', 'SECTION', 'ARTICLE'];
+        // Elements to completely ignore
+        const ignoreTags = ['SCRIPT', 'STYLE', 'NOSCRIPT', 'IMG', 'FIGURE', 'FIGCAPTION', 'SVG', 'CANVAS', 'VIDEO', 'AUDIO', 'IFRAME', 'OBJECT', 'EMBED'];
         
-        // Elements that should be completely ignored (no text, no spacing)
-        const ignoreTags = ['SCRIPT', 'STYLE', 'NOSCRIPT', 'IMG', 'FIGURE', 'FIGCAPTION', 'SVG', 'CANVAS', 'VIDEO', 'AUDIO'];
+        // Elements that should be treated as block elements
+        const blockTags = ['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE', 'SECTION', 'ARTICLE', 'HEADER', 'FOOTER', 'MAIN', 'ASIDE'];
 
         function processNode(node) {
             // Handle text nodes
@@ -39,10 +36,9 @@
                 // Skip if only whitespace
                 if (!rawText.trim()) return;
                 
-                // Normalize whitespace
+                hasTextContent = true;
                 const normalizedText = rawText.replace(/\s+/g, ' ');
                 
-                // Only add non-empty text
                 if (normalizedText.trim().length > 0) {
                     const startOffset = speechText.length;
                     
@@ -76,14 +72,13 @@
             if (node.nodeType === Node.ELEMENT_NODE) {
                 const tagName = node.tagName.toUpperCase();
                 
-                // Skip ignored elements entirely
+                // Skip ignored elements entirely (images, figures, etc.)
                 if (ignoreTags.includes(tagName)) {
                     return;
                 }
                 
                 // Handle block elements - add spacing
                 if (blockTags.includes(tagName)) {
-                    // Add space before block if needed
                     if (speechText.length > 0 && 
                         !speechText.endsWith(' ') && 
                         !speechText.endsWith('(') &&
@@ -97,7 +92,7 @@
                     }
                 }
                 
-                // Process all children
+                // Process all children (this will skip images via the ignore list)
                 node.childNodes.forEach(child => processNode(child));
                 
                 // Add space after block if needed
@@ -126,7 +121,15 @@
         // Process all content nodes
         contentNodes.forEach(node => processNode(node));
 
-        // Final cleanup: collapse extra spaces
+        // If no text content, return empty
+        if (!hasTextContent || speechText.trim().length === 0) {
+            return {
+                speechText: '',
+                mapping: []
+            };
+        }
+
+        // Final cleanup
         speechText = speechText.replace(/\s+/g, ' ');
         speechText = speechText.trim();
 
@@ -187,6 +190,13 @@
             node = walker.nextNode();
         }
 
+        if (startNodes.length === 0) {
+            console.log('PlebVox: No START markers found');
+            return [];
+        }
+
+        console.log(`PlebVox: Found ${startNodes.length} START marker(s)`);
+
         startNodes.forEach((startNode, index) => {
             let endNode = null;
             let nextNode = startNode.nextSibling;
@@ -199,27 +209,33 @@
                 nextNode = nextNode.nextSibling;
             }
 
-            if (endNode) {
-                const contentNodes = [];
-                let currentNode = startNode.nextSibling;
-                while (currentNode && currentNode !== endNode) {
-                    contentNodes.push(currentNode);
-                    currentNode = currentNode.nextSibling;
-                }
+            if (!endNode) {
+                console.warn(`PlebVox: No END marker found for START #${index + 1}`);
+                return;
+            }
 
-                const mappingData = buildTextMapping(contentNodes);
-                
-                if (mappingData.speechText.length > 0) {
-                    sections.push({
-                        number: sections.length + 1,
-                        text: mappingData.speechText,
-                        startNode: startNode,
-                        endNode: endNode,
-                        contentNodes: contentNodes,
-                        mappingData: mappingData,
-                        controlElement: null
-                    });
-                }
+            const contentNodes = [];
+            let currentNode = startNode.nextSibling;
+            while (currentNode && currentNode !== endNode) {
+                contentNodes.push(currentNode);
+                currentNode = currentNode.nextSibling;
+            }
+
+            const mappingData = buildTextMapping(contentNodes);
+            
+            if (mappingData.speechText.length > 0) {
+                console.log(`PlebVox: Section ${sections.length + 1} has ${mappingData.speechText.length} characters of text`);
+                sections.push({
+                    number: sections.length + 1,
+                    text: mappingData.speechText,
+                    startNode: startNode,
+                    endNode: endNode,
+                    contentNodes: contentNodes,
+                    mappingData: mappingData,
+                    controlElement: null
+                });
+            } else {
+                console.warn(`PlebVox: Section ${sections.length + 1} has no readable text (skipping)`);
             }
         });
 
@@ -227,7 +243,7 @@
     }
 
     // ==========================================
-    // HIGHLIGHTING - Handles Images & Non-Text Elements
+    // HIGHLIGHTING
     // ==========================================
     function clearHighlights() {
         document.querySelectorAll('.plebvox-highlight').forEach(el => {
@@ -265,9 +281,7 @@
         let rawPos = 0;
         let normalizedPos = 0;
         
-        // Skip leading whitespace in normalized text
-        while (normalizedPos < normalizedText.length && 
-               normalizedText[normalizedPos] === ' ') {
+        while (normalizedPos < normalizedText.length && normalizedText[normalizedPos] === ' ') {
             normalizedPos++;
         }
         
@@ -280,15 +294,12 @@
             normalizedPos++;
         }
         
-        // Find word boundaries
         let wordStart = rawPos;
         let wordEnd = rawPos;
         
         while (wordStart > 0) {
             const prevChar = rawText[wordStart - 1];
-            if (prevChar === ' ' || prevChar === '\n' || prevChar === '\t') {
-                break;
-            }
+            if (prevChar === ' ' || prevChar === '\n' || prevChar === '\t') break;
             if (prevChar === '.' || prevChar === ',' || prevChar === '!' || 
                 prevChar === '?' || prevChar === ';' || prevChar === ':' ||
                 prevChar === '"' || prevChar === "'" || prevChar === ')' ||
@@ -303,9 +314,7 @@
         
         while (wordEnd < rawText.length) {
             const nextChar = rawText[wordEnd];
-            if (nextChar === ' ' || nextChar === '\n' || nextChar === '\t') {
-                break;
-            }
+            if (nextChar === ' ' || nextChar === '\n' || nextChar === '\t') break;
             if (nextChar === '.' || nextChar === ',' || nextChar === '!' || 
                 nextChar === '?' || nextChar === ';' || nextChar === ':' ||
                 nextChar === '"' || nextChar === "'" || nextChar === '(' ||
@@ -789,24 +798,4 @@
                 animation: plebvox-pulse-amber 1.5s ease-in-out infinite;
             }
             @keyframes plebvox-pulse-green {
-                0%, 100% { box-shadow: 0 0 8px rgba(40, 167, 69, 0.6); }
-                50% { box-shadow: 0 0 16px rgba(40, 167, 69, 0.9); }
-            }
-            @keyframes plebvox-pulse-amber {
-                0%, 100% { box-shadow: 0 0 8px rgba(255, 193, 7, 0.5); }
-                50% { box-shadow: 0 0 16px rgba(255, 193, 7, 0.8); }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-
-    // ==========================================
-    // RUN
-    // ==========================================
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initPlebVox);
-    } else {
-        initPlebVox();
-    }
-
-})();
+                0%, 100% { box-shadow: 0 0 8px rgba(40, 167, 69, 
