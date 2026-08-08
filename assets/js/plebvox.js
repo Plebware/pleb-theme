@@ -1,5 +1,5 @@
-// assets/js/plebvox.js - Production Ready v2.7
-// Uses text search to find markers (more reliable)
+// assets/js/plebvox.js - Production Ready v2.8
+// Fixed: Controls inserted at correct marker position
 (function() {
     'use strict';
 
@@ -152,7 +152,7 @@
     }
 
     // ==========================================
-    // GET PLEBVOX SECTIONS - Using Text Search
+    // GET PLEBVOX SECTIONS - Finds both markers and nodes
     // ==========================================
     function getPlebVoxSections() {
         const main = document.querySelector('main');
@@ -160,129 +160,80 @@
 
         const sections = [];
         
-        // Get the full HTML as a string
-        const html = main.innerHTML;
-        
-        // Find all START markers using string search
-        const startMarker = '<!-- PLEBVOX:START -->';
-        const endMarker = '<!-- PLEBVOX:END -->';
-        
-        let searchPos = 0;
-        let sectionNumber = 1;
-        
-        while (true) {
-            const startPos = html.indexOf(startMarker, searchPos);
-            if (startPos === -1) break;
-            
-            // Find the END marker after this START
-            const endPos = html.indexOf(endMarker, startPos + startMarker.length);
-            if (endPos === -1) {
-                console.warn(`PlebVox: No END marker found for START #${sectionNumber}`);
-                break;
-            }
-            
-            // Extract the content between markers
-            const contentStart = startPos + startMarker.length;
-            const contentHtml = html.substring(contentStart, endPos);
-            
-            // Create a temporary container to extract text
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = contentHtml;
-            const textContent = tempDiv.textContent || tempDiv.innerText || '';
-            
-            console.log(`PlebVox: Section ${sectionNumber} text length: ${textContent.trim().length}`);
-            
-            if (textContent.trim().length > 0) {
-                // Build mapping from content
-                const contentNodes = [];
-                // We need to find the actual DOM nodes between START and END
-                // Use a simpler approach: get all nodes between the markers by position
-                const walker = document.createTreeWalker(
-                    main,
-                    NodeFilter.SHOW_COMMENT,
-                    null,
-                    false
-                );
-                
-                let startNode = null;
-                let endNode = null;
-                let node = walker.nextNode();
-                while (node) {
+        // First, find all START comment nodes
+        const startNodes = [];
+        const walker = document.createTreeWalker(
+            main,
+            NodeFilter.SHOW_COMMENT,
+            {
+                acceptNode: function(node) {
                     if (node.textContent && node.textContent.trim() === 'PLEBVOX:START') {
-                        if (startNode === null) {
-                            startNode = node;
-                        }
-                    } else if (node.textContent && node.textContent.trim() === 'PLEBVOX:END') {
-                        if (startNode !== null && endNode === null) {
-                            endNode = node;
-                            break;
-                        }
+                        return NodeFilter.FILTER_ACCEPT;
                     }
-                    node = walker.nextNode();
+                    return NodeFilter.FILTER_REJECT;
                 }
-                
-                if (startNode && endNode) {
-                    // Collect content nodes between start and end
-                    let currentNode = startNode.nextSibling;
-                    while (currentNode && currentNode !== endNode) {
-                        contentNodes.push(currentNode);
-                        currentNode = currentNode.nextSibling;
-                    }
-                    
-                    const mappingData = buildTextMapping(contentNodes);
-                    
-                    if (mappingData.speechText.length > 0) {
-                        sections.push({
-                            number: sectionNumber,
-                            text: mappingData.speechText,
-                            startNode: startNode,
-                            endNode: endNode,
-                            contentNodes: contentNodes,
-                            mappingData: mappingData,
-                            controlElement: null
-                        });
-                    }
-                } else {
-                    // Fallback: use the extracted text
-                    const cleanText = textContent.trim();
-                    if (cleanText.length > 0) {
-                        // Create a simple mapping from the extracted text
-                        const mappingData = {
-                            speechText: cleanText,
-                            mapping: [{
-                                node: null,
-                                rawText: cleanText,
-                                normalizedText: cleanText,
-                                speechStart: 0,
-                                speechEnd: cleanText.length
-                            }]
-                        };
-                        
-                        sections.push({
-                            number: sectionNumber,
-                            text: cleanText,
-                            startNode: null,
-                            endNode: null,
-                            contentNodes: [],
-                            mappingData: mappingData,
-                            controlElement: null
-                        });
-                    }
-                }
-            } else {
-                console.warn(`PlebVox: Section ${sectionNumber} has no readable text (skipping)`);
             }
+        );
+
+        let node = walker.nextNode();
+        while (node) {
+            startNodes.push(node);
+            node = walker.nextNode();
+        }
+
+        if (startNodes.length === 0) {
+            console.log('PlebVox: No START markers found');
+            return [];
+        }
+
+        console.log(`PlebVox: Found ${startNodes.length} START marker(s)`);
+
+        // Process each START node
+        startNodes.forEach((startNode, index) => {
+            // Find the corresponding END node
+            let endNode = null;
+            let currentNode = startNode.nextSibling;
+            while (currentNode) {
+                if (currentNode.nodeType === Node.COMMENT_NODE && 
+                    currentNode.textContent && currentNode.textContent.trim() === 'PLEBVOX:END') {
+                    endNode = currentNode;
+                    break;
+                }
+                currentNode = currentNode.nextSibling;
+            }
+
+            if (!endNode) {
+                console.warn(`PlebVox: No END marker found for START #${index + 1}`);
+                return;
+            }
+
+            console.log(`PlebVox: Found END marker for START #${index + 1}`);
+
+            // Collect content nodes between START and END
+            const contentNodes = [];
+            let contentNode = startNode.nextSibling;
+            while (contentNode && contentNode !== endNode) {
+                contentNodes.push(contentNode);
+                contentNode = contentNode.nextSibling;
+            }
+
+            const mappingData = buildTextMapping(contentNodes);
             
-            sectionNumber++;
-            searchPos = endPos + endMarker.length;
-        }
-        
-        if (sections.length === 0) {
-            console.log('PlebVox: No valid sections found');
-        } else {
-            console.log(`PlebVox: Found ${sections.length} valid section(s)`);
-        }
-        
+            if (mappingData.speechText.length > 0) {
+                sections.push({
+                    number: sections.length + 1,
+                    text: mappingData.speechText,
+                    startNode: startNode,
+                    endNode: endNode,
+                    contentNodes: contentNodes,
+                    mappingData: mappingData,
+                    controlElement: null
+                });
+            } else {
+                console.warn(`PlebVox: Section ${sections.length + 1} has no readable text (skipping)`);
+            }
+        });
+
         return sections;
     }
 
@@ -317,7 +268,6 @@
         
         if (!targetEntry) return;
         
-        // If we don't have a real DOM node, we can't highlight
         if (!targetEntry.node) return;
         
         const node = targetEntry.node;
@@ -808,14 +758,18 @@
         const main = document.querySelector('main');
         if (!main) return;
 
+        // Insert each control after its START marker
         sectionDataList.forEach((section, index) => {
             const controlElement = createSectionControls(section, index);
             section.controlElement = controlElement;
-            // Insert after the START comment if we have one
+            
+            // Insert after the START comment
             if (section.startNode) {
                 section.startNode.parentNode.insertBefore(controlElement, section.startNode.nextSibling);
+                console.log(`PlebVox: Inserted Part ${section.number} after START marker`);
             } else {
-                // Fallback: insert at the top of main
+                // Fallback: this should never happen now
+                console.warn(`PlebVox: No START node for Part ${section.number}, inserting at top`);
                 main.insertBefore(controlElement, main.firstChild);
             }
         });
