@@ -1,5 +1,5 @@
-// assets/js/plebvox.js - Production Ready v2.8
-// Fixed: Controls inserted at correct marker position
+// assets/js/plebvox.js - Production Ready v2.9
+// Fixed: Multiple sections with proper content extraction
 (function() {
     'use strict';
 
@@ -31,6 +31,11 @@
         const blockTags = ['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE', 'SECTION', 'ARTICLE', 'HEADER', 'FOOTER', 'MAIN', 'ASIDE'];
 
         function processNode(node) {
+            // Skip comment nodes (markers)
+            if (node.nodeType === Node.COMMENT_NODE) {
+                return;
+            }
+
             if (node.nodeType === Node.TEXT_NODE) {
                 const rawText = node.textContent;
                 if (!rawText.trim()) return;
@@ -152,7 +157,7 @@
     }
 
     // ==========================================
-    // GET PLEBVOX SECTIONS - Finds both markers and nodes
+    // GET PLEBVOX SECTIONS - Multiple Section Support
     // ==========================================
     function getPlebVoxSections() {
         const main = document.querySelector('main');
@@ -160,7 +165,7 @@
 
         const sections = [];
         
-        // First, find all START comment nodes
+        // Find all START comment nodes
         const startNodes = [];
         const walker = document.createTreeWalker(
             main,
@@ -209,11 +214,14 @@
 
             console.log(`PlebVox: Found END marker for START #${index + 1}`);
 
-            // Collect content nodes between START and END
+            // Collect content nodes between START and END (excluding the markers)
             const contentNodes = [];
             let contentNode = startNode.nextSibling;
             while (contentNode && contentNode !== endNode) {
-                contentNodes.push(contentNode);
+                // Skip comment nodes (just in case there are other comments)
+                if (contentNode.nodeType !== Node.COMMENT_NODE) {
+                    contentNodes.push(contentNode);
+                }
                 contentNode = contentNode.nextSibling;
             }
 
@@ -229,6 +237,7 @@
                     mappingData: mappingData,
                     controlElement: null
                 });
+                console.log(`PlebVox: Section ${sections.length} has ${mappingData.speechText.length} characters`);
             } else {
                 console.warn(`PlebVox: Section ${sections.length + 1} has no readable text (skipping)`);
             }
@@ -763,12 +772,10 @@
             const controlElement = createSectionControls(section, index);
             section.controlElement = controlElement;
             
-            // Insert after the START comment
             if (section.startNode) {
                 section.startNode.parentNode.insertBefore(controlElement, section.startNode.nextSibling);
                 console.log(`PlebVox: Inserted Part ${section.number} after START marker`);
             } else {
-                // Fallback: this should never happen now
                 console.warn(`PlebVox: No START node for Part ${section.number}, inserting at top`);
                 main.insertBefore(controlElement, main.firstChild);
             }
