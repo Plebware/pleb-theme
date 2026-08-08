@@ -1,5 +1,5 @@
-// assets/js/plebvox.js - Production Ready v2.3
-// Character mapping with full punctuation support
+// assets/js/plebvox.js - Production Ready v2.4
+// Fixed: Images and non-text elements now handled properly
 (function() {
     'use strict';
 
@@ -20,30 +20,42 @@
     let voiceLoadAttempts = 0;
 
     // ==========================================
-    // BUILD TEXT MAPPING - Full Punctuation Support
+    // BUILD TEXT MAPPING - Handles Images & Non-Text Elements
     // ==========================================
     function buildTextMapping(contentNodes) {
         let speechText = '';
         let mapping = [];
 
+        // Elements that should be treated as block elements with spacing
+        const blockTags = ['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE', 'SECTION', 'ARTICLE'];
+        
+        // Elements that should be completely ignored (no text, no spacing)
+        const ignoreTags = ['SCRIPT', 'STYLE', 'NOSCRIPT', 'IMG', 'FIGURE', 'FIGCAPTION', 'SVG', 'CANVAS', 'VIDEO', 'AUDIO'];
+
         function processNode(node) {
+            // Handle text nodes
             if (node.nodeType === Node.TEXT_NODE) {
                 const rawText = node.textContent;
-                // Preserve all characters except collapsing whitespace
+                // Skip if only whitespace
+                if (!rawText.trim()) return;
+                
+                // Normalize whitespace
                 const normalizedText = rawText.replace(/\s+/g, ' ');
                 
+                // Only add non-empty text
                 if (normalizedText.trim().length > 0) {
                     const startOffset = speechText.length;
                     
-                    // Add space between text nodes if needed
+                    // Add space before if needed
                     if (speechText.length > 0 && 
                         !speechText.endsWith(' ') && 
-                        !normalizedText.startsWith(' ') &&
                         !speechText.endsWith('(') &&
                         !speechText.endsWith('[') &&
                         !speechText.endsWith('{') &&
                         !speechText.endsWith('"') &&
-                        !speechText.endsWith("'")) {
+                        !speechText.endsWith("'") &&
+                        !speechText.endsWith('\u201C') &&
+                        !speechText.endsWith('\u2018')) {
                         speechText += ' ';
                     }
                     
@@ -57,49 +69,64 @@
                         speechEnd: speechText.length
                     });
                 }
-            } else if (node.nodeType === Node.ELEMENT_NODE) {
-                if (node.tagName && ['SCRIPT', 'STYLE', 'NOSCRIPT'].includes(node.tagName)) {
+                return;
+            }
+
+            // Handle element nodes
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                const tagName = node.tagName.toUpperCase();
+                
+                // Skip ignored elements entirely
+                if (ignoreTags.includes(tagName)) {
                     return;
                 }
                 
-                // Handle block elements with appropriate spacing
-                const blockTags = ['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE'];
-                const inlineTags = ['STRONG', 'EM', 'B', 'I', 'SPAN', 'A'];
-                
-                if (blockTags.includes(node.tagName) && 
-                    speechText.length > 0 && 
-                    !speechText.endsWith(' ') && 
-                    !speechText.endsWith('(') &&
-                    !speechText.endsWith('[') &&
-                    !speechText.endsWith('{') &&
-                    !speechText.endsWith('"') &&
-                    !speechText.endsWith("'")) {
-                    speechText += ' ';
+                // Handle block elements - add spacing
+                if (blockTags.includes(tagName)) {
+                    // Add space before block if needed
+                    if (speechText.length > 0 && 
+                        !speechText.endsWith(' ') && 
+                        !speechText.endsWith('(') &&
+                        !speechText.endsWith('[') &&
+                        !speechText.endsWith('{') &&
+                        !speechText.endsWith('"') &&
+                        !speechText.endsWith("'") &&
+                        !speechText.endsWith('\u201C') &&
+                        !speechText.endsWith('\u2018')) {
+                        speechText += ' ';
+                    }
                 }
                 
+                // Process all children
                 node.childNodes.forEach(child => processNode(child));
                 
-                // Add space after block elements if needed
-                if (blockTags.includes(node.tagName) && 
-                    speechText.length > 0 && 
-                    !speechText.endsWith(' ') && 
-                    !speechText.endsWith(')') &&
-                    !speechText.endsWith(']') &&
-                    !speechText.endsWith('}') &&
-                    !speechText.endsWith('.') &&
-                    !speechText.endsWith(',') &&
-                    !speechText.endsWith('!') &&
-                    !speechText.endsWith('?') &&
-                    !speechText.endsWith(';') &&
-                    !speechText.endsWith(':')) {
-                    speechText += ' ';
+                // Add space after block if needed
+                if (blockTags.includes(tagName)) {
+                    if (speechText.length > 0 && 
+                        !speechText.endsWith(' ') && 
+                        !speechText.endsWith(')') &&
+                        !speechText.endsWith(']') &&
+                        !speechText.endsWith('}') &&
+                        !speechText.endsWith('.') &&
+                        !speechText.endsWith(',') &&
+                        !speechText.endsWith('!') &&
+                        !speechText.endsWith('?') &&
+                        !speechText.endsWith(';') &&
+                        !speechText.endsWith(':') &&
+                        !speechText.endsWith('"') &&
+                        !speechText.endsWith("'") &&
+                        !speechText.endsWith('\u201D') &&
+                        !speechText.endsWith('\u2019')) {
+                        speechText += ' ';
+                    }
                 }
             }
         }
 
+        // Process all content nodes
         contentNodes.forEach(node => processNode(node));
 
-        // Clean up extra spaces but preserve punctuation
+        // Final cleanup: collapse extra spaces
         speechText = speechText.replace(/\s+/g, ' ');
         speechText = speechText.trim();
 
@@ -110,7 +137,6 @@
         for (let entry of mapping) {
             const textToAdd = entry.normalizedText.trim();
             if (textToAdd.length > 0) {
-                // Find in speech text from current position
                 const searchStart = currentPos;
                 const indexInSpeech = speechText.indexOf(textToAdd, searchStart);
                 
@@ -201,7 +227,7 @@
     }
 
     // ==========================================
-    // HIGHLIGHTING - Full Punctuation Support
+    // HIGHLIGHTING - Handles Images & Non-Text Elements
     // ==========================================
     function clearHighlights() {
         document.querySelectorAll('.plebvox-highlight').forEach(el => {
@@ -222,7 +248,6 @@
         const mappingData = sectionData.mappingData;
         let targetEntry = null;
         
-        // Find which mapping entry contains this character position
         for (let entry of mappingData.mapping) {
             if (charIndex >= entry.speechStart && charIndex < entry.speechEnd) {
                 targetEntry = entry;
@@ -237,7 +262,6 @@
         const normalizedText = targetEntry.normalizedText;
         const relativePos = charIndex - targetEntry.speechStart;
         
-        // Map relative position in normalized text back to raw text
         let rawPos = 0;
         let normalizedPos = 0;
         
@@ -247,9 +271,7 @@
             normalizedPos++;
         }
         
-        // Find the corresponding position in raw text
         while (rawPos < rawText.length && normalizedPos < relativePos && normalizedPos < normalizedText.length) {
-            // Skip whitespace in raw text
             if (rawText[rawPos] === ' ' || rawText[rawPos] === '\n' || rawText[rawPos] === '\t') {
                 rawPos++;
                 continue;
@@ -258,18 +280,15 @@
             normalizedPos++;
         }
         
-        // Find word boundaries in raw text (including punctuation handling)
+        // Find word boundaries
         let wordStart = rawPos;
         let wordEnd = rawPos;
         
-        // Move to start of word (handle punctuation)
         while (wordStart > 0) {
             const prevChar = rawText[wordStart - 1];
-            // Stop if we hit whitespace or punctuation that shouldn't be part of the word
             if (prevChar === ' ' || prevChar === '\n' || prevChar === '\t') {
                 break;
             }
-            // Include punctuation that's attached to words (e.g., "Hello,")
             if (prevChar === '.' || prevChar === ',' || prevChar === '!' || 
                 prevChar === '?' || prevChar === ';' || prevChar === ':' ||
                 prevChar === '"' || prevChar === "'" || prevChar === ')' ||
@@ -282,14 +301,11 @@
             break;
         }
         
-        // Move to end of word (handle punctuation)
         while (wordEnd < rawText.length) {
             const nextChar = rawText[wordEnd];
-            // Stop if we hit whitespace
             if (nextChar === ' ' || nextChar === '\n' || nextChar === '\t') {
                 break;
             }
-            // Include punctuation that's attached to words
             if (nextChar === '.' || nextChar === ',' || nextChar === '!' || 
                 nextChar === '?' || nextChar === ';' || nextChar === ':' ||
                 nextChar === '"' || nextChar === "'" || nextChar === '(' ||
