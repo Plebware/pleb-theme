@@ -1,7 +1,10 @@
-// assets/js/plebvox.js - v2.5 (Image Safe)
+// assets/js/plebvox.js - Production Ready v2.5 (Image Safe)
 (function() {
     'use strict';
 
+    // ==========================================
+    // STATE VARIABLES
+    // ==========================================
     let isReading = false;
     let isPaused = false;
     let utterance = null;
@@ -23,7 +26,7 @@
         let mapping = [];
         let hasTextContent = false;
 
-        // Elements to completely ignore
+        // Elements to completely ignore (images, figures, etc.)
         const ignoreTags = ['SCRIPT', 'STYLE', 'NOSCRIPT', 'IMG', 'FIGURE', 'FIGCAPTION', 'SVG', 'CANVAS', 'VIDEO', 'AUDIO', 'IFRAME', 'OBJECT', 'EMBED'];
         
         // Elements that should be treated as block elements
@@ -191,7 +194,6 @@
         }
 
         if (startNodes.length === 0) {
-            console.log('PlebVox: No START markers found');
             return [];
         }
 
@@ -224,7 +226,6 @@
             const mappingData = buildTextMapping(contentNodes);
             
             if (mappingData.speechText.length > 0) {
-                console.log(`PlebVox: Section ${sections.length + 1} has ${mappingData.speechText.length} characters of text`);
                 sections.push({
                     number: sections.length + 1,
                     text: mappingData.speechText,
@@ -243,7 +244,7 @@
     }
 
     // ==========================================
-    // HIGHLIGHTING
+    // HIGHLIGHTING - Image Safe
     // ==========================================
     function clearHighlights() {
         document.querySelectorAll('.plebvox-highlight').forEach(el => {
@@ -798,4 +799,24 @@
                 animation: plebvox-pulse-amber 1.5s ease-in-out infinite;
             }
             @keyframes plebvox-pulse-green {
-                0%, 100% { box-shadow: 0 0 8px rgba(40, 167, 69, 
+                0%, 100% { box-shadow: 0 0 8px rgba(40, 167, 69, 0.6); }
+                50% { box-shadow: 0 0 16px rgba(40, 167, 69, 0.9); }
+            }
+            @keyframes plebvox-pulse-amber {
+                0%, 100% { box-shadow: 0 0 8px rgba(255, 193, 7, 0.5); }
+                50% { box-shadow: 0 0 16px rgba(255, 193, 7, 0.8); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // ==========================================
+    // RUN
+    // ==========================================
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPlebVox);
+    } else {
+        initPlebVox();
+    }
+
+})();
