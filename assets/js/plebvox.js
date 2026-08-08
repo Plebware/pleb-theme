@@ -1,10 +1,9 @@
-// assets/js/plebvox.js - Production Ready v2.9
-// Fixed: Multiple sections with proper content extraction
+// assets/js/plebvox.js - SIMPLIFIED VERSION
 (function() {
     'use strict';
 
     // ==========================================
-    // STATE VARIABLES
+    // STATE
     // ==========================================
     let isReading = false;
     let isPaused = false;
@@ -12,152 +11,12 @@
     let availableVoices = [];
     let selectedVoice = null;
     let speechRate = 0.7;
-    let currentCharIndex = 0;
     let currentSectionData = null;
     let activeControls = null;
     let sectionDataList = [];
-    let voicesLoaded = false;
-    let voiceLoadAttempts = 0;
 
     // ==========================================
-    // BUILD TEXT MAPPING - Image Safe
-    // ==========================================
-    function buildTextMapping(contentNodes) {
-        let speechText = '';
-        let mapping = [];
-        let hasTextContent = false;
-
-        const ignoreTags = ['SCRIPT', 'STYLE', 'NOSCRIPT', 'IMG', 'FIGURE', 'FIGCAPTION', 'SVG', 'CANVAS', 'VIDEO', 'AUDIO', 'IFRAME', 'OBJECT', 'EMBED'];
-        const blockTags = ['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE', 'SECTION', 'ARTICLE', 'HEADER', 'FOOTER', 'MAIN', 'ASIDE'];
-
-        function processNode(node) {
-            // Skip comment nodes (markers)
-            if (node.nodeType === Node.COMMENT_NODE) {
-                return;
-            }
-
-            if (node.nodeType === Node.TEXT_NODE) {
-                const rawText = node.textContent;
-                if (!rawText.trim()) return;
-                
-                hasTextContent = true;
-                const normalizedText = rawText.replace(/\s+/g, ' ');
-                
-                if (normalizedText.trim().length > 0) {
-                    const startOffset = speechText.length;
-                    
-                    if (speechText.length > 0 && 
-                        !speechText.endsWith(' ') && 
-                        !speechText.endsWith('(') &&
-                        !speechText.endsWith('[') &&
-                        !speechText.endsWith('{') &&
-                        !speechText.endsWith('"') &&
-                        !speechText.endsWith("'") &&
-                        !speechText.endsWith('\u201C') &&
-                        !speechText.endsWith('\u2018')) {
-                        speechText += ' ';
-                    }
-                    
-                    speechText += normalizedText;
-                    
-                    mapping.push({
-                        node: node,
-                        rawText: rawText,
-                        normalizedText: normalizedText,
-                        speechStart: startOffset,
-                        speechEnd: speechText.length
-                    });
-                }
-                return;
-            }
-
-            if (node.nodeType === Node.ELEMENT_NODE) {
-                const tagName = node.tagName.toUpperCase();
-                
-                if (ignoreTags.includes(tagName)) {
-                    return;
-                }
-                
-                if (blockTags.includes(tagName)) {
-                    if (speechText.length > 0 && 
-                        !speechText.endsWith(' ') && 
-                        !speechText.endsWith('(') &&
-                        !speechText.endsWith('[') &&
-                        !speechText.endsWith('{') &&
-                        !speechText.endsWith('"') &&
-                        !speechText.endsWith("'") &&
-                        !speechText.endsWith('\u201C') &&
-                        !speechText.endsWith('\u2018')) {
-                        speechText += ' ';
-                    }
-                }
-                
-                node.childNodes.forEach(child => processNode(child));
-                
-                if (blockTags.includes(tagName)) {
-                    if (speechText.length > 0 && 
-                        !speechText.endsWith(' ') && 
-                        !speechText.endsWith(')') &&
-                        !speechText.endsWith(']') &&
-                        !speechText.endsWith('}') &&
-                        !speechText.endsWith('.') &&
-                        !speechText.endsWith(',') &&
-                        !speechText.endsWith('!') &&
-                        !speechText.endsWith('?') &&
-                        !speechText.endsWith(';') &&
-                        !speechText.endsWith(':') &&
-                        !speechText.endsWith('"') &&
-                        !speechText.endsWith("'") &&
-                        !speechText.endsWith('\u201D') &&
-                        !speechText.endsWith('\u2019')) {
-                        speechText += ' ';
-                    }
-                }
-            }
-        }
-
-        contentNodes.forEach(node => processNode(node));
-
-        if (!hasTextContent || speechText.trim().length === 0) {
-            return {
-                speechText: '',
-                mapping: []
-            };
-        }
-
-        speechText = speechText.replace(/\s+/g, ' ');
-        speechText = speechText.trim();
-
-        let currentPos = 0;
-        let finalMapping = [];
-
-        for (let entry of mapping) {
-            const textToAdd = entry.normalizedText.trim();
-            if (textToAdd.length > 0) {
-                const searchStart = currentPos;
-                const indexInSpeech = speechText.indexOf(textToAdd, searchStart);
-                
-                if (indexInSpeech !== -1) {
-                    finalMapping.push({
-                        node: entry.node,
-                        rawText: entry.rawText,
-                        normalizedText: textToAdd,
-                        speechStart: indexInSpeech,
-                        speechEnd: indexInSpeech + textToAdd.length
-                    });
-                    currentPos = indexInSpeech + textToAdd.length;
-                }
-            }
-        }
-
-        return {
-            speechText: speechText,
-            mapping: finalMapping
-        };
-    }
-
-    // ==========================================
-    // GET PLEBVOX SECTIONS - Multiple Section Support
+    // GET SECTIONS - SIMPLIFIED
     // ==========================================
     function getPlebVoxSections() {
         const main = document.querySelector('main');
@@ -187,59 +46,55 @@
         }
 
         if (startNodes.length === 0) {
-            console.log('PlebVox: No START markers found');
             return [];
         }
 
-        console.log(`PlebVox: Found ${startNodes.length} START marker(s)`);
+        console.log(`PlebVox: Found ${startNodes.length} sections`);
 
         // Process each START node
         startNodes.forEach((startNode, index) => {
-            // Find the corresponding END node
+            // Find END
             let endNode = null;
-            let currentNode = startNode.nextSibling;
-            while (currentNode) {
-                if (currentNode.nodeType === Node.COMMENT_NODE && 
-                    currentNode.textContent && currentNode.textContent.trim() === 'PLEBVOX:END') {
-                    endNode = currentNode;
+            let current = startNode.nextSibling;
+            while (current) {
+                if (current.nodeType === Node.COMMENT_NODE && 
+                    current.textContent && current.textContent.trim() === 'PLEBVOX:END') {
+                    endNode = current;
                     break;
                 }
-                currentNode = currentNode.nextSibling;
+                current = current.nextSibling;
             }
 
             if (!endNode) {
-                console.warn(`PlebVox: No END marker found for START #${index + 1}`);
+                console.warn(`No END for section ${index + 1}`);
                 return;
             }
 
-            console.log(`PlebVox: Found END marker for START #${index + 1}`);
-
-            // Collect content nodes between START and END (excluding the markers)
-            const contentNodes = [];
-            let contentNode = startNode.nextSibling;
-            while (contentNode && contentNode !== endNode) {
-                // Skip comment nodes (just in case there are other comments)
-                if (contentNode.nodeType !== Node.COMMENT_NODE) {
-                    contentNodes.push(contentNode);
+            // Get ALL text between START and END
+            let sectionText = '';
+            let currentText = startNode.nextSibling;
+            while (currentText && currentText !== endNode) {
+                // Skip comment nodes
+                if (currentText.nodeType !== Node.COMMENT_NODE) {
+                    if (currentText.textContent) {
+                        sectionText += currentText.textContent + ' ';
+                    }
                 }
-                contentNode = contentNode.nextSibling;
+                currentText = currentText.nextSibling;
             }
 
-            const mappingData = buildTextMapping(contentNodes);
-            
-            if (mappingData.speechText.length > 0) {
+            // Clean the text
+            sectionText = sectionText.replace(/\s+/g, ' ').trim();
+
+            if (sectionText.length > 0) {
                 sections.push({
                     number: sections.length + 1,
-                    text: mappingData.speechText,
+                    text: sectionText,
                     startNode: startNode,
                     endNode: endNode,
-                    contentNodes: contentNodes,
-                    mappingData: mappingData,
                     controlElement: null
                 });
-                console.log(`PlebVox: Section ${sections.length} has ${mappingData.speechText.length} characters`);
-            } else {
-                console.warn(`PlebVox: Section ${sections.length + 1} has no readable text (skipping)`);
+                console.log(`Section ${sections.length}: ${sectionText.substring(0, 50)}... (${sectionText.length} chars)`);
             }
         });
 
@@ -247,116 +102,7 @@
     }
 
     // ==========================================
-    // HIGHLIGHTING
-    // ==========================================
-    function clearHighlights() {
-        document.querySelectorAll('.plebvox-highlight').forEach(el => {
-            const textNode = el.firstChild;
-            const parent = el.parentNode;
-            if (textNode) {
-                parent.replaceChild(textNode, el);
-                parent.normalize();
-            }
-        });
-    }
-
-    function highlightWordByCharIndex(charIndex, sectionData) {
-        clearHighlights();
-        
-        if (!sectionData || !sectionData.mappingData) return;
-        
-        const mappingData = sectionData.mappingData;
-        let targetEntry = null;
-        
-        for (let entry of mappingData.mapping) {
-            if (charIndex >= entry.speechStart && charIndex < entry.speechEnd) {
-                targetEntry = entry;
-                break;
-            }
-        }
-        
-        if (!targetEntry) return;
-        
-        if (!targetEntry.node) return;
-        
-        const node = targetEntry.node;
-        const rawText = node.textContent;
-        const normalizedText = targetEntry.normalizedText;
-        const relativePos = charIndex - targetEntry.speechStart;
-        
-        let rawPos = 0;
-        let normalizedPos = 0;
-        
-        while (normalizedPos < normalizedText.length && normalizedText[normalizedPos] === ' ') {
-            normalizedPos++;
-        }
-        
-        while (rawPos < rawText.length && normalizedPos < relativePos && normalizedPos < normalizedText.length) {
-            if (rawText[rawPos] === ' ' || rawText[rawPos] === '\n' || rawText[rawPos] === '\t') {
-                rawPos++;
-                continue;
-            }
-            rawPos++;
-            normalizedPos++;
-        }
-        
-        let wordStart = rawPos;
-        let wordEnd = rawPos;
-        
-        while (wordStart > 0) {
-            const prevChar = rawText[wordStart - 1];
-            if (prevChar === ' ' || prevChar === '\n' || prevChar === '\t') break;
-            if (prevChar === '.' || prevChar === ',' || prevChar === '!' || 
-                prevChar === '?' || prevChar === ';' || prevChar === ':' ||
-                prevChar === '"' || prevChar === "'" || prevChar === ')' ||
-                prevChar === ']' || prevChar === '}' || prevChar === '-' ||
-                prevChar === '\u2019' || prevChar === '\u2018' || prevChar === '\u201C' ||
-                prevChar === '\u201D' || prevChar === '\u2026') {
-                wordStart--;
-                continue;
-            }
-            break;
-        }
-        
-        while (wordEnd < rawText.length) {
-            const nextChar = rawText[wordEnd];
-            if (nextChar === ' ' || nextChar === '\n' || nextChar === '\t') break;
-            if (nextChar === '.' || nextChar === ',' || nextChar === '!' || 
-                nextChar === '?' || nextChar === ';' || nextChar === ':' ||
-                nextChar === '"' || nextChar === "'" || nextChar === '(' ||
-                nextChar === '[' || nextChar === '{' || nextChar === '-' ||
-                nextChar === '\u2019' || nextChar === '\u2018' || nextChar === '\u201C' ||
-                nextChar === '\u201D' || nextChar === '\u2026') {
-                wordEnd++;
-                continue;
-            }
-            break;
-        }
-        
-        if (wordStart === wordEnd) return;
-        
-        const parent = node.parentNode;
-        const before = document.createTextNode(rawText.substring(0, wordStart));
-        const wordNode = document.createTextNode(rawText.substring(wordStart, wordEnd));
-        const after = document.createTextNode(rawText.substring(wordEnd));
-        
-        const span = document.createElement('span');
-        span.className = 'plebvox-highlight';
-        span.style.backgroundColor = '#ffeb3b';
-        span.style.color = '#000';
-        span.style.padding = '0 2px';
-        span.style.borderRadius = '2px';
-        span.style.boxShadow = '0 0 0 2px #f57c00';
-        span.appendChild(wordNode);
-        
-        parent.insertBefore(before, node);
-        parent.insertBefore(span, node);
-        parent.insertBefore(after, node);
-        parent.removeChild(node);
-    }
-
-    // ==========================================
-    // SPEECH ENGINE
+    // SPEAK SECTION
     // ==========================================
     function speakSection(text, sectionData, controls) {
         if (!window.speechSynthesis) {
@@ -364,39 +110,24 @@
             return;
         }
 
-        if (isReading && currentSectionData === sectionData) {
-            if (isPaused) {
-                resumeSpeech(controls);
-            } else {
-                pauseSpeech(controls);
-            }
-            return;
-        }
-
         if (isReading) {
             window.speechSynthesis.cancel();
             isReading = false;
-            isPaused = false;
-            clearHighlights();
             if (activeControls) {
                 updateControls(activeControls, 'idle');
-                updateLED(activeControls, 'idle');
                 activeControls = null;
             }
-            currentSectionData = null;
         }
 
-        const cleanTextContent = sectionData.mappingData.speechText;
-        if (!cleanTextContent || cleanTextContent.length < 2) {
-            alert('No readable content in this section.');
+        if (!text || text.length < 2) {
+            alert('No readable content.');
             return;
         }
 
         currentSectionData = sectionData;
-        currentCharIndex = 0;
         activeControls = controls;
 
-        utterance = new SpeechSynthesisUtterance(cleanTextContent);
+        utterance = new SpeechSynthesisUtterance(text);
         utterance.rate = speechRate;
         utterance.pitch = 1;
         utterance.volume = 1;
@@ -414,38 +145,20 @@
 
         utterance.onstart = function() {
             isReading = true;
-            isPaused = false;
             updateControls(controls, 'playing');
-            updateLED(controls, 'playing');
-            clearHighlights();
-        };
-
-        utterance.onboundary = function(event) {
-            if (event.name === 'word') {
-                currentCharIndex = event.charIndex;
-                highlightWordByCharIndex(event.charIndex, sectionData);
-            }
         };
 
         utterance.onend = function() {
             isReading = false;
-            isPaused = false;
             updateControls(controls, 'idle');
-            updateLED(controls, 'idle');
-            clearHighlights();
             activeControls = null;
-            currentSectionData = null;
         };
 
         utterance.onerror = function(e) {
             console.error('Speech error:', e);
             isReading = false;
-            isPaused = false;
             updateControls(controls, 'idle');
-            updateLED(controls, 'idle');
-            clearHighlights();
             activeControls = null;
-            currentSectionData = null;
         };
 
         try {
@@ -453,9 +166,6 @@
         } catch (e) {
             console.error('Failed to speak:', e);
             updateControls(controls, 'idle');
-            updateLED(controls, 'idle');
-            activeControls = null;
-            currentSectionData = null;
         }
     }
 
@@ -464,7 +174,6 @@
             window.speechSynthesis.pause();
             isPaused = true;
             updateControls(controls, 'paused');
-            updateLED(controls, 'paused');
         }
     }
 
@@ -473,7 +182,6 @@
             window.speechSynthesis.resume();
             isPaused = false;
             updateControls(controls, 'playing');
-            updateLED(controls, 'playing');
         }
     }
 
@@ -483,10 +191,7 @@
             isReading = false;
             isPaused = false;
             updateControls(controls, 'idle');
-            updateLED(controls, 'idle');
-            clearHighlights();
             activeControls = null;
-            currentSectionData = null;
         }
     }
 
@@ -526,54 +231,21 @@
     }
 
     // ==========================================
-    // LED CONTROL
-    // ==========================================
-    function updateLED(controls, state) {
-        if (!controls || !controls.led) return;
-        
-        const led = controls.led;
-        led.className = 'plebvox-led';
-        
-        switch(state) {
-            case 'idle':
-                led.classList.add('plebvox-led-off');
-                led.setAttribute('aria-label', 'PlebVox inactive');
-                break;
-            case 'playing':
-                led.classList.add('plebvox-led-playing');
-                led.setAttribute('aria-label', 'PlebVox playing');
-                break;
-            case 'paused':
-                led.classList.add('plebvox-led-paused');
-                led.setAttribute('aria-label', 'PlebVox paused');
-                break;
-        }
-    }
-
-    // ==========================================
     // VOICE LOADING
     // ==========================================
     function loadVoices() {
-        if (voicesLoaded) return;
-        
         const voices = window.speechSynthesis.getVoices();
         if (voices.length === 0) {
-            voiceLoadAttempts++;
-            if (voiceLoadAttempts < 20) {
-                setTimeout(loadVoices, 200);
-            }
+            setTimeout(loadVoices, 300);
             return;
         }
 
-        voicesLoaded = true;
         availableVoices = voices;
-        
         const ukMale = availableVoices.find(v => 
             v.name && v.name.toLowerCase().includes('uk') && 
             (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('daniel'))
         );
         selectedVoice = ukMale || availableVoices.find(v => v.lang && v.lang.startsWith('en')) || availableVoices[0];
-        
         updateAllVoiceSelectors();
     }
 
@@ -584,9 +256,7 @@
     }
 
     function populateVoiceSelector(select) {
-        const currentValue = select.value;
         select.innerHTML = '';
-        
         availableVoices.forEach(voice => {
             const option = document.createElement('option');
             option.value = voice.name;
@@ -597,69 +267,43 @@
             option.textContent = `${flag} ${voice.name}`;
             select.appendChild(option);
         });
-        
-        if (selectedVoice && availableVoices.find(v => v.name === selectedVoice.name)) {
+        if (selectedVoice) {
             select.value = selectedVoice.name;
         }
     }
 
     // ==========================================
-    // CREATE CONTROLS FOR A SECTION
+    // CREATE CONTROLS
     // ==========================================
     function createSectionControls(section, sectionIndex) {
         const container = document.createElement('div');
         container.className = `plebvox-control-${sectionIndex}`;
         container.style.cssText = 'margin: 0.75rem 0; padding: 0.75rem 1rem; max-width: 100%; background: var(--secondary-nav-bg, #f4f4f4); border-radius: 8px; border: 1px solid var(--border, #ddd); text-align: center;';
 
-        const headerRow = document.createElement('div');
-        headerRow.style.cssText = 'display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem;';
-
-        const led = document.createElement('span');
-        led.className = 'plebvox-led plebvox-led-off';
-        led.setAttribute('aria-label', 'PlebVox inactive');
-        led.style.cssText = 'display: inline-block; width: 12px; height: 12px; border-radius: 50%; transition: background-color 0.3s, box-shadow 0.3s; flex-shrink: 0;';
-        led.classList.add('plebvox-led-off');
-
-        const title = document.createElement('span');
-        title.textContent = `PlebVox — Part ${section.number}`;
-        title.style.cssText = 'font-weight: 700; font-size: 1rem; color: var(--text, #000);';
-
-        headerRow.appendChild(led);
-        headerRow.appendChild(title);
+        const title = document.createElement('div');
+        title.textContent = `🔊 PlebVox — Part ${section.number}`;
+        title.style.cssText = 'font-weight: 700; font-size: 1rem; color: var(--text, #000); margin-bottom: 0.5rem; text-align: center;';
 
         const buttonContainer = document.createElement('div');
         buttonContainer.style.cssText = 'display: flex; justify-content: center; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;';
 
         const playBtn = document.createElement('button');
-        playBtn.className = 'plebvox-play';
         playBtn.textContent = '▶ Play';
-        playBtn.style.cssText = 'padding: 0.4rem 1rem; background: #28a745; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;';
-        playBtn.addEventListener('mouseenter', function() { this.style.backgroundColor = '#218838'; });
-        playBtn.addEventListener('mouseleave', function() { this.style.backgroundColor = '#28a745'; });
+        playBtn.style.cssText = 'padding: 0.4rem 1rem; background: #28a745; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: 600;';
 
         const pauseBtn = document.createElement('button');
-        pauseBtn.className = 'plebvox-pause';
         pauseBtn.textContent = '⏸ Pause';
-        pauseBtn.style.cssText = 'padding: 0.4rem 1rem; background: #ffc107; color: #000; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: 600; display: none; transition: background 0.2s;';
-        pauseBtn.addEventListener('mouseenter', function() { this.style.backgroundColor = '#e0a800'; });
-        pauseBtn.addEventListener('mouseleave', function() { this.style.backgroundColor = '#ffc107'; });
+        pauseBtn.style.cssText = 'padding: 0.4rem 1rem; background: #ffc107; color: #000; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: 600; display: none;';
 
         const resumeBtn = document.createElement('button');
-        resumeBtn.className = 'plebvox-resume';
         resumeBtn.textContent = '▶ Resume';
-        resumeBtn.style.cssText = 'padding: 0.4rem 1rem; background: #17a2b8; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: 600; display: none; transition: background 0.2s;';
-        resumeBtn.addEventListener('mouseenter', function() { this.style.backgroundColor = '#138496'; });
-        resumeBtn.addEventListener('mouseleave', function() { this.style.backgroundColor = '#17a2b8'; });
+        resumeBtn.style.cssText = 'padding: 0.4rem 1rem; background: #17a2b8; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: 600; display: none;';
 
         const stopBtn = document.createElement('button');
-        stopBtn.className = 'plebvox-stop';
         stopBtn.textContent = '⏹ Stop';
-        stopBtn.style.cssText = 'padding: 0.4rem 1rem; background: #dc3545; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: 600; display: none; transition: background 0.2s;';
-        stopBtn.addEventListener('mouseenter', function() { this.style.backgroundColor = '#c82333'; });
-        stopBtn.addEventListener('mouseleave', function() { this.style.backgroundColor = '#dc3545'; });
+        stopBtn.style.cssText = 'padding: 0.4rem 1rem; background: #dc3545; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: 600; display: none;';
 
         const statusText = document.createElement('span');
-        statusText.className = 'plebvox-status';
         statusText.textContent = 'Ready';
         statusText.style.cssText = 'font-size: 0.8rem; color: var(--text-secondary, #666); margin-left: 0.5rem; min-width: 60px;';
 
@@ -668,8 +312,7 @@
             pauseBtn: pauseBtn,
             resumeBtn: resumeBtn,
             stopBtn: stopBtn,
-            statusText: statusText,
-            led: led
+            statusText: statusText
         };
 
         playBtn.addEventListener('click', function() {
@@ -691,6 +334,7 @@
         buttonContainer.appendChild(stopBtn);
         buttonContainer.appendChild(statusText);
 
+        // Speed and voice row
         const controlsRow = document.createElement('div');
         controlsRow.style.cssText = 'display: flex; justify-content: center; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.25rem;';
 
@@ -720,7 +364,7 @@
 
         const voiceSelect = document.createElement('select');
         voiceSelect.className = 'plebvox-voice-select';
-        voiceSelect.style.cssText = 'padding: 0.2rem 0.4rem; border-radius: 4px; border: 1px solid var(--border, #ddd); font-size: 0.75rem; max-width: 180px; background: var(--bg, #fff); color: var(--text, #000);';
+        voiceSelect.style.cssText = 'padding: 0.2rem 0.4rem; border-radius: 4px; border: 1px solid var(--border, #ddd); font-size: 0.75rem; max-width: 180px;';
         
         if (availableVoices.length > 0) {
             populateVoiceSelector(voiceSelect);
@@ -740,7 +384,7 @@
 
         controlsRow.appendChild(voiceSelect);
 
-        container.appendChild(headerRow);
+        container.appendChild(title);
         container.appendChild(buttonContainer);
         container.appendChild(controlsRow);
 
@@ -748,84 +392,36 @@
     }
 
     // ==========================================
-    // MAIN INITIALIZATION
+    // INIT
     // ==========================================
     function initPlebVox() {
         sectionDataList = getPlebVoxSections();
         
         if (sectionDataList.length === 0) {
-            console.log('PlebVox: No sections found. Existing articles work normally.');
+            console.log('PlebVox: No sections found.');
             return;
         }
 
         console.log(`PlebVox: Found ${sectionDataList.length} section(s)`);
 
-        if (!voicesLoaded) {
-            loadVoices();
-        }
+        loadVoices();
 
         const main = document.querySelector('main');
         if (!main) return;
 
-        // Insert each control after its START marker
         sectionDataList.forEach((section, index) => {
             const controlElement = createSectionControls(section, index);
             section.controlElement = controlElement;
-            
-            if (section.startNode) {
-                section.startNode.parentNode.insertBefore(controlElement, section.startNode.nextSibling);
-                console.log(`PlebVox: Inserted Part ${section.number} after START marker`);
-            } else {
-                console.warn(`PlebVox: No START node for Part ${section.number}, inserting at top`);
-                main.insertBefore(controlElement, main.firstChild);
-            }
+            section.startNode.parentNode.insertBefore(controlElement, section.startNode.nextSibling);
         });
 
-        if (!voicesLoaded) {
-            window.speechSynthesis.onvoiceschanged = function() {
-                if (!voicesLoaded) {
-                    loadVoices();
-                }
-            };
-        }
-
-        const style = document.createElement('style');
-        style.textContent = `
-            .plebvox-highlight {
-                transition: background-color 0.1s ease;
+        window.speechSynthesis.onvoiceschanged = function() {
+            if (availableVoices.length === 0) {
+                loadVoices();
             }
-            .plebvox-led-off {
-                background-color: #dc3545;
-                opacity: 0.5;
-                box-shadow: none;
-            }
-            .plebvox-led-playing {
-                background-color: #28a745;
-                opacity: 1;
-                box-shadow: 0 0 8px rgba(40, 167, 69, 0.6);
-                animation: plebvox-pulse-green 1.5s ease-in-out infinite;
-            }
-            .plebvox-led-paused {
-                background-color: #ffc107;
-                opacity: 1;
-                box-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
-                animation: plebvox-pulse-amber 1.5s ease-in-out infinite;
-            }
-            @keyframes plebvox-pulse-green {
-                0%, 100% { box-shadow: 0 0 8px rgba(40, 167, 69, 0.6); }
-                50% { box-shadow: 0 0 16px rgba(40, 167, 69, 0.9); }
-            }
-            @keyframes plebvox-pulse-amber {
-                0%, 100% { box-shadow: 0 0 8px rgba(255, 193, 7, 0.5); }
-                50% { box-shadow: 0 0 16px rgba(255, 193, 7, 0.8); }
-            }
-        `;
-        document.head.appendChild(style);
+        };
     }
 
-    // ==========================================
-    // RUN
-    // ==========================================
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initPlebVox);
     } else {
