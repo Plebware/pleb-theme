@@ -16,22 +16,23 @@
     let sectionDataList = [];
 
     // ==========================================
-    // GET SECTIONS - SIMPLIFIED
+    // GET SECTIONS
     // ==========================================
     function getPlebVoxSections() {
         const main = document.querySelector('main');
         if (!main) return [];
 
         const sections = [];
-        
-        // Find all START comment nodes
-        const startNodes = [];
+        const markers = [];
+
+        // Find ALL PLEBVOX marker comments in document order.
         const walker = document.createTreeWalker(
             main,
             NodeFilter.SHOW_COMMENT,
             {
                 acceptNode: function(node) {
-                    if (node.textContent && node.textContent.trim() === 'PLEBVOX:START') {
+                    const text = node.textContent ? node.textContent.trim() : '';
+                    if (text === 'PLEBVOX:START' || text === 'PLEBVOX:END') {
                         return NodeFilter.FILTER_ACCEPT;
                     }
                     return NodeFilter.FILTER_REJECT;
@@ -41,63 +42,95 @@
 
         let node = walker.nextNode();
         while (node) {
-            startNodes.push(node);
+            markers.push({
+                node: node,
+                type: node.textContent.trim()
+            });
             node = walker.nextNode();
         }
 
-        if (startNodes.length === 0) {
+        if (markers.length === 0) {
             return [];
         }
 
-        console.log(`PlebVox: Found ${startNodes.length} sections`);
+        // Pair each START with the next END in document order.
+        let startNode = null;
+        let sectionNumber = 0;
 
-        // Process each START node
-        startNodes.forEach((startNode, index) => {
-            // Find END
-            let endNode = null;
-            let current = startNode.nextSibling;
-            while (current) {
-                if (current.nodeType === Node.COMMENT_NODE && 
-                    current.textContent && current.textContent.trim() === 'PLEBVOX:END') {
-                    endNode = current;
-                    break;
+        markers.forEach(function(marker) {
+            if (marker.type === 'PLEBVOX:START') {
+                if (!startNode) {
+                    startNode = marker.node;
+                } else {
+                    console.warn('PlebVox: Nested START marker detected; ignoring the nested START.');
                 }
-                current = current.nextSibling;
-            }
-
-            if (!endNode) {
-                console.warn(`No END for section ${index + 1}`);
                 return;
             }
 
-            // Get ALL text between START and END
-            let sectionText = '';
-            let currentText = startNode.nextSibling;
-            while (currentText && currentText !== endNode) {
-                // Skip comment nodes
-                if (currentText.nodeType !== Node.COMMENT_NODE) {
-                    if (currentText.textContent) {
-                        sectionText += currentText.textContent + ' ';
-                    }
-                }
-                currentText = currentText.nextSibling;
-            }
+            if (marker.type === 'PLEBVOX:END' && startNode) {
+                const endNode = marker.node;
+                sectionNumber += 1;
 
-            // Clean the text
-            sectionText = sectionText.replace(/\s+/g, ' ').trim();
+                // Use a DOM Range so content can contain arbitrary nested HTML.
+                const range = document.createRange();
+                range.setStartAfter(startNode);
+                range.setEndBefore(endNode);
 
-            if (sectionText.length > 0) {
-                sections.push({
-                    number: sections.length + 1,
-                    text: sectionText,
-                    startNode: startNode,
-                    endNode: endNode,
-                    controlElement: null
+                const fragment = range.cloneContents();
+
+                // Visual/media elements are not spoken. Removing them from the
+                // cloned fragment also prevents image alt text from entering
+                // the spoken text accidentally.
+                fragment.querySelectorAll(
+                    'img, svg, video, audio, canvas, iframe, object, embed, source, track'
+                ).forEach(function(element) {
+                    element.remove();
                 });
-                console.log(`Section ${sections.length}: ${sectionText.substring(0, 50)}... (${sectionText.length} chars)`);
+
+                // Extract only the remaining prose text.
+                let sectionText = fragment.textContent || '';
+
+                // Remove emoji and related pictographic presentation characters.
+                // This deliberately affects the speech copy only; the page itself
+                // remains unchanged and continues to display its emojis normally.
+                try {
+                    sectionText = sectionText.replace(
+                        /[\p{Extended_Pictographic}\p{Emoji_Presentation}\uFE0F\u200D]/gu,
+                        ''
+                    );
+                } catch (e) {
+                    // Older browsers may not support Unicode property escapes.
+                    // Keep the text intact rather than breaking PlebVox entirely.
+                    console.warn('PlebVox: Unicode emoji filtering is not supported by this browser.');
+                }
+
+                // Clean whitespace left by removed visual/decorative content.
+                sectionText = sectionText.replace(/\s+/g, ' ').trim();
+
+                if (sectionText.length > 0) {
+                    sections.push({
+                        number: sections.length + 1,
+                        text: sectionText,
+                        startNode: startNode,
+                        endNode: endNode,
+                        controlElement: null
+                    });
+                    console.log(
+                        `Section ${sections.length}: ${sectionText.substring(0, 50)}... (${sectionText.length} chars)`
+                    );
+                } else {
+                    console.warn(`PlebVox: Section ${sectionNumber} contains no readable prose.`);
+                }
+
+                startNode = null;
             }
         });
 
+        if (startNode) {
+            console.warn('PlebVox: START marker has no matching END marker.');
+        }
+
+        console.log(`PlebVox: Found ${sections.length} readable section(s)`);
         return sections;
     }
 
