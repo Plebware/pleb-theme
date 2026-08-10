@@ -15,27 +15,84 @@
     let activeControls = null;
     let sectionDataList = [];
     let voicesLoaded = false;
-    let voiceLoadAttempts = 0;
-    let voiceLoadTimeout = null;
     let speechSynthSupported = false;
     let browserHasVoices = false;
     let voiceLoadComplete = false;
+    let voicePromise = null;
 
     // ==========================================
-    // BROWSER DETECTION - FIXED ORDER
+    // BROWSER DETECTION
     // ==========================================
     function getBrowserInfo() {
         const ua = navigator.userAgent.toLowerCase();
 
-        // Check for specific browsers first (Brave contains Chrome in UA)
-        if (ua.indexOf('vivaldi') !== -1) return 'Vivaldi';
-        if (ua.indexOf('brave') !== -1) return 'Brave';
-        if (ua.indexOf('edg') !== -1) return 'Edge';
-        if (ua.indexOf('firefox') !== -1) return 'Firefox';
-        if (ua.indexOf('chrome') !== -1) return 'Chrome';
-        if (ua.indexOf('safari') !== -1) return 'Safari';
+        if (navigator.brave) return 'Brave';
+        if (ua.includes('vivaldi')) return 'Vivaldi';
+        if (ua.includes('edg')) return 'Edge';
+        if (ua.includes('firefox')) return 'Firefox';
+        if (ua.includes('chrome')) return 'Chrome';
+        if (ua.includes('safari')) return 'Safari';
 
         return 'Unknown';
+    }
+
+    // ==========================================
+    // WAIT FOR VOICES - WITH CHROMIUM FALLBACK
+    // ==========================================
+    function waitForVoices() {
+        if (voicePromise) return voicePromise;
+
+        voicePromise = new Promise(function(resolve) {
+            if (!('speechSynthesis' in window)) {
+                resolve([]);
+                return;
+            }
+
+            let voices = window.speechSynthesis.getVoices();
+
+            if (voices.length > 0) {
+                resolve(voices);
+                return;
+            }
+
+            // Listen for voices loading
+            function onVoicesChanged() {
+                voices = window.speechSynthesis.getVoices();
+                if (voices.length > 0) {
+                    window.speechSynthesis.removeEventListener('voiceschanged', onVoicesChanged);
+                    resolve(voices);
+                }
+            }
+
+            window.speechSynthesis.addEventListener('voiceschanged', onVoicesChanged);
+
+            // Chromium Linux sometimes needs a kick to initialise the speech subsystem
+            // Calling cancel() forces the speech system to wake up
+            try {
+                window.speechSynthesis.cancel();
+            } catch (e) {
+                // Ignore errors from cancel()
+            }
+
+            // Short delay then check again
+            setTimeout(function() {
+                voices = window.speechSynthesis.getVoices();
+                if (voices.length > 0) {
+                    window.speechSynthesis.removeEventListener('voiceschanged', onVoicesChanged);
+                    resolve(voices);
+                    return;
+                }
+
+                // Wait a bit longer for voices to load
+                setTimeout(function() {
+                    window.speechSynthesis.removeEventListener('voiceschanged', onVoicesChanged);
+                    voices = window.speechSynthesis.getVoices();
+                    resolve(voices);
+                }, 1500);
+            }, 500);
+        });
+
+        return voicePromise;
     }
 
     // ==========================================
@@ -181,11 +238,6 @@
             return;
         }
 
-        // Check if speech synthesis is supported but has no voices
-        if (!browserHasVoices && availableVoices.length === 0) {
-            console.log('PlebVox: No voices available, attempting to speak with browser default voice.');
-        }
-
         currentSectionData = sectionData;
         activeControls = controls;
 
@@ -194,46 +246,85 @@
         utterance.pitch = 1;
         utterance.volume = 1;
 
-        // Only assign a voice if one is available
+        // Store the selected voice reference
+        let voiceToUse = null;
         if (selectedVoice && availableVoices.length > 0) {
-            utterance.voice = selectedVoice;
+            voiceToUse = selectedVoice;
         } else if (availableVoices.length > 0) {
-            const englishVoice = availableVoices.find(v => v.lang && v.lang.startsWith('en'));
-            utterance.voice = englishVoice || availableVoices[0];
-            selectedVoice = utterance.voice;
-        } else {
-            // No voices available - let the browser use its default
-            console.log('PlebVox: Speaking with browser default voice (no voices installed)');
+            voiceToUse = availableVoices[0];
         }
 
-        utterance.onstart = function() {
-            isReading = true;
-            isPaused = false;
-            updateControls(controls, 'playing');
-        };
+        // Wait for voices to load, then speak
+        waitForVoices().then(function(voices) {
+            if (voices.length > 0) {
+                // Update available voices
+                availableVoices = voices;
+                browserHasVoices = true;
+                voiceLoadComplete = true;
+                voicesLoaded = true;
+                updateAllVoiceSelectors();
+                updateVoiceLoadStatus();
 
-        utterance.onend = function() {
-            isReading = false;
-            isPaused = false;
-            updateControls(controls, 'idle');
-            activeControls = null;
-        };
+                // Use the stored voice or pick one
+                if (!voiceToUse) {
+                    const zaVoice = voices.find(v => v.lang === 'en-ZA' || v.lang === 'en_ZA');
+                    const ukVoice = voices.find(v => v.lang === 'en-GB' || v.lang === 'en_GB');
+                    const auVoice = voices.find(v => v.lang === 'en-AU' || v.lang === 'en_AU');
+                    const englishVoice = voices.find(v => v.lang && v.lang.startsWith('en'));
+                    voiceToUse = zaVoice || ukVoice || auVoice || englishVoice || voices[0];
+                    selectedVoice = voiceToUse;
+                }
 
-        utterance.onerror = function(e) {
-            console.error('Speech error:', e);
-            isReading = false;
-            isPaused = false;
-            updateControls(controls, 'idle');
-            activeControls = null;
-        };
+                if (voiceToUse) {
+                    utterance.voice = voiceToUse;
+                }
+            } else {
+                // No voices found - browser exposes no speech voices
+                console.log('PlebVox: Browser exposes no speech voices. OS speech engine unavailable.');
+                browserHasVoices = false;
+                voiceLoadComplete = true;
+                updateVoiceLoadStatus();
+            }
 
-        try {
-            window.speechSynthesis.speak(utterance);
-        } catch (e) {
-            console.error('Failed to speak:', e);
-            updateControls(controls, 'idle');
-            alert('Speech synthesis failed. Please check your browser settings.');
-        }
+            // Now speak
+            utterance.onstart = function() {
+                isReading = true;
+                isPaused = false;
+                updateControls(controls, 'playing');
+            };
+
+            utterance.onend = function() {
+                isReading = false;
+                isPaused = false;
+                updateControls(controls, 'idle');
+                activeControls = null;
+            };
+
+            utterance.onerror = function(e) {
+                console.error('Speech error:', e);
+                isReading = false;
+                isPaused = false;
+                updateControls(controls, 'idle');
+                activeControls = null;
+            };
+
+            try {
+                window.speechSynthesis.speak(utterance);
+            } catch (e) {
+                console.error('Failed to speak:', e);
+                updateControls(controls, 'idle');
+                alert('Speech synthesis failed. Please check your browser settings.');
+            }
+        }).catch(function(e) {
+            console.error('Voice loading error:', e);
+            // Fallback: try speaking anyway
+            try {
+                window.speechSynthesis.speak(utterance);
+            } catch (err) {
+                console.error('Fallback speech failed:', err);
+                updateControls(controls, 'idle');
+            }
+        });
     }
 
     function pauseSpeech(controls) {
@@ -298,79 +389,42 @@
     }
 
     // ==========================================
-    // VOICE LOADING - FIXED
+    // VOICE LOADING - EVENT-DRIVEN
     // ==========================================
     function loadVoices() {
-        // Clear any pending timeout
-        if (voiceLoadTimeout) {
-            clearTimeout(voiceLoadTimeout);
-            voiceLoadTimeout = null;
-        }
+        if (voicesLoaded) return;
 
-        // Check if speech synthesis is supported
-        if (!('speechSynthesis' in window)) {
-            console.warn('PlebVox: Speech synthesis not supported in this browser.');
-            speechSynthSupported = false;
-            browserHasVoices = false;
-            voiceLoadComplete = true;
-            updateVoiceSelectors();
-            updateVoiceLoadStatus();
-            return;
-        }
-
-        speechSynthSupported = true;
-        console.log('PlebVox: Speech synthesis available');
-
-        // Get voices
-        let voices = [];
-        try {
-            voices = window.speechSynthesis.getVoices();
-        } catch (e) {
-            console.warn('PlebVox: Error getting voices:', e);
-        }
-
-        // If no voices, try waiting for them to load
-        if (!voices || voices.length === 0) {
-            voiceLoadAttempts++;
-            
-            // If we've tried too many times, give up
-            if (voiceLoadAttempts > 20) {
-                console.warn('PlebVox: No voices found after 20 attempts (6 seconds). Giving up.');
-                browserHasVoices = false;
-                availableVoices = [];
+        waitForVoices().then(function(voices) {
+            if (voices.length > 0) {
+                availableVoices = voices;
+                browserHasVoices = true;
+                voicesLoaded = true;
                 voiceLoadComplete = true;
-                updateVoiceSelectors();
+                console.log(`PlebVox: Voices loaded: ${voices.length}`);
+
+                // Select default voice with regional preference
+                const zaVoice = voices.find(v => v.lang === 'en-ZA' || v.lang === 'en_ZA');
+                const ukVoice = voices.find(v => v.lang === 'en-GB' || v.lang === 'en_GB');
+                const auVoice = voices.find(v => v.lang === 'en-AU' || v.lang === 'en_AU');
+                const englishVoice = voices.find(v => v.lang && v.lang.startsWith('en'));
+                selectedVoice = zaVoice || ukVoice || auVoice || englishVoice || voices[0];
+
+                updateAllVoiceSelectors();
                 updateVoiceLoadStatus();
-                return;
+            } else {
+                browserHasVoices = false;
+                voiceLoadComplete = true;
+                console.log('PlebVox: Browser exposes no speech voices. OS speech engine unavailable.');
+                updateVoiceLoadStatus();
             }
-
-            // Try again after a delay
-            voiceLoadTimeout = setTimeout(function() {
-                loadVoices();
-            }, 300);
-            return;
-        }
-
-        // Voices found!
-        browserHasVoices = true;
-        availableVoices = voices;
-        voicesLoaded = true;
-        voiceLoadComplete = true;
-        console.log(`PlebVox: Voices loaded: ${voices.length}`);
-
-        // Select default voice with regional preference
-        const zaVoice = availableVoices.find(v => v.lang === 'en-ZA' || v.lang === 'en_ZA');
-        const ukVoice = availableVoices.find(v => v.lang === 'en-GB' || v.lang === 'en_GB');
-        const auVoice = availableVoices.find(v => v.lang === 'en-AU' || v.lang === 'en_AU');
-        const englishVoice = availableVoices.find(v => v.lang && v.lang.startsWith('en'));
-        selectedVoice = zaVoice || ukVoice || auVoice || englishVoice || availableVoices[0];
-
-        updateAllVoiceSelectors();
-        updateVoiceLoadStatus();
+        }).catch(function(e) {
+            console.warn('PlebVox: Voice loading error:', e);
+            voiceLoadComplete = true;
+            updateVoiceLoadStatus();
+        });
     }
 
     function updateVoiceLoadStatus() {
-        // Update ALL status indicators, not just the first one
         const statusElements = document.querySelectorAll('.plebvox-voice-status');
         if (!statusElements.length) return;
 
@@ -380,7 +434,7 @@
         let statusText = '';
         let statusColor = '';
 
-        if (!speechSynthSupported) {
+        if (!('speechSynthesis' in window)) {
             statusText = '⚠️ Speech synthesis not supported';
             statusColor = '#dc3545';
         } else if (!voiceLoadComplete) {
@@ -389,12 +443,9 @@
         } else if (voiceCount > 0) {
             statusText = `✅ ${voiceCount} voice(s) available`;
             statusColor = '#28a745';
-        } else if (voiceLoadAttempts > 20) {
-            statusText = `⚠️ No selectable voices in ${browser}`;
-            statusColor = '#ffc107';
         } else {
-            statusText = '⏳ Loading voices...';
-            statusColor = '#17a2b8';
+            statusText = `ℹ️ No system voices (${browser})`;
+            statusColor = '#ffc107';
         }
 
         statusElements.forEach(function(statusEl) {
@@ -410,20 +461,17 @@
     }
 
     function populateVoiceSelector(select) {
-        // Preserve the current value
         const currentValue = select.value;
         select.innerHTML = '';
 
-        // If no voices available, show a message
-        if (!speechSynthSupported || availableVoices.length === 0) {
+        if (!('speechSynthesis' in window) || availableVoices.length === 0) {
             const option = document.createElement('option');
             option.value = '';
-            option.textContent = 'Browser default voice';
+            option.textContent = 'No voices available';
             select.appendChild(option);
             return;
         }
 
-        // Add voices
         availableVoices.forEach(function(voice) {
             const option = document.createElement('option');
             option.value = voice.name;
@@ -436,7 +484,6 @@
             select.appendChild(option);
         });
 
-        // Restore selected voice if still available
         if (currentValue && availableVoices.find(function(v) { return v.name === currentValue; })) {
             select.value = currentValue;
         } else if (selectedVoice) {
@@ -546,7 +593,7 @@
         } else {
             const option = document.createElement('option');
             option.value = '';
-            option.textContent = 'Browser default voice';
+            option.textContent = 'No voices available';
             voiceSelect.appendChild(option);
         }
 
@@ -559,7 +606,6 @@
 
         controlsRow.appendChild(voiceSelect);
 
-        // Voice status indicator - each control gets its own
         const voiceStatus = document.createElement('span');
         voiceStatus.className = 'plebvox-voice-status';
         voiceStatus.style.cssText = 'font-size: 0.7rem; color: var(--text-secondary, #666); margin-left: 0.25rem;';
@@ -578,7 +624,15 @@
     // ==========================================
     function initPlebVox() {
         console.log('PlebVox: Browser:', getBrowserInfo());
-        
+
+        // Check if speech synthesis is available
+        if (!('speechSynthesis' in window)) {
+            console.warn('PlebVox: Speech synthesis not available.');
+            speechSynthSupported = false;
+        } else {
+            speechSynthSupported = true;
+        }
+
         sectionDataList = getPlebVoxSections();
         
         if (sectionDataList.length === 0) {
@@ -588,7 +642,7 @@
 
         console.log(`PlebVox: Found ${sectionDataList.length} section(s)`);
 
-        // Load voices (will retry if needed)
+        // Load voices (event-driven)
         loadVoices();
 
         const main = document.querySelector('main');
@@ -602,24 +656,17 @@
 
         // Listen for voice changes
         if ('speechSynthesis' in window) {
-            window.speechSynthesis.onvoiceschanged = function() {
-                if (availableVoices.length === 0) {
-                    // Reset attempts and try loading again
-                    voiceLoadAttempts = 0;
-                    voiceLoadComplete = false;
-                    loadVoices();
-                } else {
-                    // Voices may have changed, update the list
-                    const newVoices = window.speechSynthesis.getVoices();
-                    if (newVoices && newVoices.length !== availableVoices.length) {
-                        availableVoices = newVoices;
-                        browserHasVoices = newVoices.length > 0;
-                        voiceLoadComplete = true;
-                        updateAllVoiceSelectors();
-                        updateVoiceLoadStatus();
-                    }
+            window.speechSynthesis.addEventListener('voiceschanged', function() {
+                const voices = window.speechSynthesis.getVoices();
+                if (voices.length > 0 && voices.length !== availableVoices.length) {
+                    availableVoices = voices;
+                    browserHasVoices = true;
+                    voiceLoadComplete = true;
+                    voicesLoaded = true;
+                    updateAllVoiceSelectors();
+                    updateVoiceLoadStatus();
                 }
-            };
+            });
         }
 
         // Update status after a moment
