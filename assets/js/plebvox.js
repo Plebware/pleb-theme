@@ -1,4 +1,4 @@
-// assets/js/plebvox.js - SIMPLIFIED VERSION
+// assets/js/plebvox.js - Accessibility Fix (Lighthouse 13.4.1)
 (function() {
     'use strict';
 
@@ -19,6 +19,7 @@
     let browserHasVoices = false;
     let voiceLoadComplete = false;
     let voicePromise = null;
+    let sectionCounter = 0;
 
     // ==========================================
     // BROWSER DETECTION
@@ -55,7 +56,6 @@
                 return;
             }
 
-            // Listen for voices loading
             function onVoicesChanged() {
                 voices = window.speechSynthesis.getVoices();
                 if (voices.length > 0) {
@@ -66,15 +66,12 @@
 
             window.speechSynthesis.addEventListener('voiceschanged', onVoicesChanged);
 
-            // Chromium Linux sometimes needs a kick to initialise the speech subsystem
-            // Calling cancel() forces the speech system to wake up
             try {
                 window.speechSynthesis.cancel();
             } catch (e) {
                 // Ignore errors from cancel()
             }
 
-            // Short delay then check again
             setTimeout(function() {
                 voices = window.speechSynthesis.getVoices();
                 if (voices.length > 0) {
@@ -83,7 +80,6 @@
                     return;
                 }
 
-                // Wait a bit longer for voices to load
                 setTimeout(function() {
                     window.speechSynthesis.removeEventListener('voiceschanged', onVoicesChanged);
                     voices = window.speechSynthesis.getVoices();
@@ -105,7 +101,6 @@
         const sections = [];
         const markers = [];
 
-        // Find ALL PLEBVOX marker comments in document order.
         const walker = document.createTreeWalker(
             main,
             NodeFilter.SHOW_COMMENT,
@@ -133,7 +128,6 @@
             return [];
         }
 
-        // Pair each START with the next END in document order.
         let startNode = null;
         let sectionNumber = 0;
 
@@ -151,40 +145,29 @@
                 const endNode = marker.node;
                 sectionNumber += 1;
 
-                // Use a DOM Range so content can contain arbitrary nested HTML.
                 const range = document.createRange();
                 range.setStartAfter(startNode);
                 range.setEndBefore(endNode);
 
                 const fragment = range.cloneContents();
 
-                // Visual/media elements are not spoken. Removing them from the
-                // cloned fragment also prevents image alt text from entering
-                // the spoken text accidentally.
                 fragment.querySelectorAll(
                     'img, svg, video, audio, canvas, iframe, object, embed, source, track'
                 ).forEach(function(element) {
                     element.remove();
                 });
 
-                // Extract only the remaining prose text.
                 let sectionText = fragment.textContent || '';
 
-                // Remove emoji and related pictographic presentation characters.
-                // This deliberately affects the speech copy only; the page itself
-                // remains unchanged and continues to display its emojis normally.
                 try {
                     sectionText = sectionText.replace(
                         /[\p{Extended_Pictographic}\p{Emoji_Presentation}\uFE0F\u200D]/gu,
                         ''
                     );
                 } catch (e) {
-                    // Older browsers may not support Unicode property escapes.
-                    // Keep the text intact rather than breaking PlebVox entirely.
                     console.warn('PlebVox: Unicode emoji filtering is not supported by this browser.');
                 }
 
-                // Clean whitespace left by removed visual/decorative content.
                 sectionText = sectionText.replace(/\s+/g, ' ').trim();
 
                 if (sectionText.length > 0) {
@@ -246,7 +229,6 @@
         utterance.pitch = 1;
         utterance.volume = 1;
 
-        // Store the selected voice reference
         let voiceToUse = null;
         if (selectedVoice && availableVoices.length > 0) {
             voiceToUse = selectedVoice;
@@ -254,10 +236,8 @@
             voiceToUse = availableVoices[0];
         }
 
-        // Wait for voices to load, then speak
         waitForVoices().then(function(voices) {
             if (voices.length > 0) {
-                // Update available voices
                 availableVoices = voices;
                 browserHasVoices = true;
                 voiceLoadComplete = true;
@@ -265,7 +245,6 @@
                 updateAllVoiceSelectors();
                 updateVoiceLoadStatus();
 
-                // Use the stored voice or pick one
                 if (!voiceToUse) {
                     const zaVoice = voices.find(v => v.lang === 'en-ZA' || v.lang === 'en_ZA');
                     const ukVoice = voices.find(v => v.lang === 'en-GB' || v.lang === 'en_GB');
@@ -279,14 +258,12 @@
                     utterance.voice = voiceToUse;
                 }
             } else {
-                // No voices found - browser exposes no speech voices
                 console.log('PlebVox: Browser exposes no speech voices. OS speech engine unavailable.');
                 browserHasVoices = false;
                 voiceLoadComplete = true;
                 updateVoiceLoadStatus();
             }
 
-            // Now speak
             utterance.onstart = function() {
                 isReading = true;
                 isPaused = false;
@@ -317,7 +294,6 @@
             }
         }).catch(function(e) {
             console.error('Voice loading error:', e);
-            // Fallback: try speaking anyway
             try {
                 window.speechSynthesis.speak(utterance);
             } catch (err) {
@@ -402,7 +378,6 @@
                 voiceLoadComplete = true;
                 console.log(`PlebVox: Voices loaded: ${voices.length}`);
 
-                // Select default voice with regional preference
                 const zaVoice = voices.find(v => v.lang === 'en-ZA' || v.lang === 'en_ZA');
                 const ukVoice = voices.find(v => v.lang === 'en-GB' || v.lang === 'en_GB');
                 const auVoice = voices.find(v => v.lang === 'en-AU' || v.lang === 'en_AU');
@@ -492,7 +467,15 @@
     }
 
     // ==========================================
-    // CREATE CONTROLS
+    // GENERATE UNIQUE ID
+    // ==========================================
+    function generateUniqueId(prefix) {
+        sectionCounter += 1;
+        return prefix + '-' + sectionCounter + '-' + Date.now().toString(36);
+    }
+
+    // ==========================================
+    // CREATE CONTROLS - ACCESSIBILITY FIXED
     // ==========================================
     function createSectionControls(section, sectionIndex) {
         const container = document.createElement('div');
@@ -508,18 +491,22 @@
 
         const playBtn = document.createElement('button');
         playBtn.textContent = '▶ Play';
+        playBtn.setAttribute('aria-label', `Play Part ${section.number}`);
         playBtn.style.cssText = 'padding: 0.4rem 1rem; background: #28a745; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: 600;';
 
         const pauseBtn = document.createElement('button');
         pauseBtn.textContent = '⏸ Pause';
+        pauseBtn.setAttribute('aria-label', `Pause Part ${section.number}`);
         pauseBtn.style.cssText = 'padding: 0.4rem 1rem; background: #ffc107; color: #000; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: 600; display: none;';
 
         const resumeBtn = document.createElement('button');
         resumeBtn.textContent = '▶ Resume';
+        resumeBtn.setAttribute('aria-label', `Resume Part ${section.number}`);
         resumeBtn.style.cssText = 'padding: 0.4rem 1rem; background: #17a2b8; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: 600; display: none;';
 
         const stopBtn = document.createElement('button');
         stopBtn.textContent = '⏹ Stop';
+        stopBtn.setAttribute('aria-label', `Stop Part ${section.number}`);
         stopBtn.style.cssText = 'padding: 0.4rem 1rem; background: #dc3545; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: 600; display: none;';
 
         const statusText = document.createElement('span');
@@ -558,32 +545,54 @@
         const controlsRow = document.createElement('div');
         controlsRow.style.cssText = 'display: flex; justify-content: center; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.25rem;';
 
-        const speedLabel = document.createElement('span');
+        // Speed control with proper label
+        const speedLabel = document.createElement('label');
+        const speedId = generateUniqueId('plebvox-speed');
         speedLabel.textContent = 'Speed:';
+        speedLabel.setAttribute('for', speedId);
         speedLabel.style.cssText = 'font-size: 0.8rem; color: var(--text-secondary, #666);';
 
         const speedDisplay = document.createElement('span');
         speedDisplay.textContent = '0.70x';
         speedDisplay.style.cssText = 'font-size: 0.8rem; min-width: 3rem; color: var(--text-secondary, #666);';
+        speedDisplay.id = speedId + '-display';
+        speedDisplay.setAttribute('aria-live', 'polite');
+        speedDisplay.setAttribute('aria-atomic', 'true');
 
         const speedSlider = document.createElement('input');
         speedSlider.type = 'range';
+        speedSlider.id = speedId;
         speedSlider.min = 0.3;
         speedSlider.max = 1.8;
         speedSlider.step = 0.05;
         speedSlider.value = speechRate;
+        speedSlider.setAttribute('aria-label', `Reading speed for Part ${section.number}`);
+        speedSlider.setAttribute('aria-valuenow', speechRate);
+        speedSlider.setAttribute('aria-valuemin', '0.3');
+        speedSlider.setAttribute('aria-valuemax', '1.8');
         speedSlider.style.cssText = 'width: 100px; cursor: pointer;';
+        
         speedSlider.addEventListener('input', function() {
             speechRate = parseFloat(this.value);
             speedDisplay.textContent = speechRate.toFixed(2) + 'x';
+            this.setAttribute('aria-valuenow', speechRate);
         });
 
         controlsRow.appendChild(speedLabel);
         controlsRow.appendChild(speedSlider);
         controlsRow.appendChild(speedDisplay);
 
+        // Voice selector with proper label
+        const voiceLabel = document.createElement('label');
+        const voiceId = generateUniqueId('plebvox-voice');
+        voiceLabel.textContent = 'Voice:';
+        voiceLabel.setAttribute('for', voiceId);
+        voiceLabel.style.cssText = 'font-size: 0.8rem; color: var(--text-secondary, #666);';
+
         const voiceSelect = document.createElement('select');
+        voiceSelect.id = voiceId;
         voiceSelect.className = 'plebvox-voice-select';
+        voiceSelect.setAttribute('aria-label', `Select voice for Part ${section.number}`);
         voiceSelect.style.cssText = 'padding: 0.2rem 0.4rem; border-radius: 4px; border: 1px solid var(--border, #ddd); font-size: 0.75rem; max-width: 180px;';
         
         controls.voiceSelect = voiceSelect;
@@ -604,8 +613,10 @@
             }
         });
 
+        controlsRow.appendChild(voiceLabel);
         controlsRow.appendChild(voiceSelect);
 
+        // Voice status indicator
         const voiceStatus = document.createElement('span');
         voiceStatus.className = 'plebvox-voice-status';
         voiceStatus.style.cssText = 'font-size: 0.7rem; color: var(--text-secondary, #666); margin-left: 0.25rem;';
@@ -625,7 +636,6 @@
     function initPlebVox() {
         console.log('PlebVox: Browser:', getBrowserInfo());
 
-        // Check if speech synthesis is available
         if (!('speechSynthesis' in window)) {
             console.warn('PlebVox: Speech synthesis not available.');
             speechSynthSupported = false;
@@ -642,7 +652,6 @@
 
         console.log(`PlebVox: Found ${sectionDataList.length} section(s)`);
 
-        // Load voices (event-driven)
         loadVoices();
 
         const main = document.querySelector('main');
@@ -654,7 +663,6 @@
             section.startNode.parentNode.insertBefore(controlElement, section.startNode.nextSibling);
         });
 
-        // Listen for voice changes
         if ('speechSynthesis' in window) {
             window.speechSynthesis.addEventListener('voiceschanged', function() {
                 const voices = window.speechSynthesis.getVoices();
@@ -669,7 +677,6 @@
             });
         }
 
-        // Update status after a moment
         setTimeout(function() {
             updateVoiceLoadStatus();
         }, 1000);
