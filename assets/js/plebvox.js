@@ -1,4 +1,4 @@
-// assets/js/plebvox.js - Accessibility Fix (Lighthouse 13.4.1)
+// assets/js/plebvox.js - Accessibility Fixed (Lighthouse 13.4.1)
 (function() {
     'use strict';
 
@@ -420,7 +420,7 @@
             statusColor = '#28a745';
         } else {
             statusText = `ℹ️ No system voices (${browser})`;
-            statusColor = '#ffc107';
+            statusColor = '#b38600';
         }
 
         statusElements.forEach(function(statusEl) {
@@ -492,7 +492,7 @@
         const playBtn = document.createElement('button');
         playBtn.textContent = '▶ Play';
         playBtn.setAttribute('aria-label', `Play Part ${section.number}`);
-        playBtn.style.cssText = 'padding: 0.4rem 1rem; background: #28a745; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: 600;';
+        playBtn.style.cssText = 'padding: 0.4rem 1rem; background: #1e7e34; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: 600;';
 
         const pauseBtn = document.createElement('button');
         pauseBtn.textContent = '⏸ Pause';
@@ -502,7 +502,7 @@
         const resumeBtn = document.createElement('button');
         resumeBtn.textContent = '▶ Resume';
         resumeBtn.setAttribute('aria-label', `Resume Part ${section.number}`);
-        resumeBtn.style.cssText = 'padding: 0.4rem 1rem; background: #17a2b8; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: 600; display: none;';
+        resumeBtn.style.cssText = 'padding: 0.4rem 1rem; background: #0f7c8c; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: 600; display: none;';
 
         const stopBtn = document.createElement('button');
         stopBtn.textContent = '⏹ Stop';
