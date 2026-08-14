@@ -17,7 +17,7 @@
         // Cache-bust the implementation after every PlebVox deployment.
         loaded = true;
         const script = document.createElement('script');
-        script.src = '/assets/js/plebvox.js?v=20260814-4';
+        script.src = '/assets/js/plebvox.js?v=20260814-5';
         script.async = true;
         script.defer = true;
         document.head.appendChild(script);
