@@ -1,7 +1,7 @@
-// assets/js/plebvox.js - PlebVox 3.4
-// Mobile fix: use a deliberately conservative timed word-highlighting fallback
-// when SpeechSynthesis does not emit boundary events. Desktop/native boundary
-// highlighting remains unchanged.
+// assets/js/plebvox.js - PlebVox 3.3
+// Mobile fix: use a timed word-highlighting fallback when SpeechSynthesis
+// does not emit boundary events, while retaining native CSS Highlight API
+// and the existing DOM fallback when boundary events are available.
 (function () {
     'use strict';
 
@@ -21,7 +21,7 @@
             document.head.appendChild(s);
         }
         customHighlightSupported = !!(window.CSS && CSS.highlights && typeof Highlight === 'function');
-        console.log('PlebVox 3.4: CSS Highlight API ' + (customHighlightSupported ? 'available' : 'unavailable; DOM fallback enabled'));
+        console.log('PlebVox 3.3: CSS Highlight API ' + (customHighlightSupported ? 'available' : 'unavailable; DOM fallback enabled'));
     }
 
     function clearFallbackTimer() {
@@ -225,9 +225,8 @@
         return starts;
     }
 
-    // Android speech engines may speak correctly but emit no boundary events.
-    // The fallback deliberately runs slower than the first mobile prototype.
-    // It is safer for highlighting to trail the voice slightly than to race ahead.
+    // Android/browser speech engines may speak correctly but emit no boundary events.
+    // In that case, estimate word timing so accessibility highlighting still works.
     function startMobileHighlightFallback(section) {
         clearFallbackTimer();
         if (!section || !section.mappingData || boundarySeen) return;
@@ -243,10 +242,8 @@
             highlightWordByCharIndex(index, section);
             const bounds = wordBounds(text, index);
             const chars = bounds ? bounds.end - bounds.start : 5;
-            // 3.4: conservative timing to counter the observed Android drift.
-            // At rate 0.7 this is ~314 ms per character, rather than ~164 ms.
-            const msPerChar = 220 / Math.max(0.5, speechRate);
-            const delay = Math.max(280, Math.min(1500, Math.round(chars * msPerChar + 180)));
+            const msPerChar = 115 / Math.max(0.5, speechRate);
+            const delay = Math.max(180, Math.min(950, Math.round(chars * msPerChar + 110)));
             fallbackTimer = setTimeout(tick, delay);
         }
         tick();
@@ -293,6 +290,8 @@
                 boundarySeen = false;
                 clearHighlights();
                 updateControls(controls, 'playing');
+                // Give browsers a short opportunity to provide native boundary events.
+                // If none arrive, switch to the mobile-safe timed fallback.
                 fallbackTimer = setTimeout(function() {
                     if (!boundarySeen && isReading && !isPaused) startMobileHighlightFallback(section);
                 }, 900);
@@ -429,16 +428,98 @@
             updateVoiceLoadStatus();
         }).catch(function(e) {
             console.warn('PlebVox: voice loading error', e);
+            voiceLoadComplete = true;
+            updateVoiceLoadStatus();
         });
     }
 
-    // Remaining PlebVox UI/control implementation follows the existing 3.3 implementation.
-    // This section is intentionally retained by the deployment build.
+    function getBrowserInfo() {
+        const ua = navigator.userAgent.toLowerCase();
+        if (navigator.brave) return 'Brave';
+        if (ua.includes('vivaldi')) return 'Vivaldi';
+        if (ua.includes('edg')) return 'Edge';
+        if (ua.includes('firefox')) return 'Firefox';
+        if (ua.includes('chrome')) return 'Chrome';
+        if (ua.includes('safari')) return 'Safari';
+        return 'Unknown';
+    }
 
-    window.addEventListener('DOMContentLoaded', function() {
+    function updateVoiceLoadStatus() {
+        document.querySelectorAll('.plebvox-voice-status').forEach(function(el) {
+            if (!('speechSynthesis' in window)) el.textContent = '⚠️ Speech synthesis not supported';
+            else if (!voiceLoadComplete) el.textContent = '⏳ Loading voices...';
+            else if (availableVoices.length) el.textContent = '✅ ' + availableVoices.length + ' voice(s) available';
+            else el.textContent = 'ℹ️ No system voices (' + getBrowserInfo() + ')';
+        });
+    }
+
+    function updateAllVoiceSelectors() { document.querySelectorAll('.plebvox-voice-select').forEach(populateVoiceSelector); }
+
+    function populateVoiceSelector(select) {
+        const current = select.value;
+        select.innerHTML = '';
+        if (!availableVoices.length) {
+            const o = document.createElement('option'); o.value = ''; o.textContent = 'No voices available'; select.appendChild(o); return;
+        }
+        availableVoices.forEach(function(v) {
+            const o = document.createElement('option');
+            o.value = v.name;
+            let f = '🌐';
+            if (/^en[-_]GB$/i.test(v.lang)) f = '🇬🇧';
+            else if (/^en[-_]US$/i.test(v.lang)) f = '🇺🇸';
+            else if (/^en[-_]AU$/i.test(v.lang)) f = '🇦🇺';
+            else if (/^en[-_]ZA$/i.test(v.lang)) f = '🇿🇦';
+            o.textContent = f + ' ' + v.name;
+            select.appendChild(o);
+        });
+        if (current && availableVoices.some(v => v.name === current)) select.value = current;
+        else if (selectedVoice) select.value = selectedVoice.name;
+    }
+
+    function createSectionControls(section, index) {
+        const container = document.createElement('div');
+        container.className = 'plebvox-control-' + index;
+        container.setAttribute('data-plebvox-ui', 'true');
+        container.setAttribute('aria-label', 'PlebVox controls for Part ' + section.number);
+        container.style.cssText = 'margin:.75rem 0;padding:.75rem 1rem;max-width:100%;background:var(--secondary-nav-bg,#f4f4f4);border-radius:8px;border:1px solid var(--border,#ddd);text-align:center;';
+        const title = document.createElement('div');
+        title.textContent = '🔊 PlebVox — Part ' + section.number;
+        title.style.cssText = 'font-weight:700;font-size:1rem;color:var(--text,#000);margin-bottom:.5rem;text-align:center;';
+        const bc = document.createElement('div');
+        bc.style.cssText = 'display:flex;justify-content:center;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem;';
+        function btn(t, l, css, d) { const b = document.createElement('button'); b.textContent=t; b.setAttribute('aria-label',l); b.style.cssText=css+'display:'+d+';'; return b; }
+        const base='padding:.4rem 1rem;border:none;border-radius:4px;cursor:pointer;font-size:.9rem;font-weight:600;';
+        const play=btn('▶ Play','Play Part '+section.number,base+'background:#28a745;color:#fff;','inline-block');
+        const pause=btn('⏸ Pause','Pause Part '+section.number,base+'background:#ffc107;color:#000;','none');
+        const resume=btn('▶ Resume','Resume Part '+section.number,base+'background:#17a2b8;color:#fff;','none');
+        const stop=btn('⏹ Stop','Stop Part '+section.number,base+'background:#dc3545;color:#fff;','none');
+        const status=document.createElement('span'); status.textContent='Ready'; status.setAttribute('aria-live','polite'); status.style.cssText='font-size:.8rem;color:var(--text-secondary,#666);margin-left:.5rem;min-width:60px;';
+        const controls={playBtn:play,pauseBtn:pause,resumeBtn:resume,stopBtn:stop,statusText:status};
+        play.addEventListener('click',()=>speakSection(section.text,section,controls));
+        pause.addEventListener('click',()=>pauseSpeech(controls));
+        resume.addEventListener('click',()=>resumeSpeech(controls));
+        stop.addEventListener('click',()=>stopSpeech(controls));
+        bc.append(play,pause,resume,stop,status);
+        const row=document.createElement('div'); row.style.cssText='display:flex;justify-content:center;align-items:center;gap:.75rem;flex-wrap:wrap;margin-top:.25rem;';
+        const sid=generateUniqueId('plebvox-speed'), sl=document.createElement('label'); sl.textContent='Speed:'; sl.setAttribute('for',sid);
+        const speed=document.createElement('input'); speed.id=sid; speed.type='range'; speed.min='0.5'; speed.max='2'; speed.step='0.1'; speed.value=speechRate; speed.setAttribute('aria-label','Reading speed'); speed.addEventListener('input',function(){speechRate=parseFloat(this.value);});
+        const vid=generateUniqueId('plebvox-voice'), vl=document.createElement('label'); vl.textContent='Voice:'; vl.setAttribute('for',vid);
+        const vs=document.createElement('select'); vs.id=vid; vs.className='plebvox-voice-select'; vs.setAttribute('aria-label','Select reading voice'); vs.style.cssText='max-width:240px;padding:.25rem;';
+        vs.addEventListener('change',function(){const found=availableVoices.find(v=>v.name===this.value);if(found)selectedVoice=found;});
+        const statusVoice=document.createElement('div'); statusVoice.className='plebvox-voice-status'; statusVoice.setAttribute('aria-live','polite'); statusVoice.style.cssText='font-size:.75rem;margin-top:.35rem;';
+        row.append(sl,speed,vl,vs); container.append(title,bc,row,statusVoice); populateVoiceSelector(vs);
+        return {element:container,playBtn:play,pauseBtn:pause,resumeBtn:resume,stopBtn:stop,statusText:status};
+    }
+
+    function initPlebVox() {
+        if (!('speechSynthesis' in window)) { console.warn('PlebVox: speech synthesis unavailable'); return; }
         installHighlightStyle();
+        sectionDataList=getPlebVoxSections();
+        if (!sectionDataList.length) return;
+        sectionDataList.forEach(function(section,index){const controls=createSectionControls(section,index);section.controlElement=controls.element;section.startNode.parentNode.insertBefore(controls.element,section.startNode.nextSibling);});
         loadVoices();
-        sectionDataList = getPlebVoxSections();
-    });
+        console.log('PlebVox 3.3: initialized');
+    }
 
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',initPlebVox); else initPlebVox();
 })();
