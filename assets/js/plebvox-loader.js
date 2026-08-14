@@ -14,11 +14,10 @@
             return;
         }
 
-        // Cache-bust the implementation so a previously cached PlebVox build
-        // cannot remain active after a deployment.
+        // Cache-bust the implementation after every PlebVox deployment.
         loaded = true;
         const script = document.createElement('script');
-        script.src = '/assets/js/plebvox.js?v=20260809-2';
+        script.src = '/assets/js/plebvox.js?v=20260814-3';
         script.async = true;
         script.defer = true;
         document.head.appendChild(script);
