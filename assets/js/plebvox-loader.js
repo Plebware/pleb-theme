@@ -14,10 +14,10 @@
             return;
         }
 
-        // Cache-bust the implementation after every PlebVox deployment.
+        // Cache-bust the static-mapping PlebVox 3.4 test build.
         loaded = true;
         const script = document.createElement('script');
-        script.src = '/assets/js/plebvox.js?v=20260814-6';
+        script.src = '/assets/js/plebvox.js?v=20260814-7';
         script.async = true;
         script.defer = true;
         document.head.appendChild(script);
