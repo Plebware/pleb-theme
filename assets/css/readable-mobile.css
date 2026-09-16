@@ -19,6 +19,12 @@ main p, main li, main blockquote, main td, main th {
   padding: 0.45rem 0.5rem !important;
 }
 
+/* Primary category titles are deliberately bold. */
+.modes-list.primary-nav li a,
+.modes-list li a {
+  font-weight: 700 !important;
+}
+
 .nav-brand a { font-size: 1.35rem !important; }
 .theme-toggle { font-size: 1.25rem !important; padding: 0.4rem 0.8rem !important; }
 .systems-links, .systems-links li a { font-size: 1.05rem !important; }
@@ -77,6 +83,12 @@ main p, main li, main blockquote, main td, main th {
     padding: 0.5rem 0.35rem !important;
   }
 
+  /* Keep the main category titles bold on phones. */
+  .modes-list.primary-nav li a,
+  .modes-list li a {
+    font-weight: 700 !important;
+  }
+
   .nav-brand a { font-size: 1.35rem !important; }
   .theme-toggle { font-size: 1.2rem !important; }
   .console-btn .label, .footer-btn, .copy-btn, #read-aloud-voice-select { font-size: 1rem !important; }
@@ -101,10 +113,16 @@ main p, main li, main blockquote, main td, main th {
     font-size: 1.35rem !important;
   }
 
+  .modes-list.primary-nav li a,
+  .modes-list li a {
+    font-weight: 700 !important;
+  }
+
   .console-btn .label, .footer-btn, .copy-btn, #read-aloud-voice-select { font-size: 0.95rem !important; }
 }
 
 @media (min-width: 601px) and (max-width: 1024px) {
   body { font-size: 1.2rem !important; }
-  .modes-list li a, .top-nav .secondary-nav li a, .secondary-nav li a { font-size: 1.5rem !important; }
+  .modes-list li a, .top-nav .secondary-nav li a { font-size: 1.5rem !important; }
+  .modes-list.primary-nav li a, .modes-list li a { font-weight: 700 !important; }
 }
