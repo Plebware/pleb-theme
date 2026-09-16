@@ -40,15 +40,10 @@ main p, main li, main blockquote, main td, main th {
   body { font-size: 1.2rem !important; }
   main p, main li, main blockquote, main td, main th { font-size: 1.2rem !important; }
 
-  .modes-list li a {
-    font-size: 1.5rem !important;
-    line-height: 1.3 !important;
-    font-weight: 600 !important;
-    padding: 0.5rem 0.35rem !important;
-  }
-
-  /* Secondary categories: one full-width category per row on phones.
-     The larger mobile type needs the extra horizontal room. */
+  /* All navigation categories: one full-width category per row on phones.
+     This applies to both the 12 primary modes and secondary categories. */
+  .modes-list.primary-nav,
+  .modes-list,
   .top-nav .secondary-nav,
   .secondary-nav {
     display: grid !important;
@@ -59,14 +54,16 @@ main p, main li, main blockquote, main td, main th {
     padding: 0.5rem !important;
   }
 
+  .modes-list li,
   .top-nav .secondary-nav li,
   .secondary-nav li {
     display: block !important;
     width: 100% !important;
-    text-align: center !important;
     min-width: 0 !important;
+    text-align: center !important;
   }
 
+  .modes-list li a,
   .top-nav .secondary-nav li a,
   .secondary-nav li a {
     display: block !important;
@@ -90,13 +87,15 @@ main p, main li, main blockquote, main td, main th {
 @media (max-width: 400px) {
   main p, main li, main blockquote, main td, main th { font-size: 1.15rem !important; }
 
-  .modes-list li a { font-size: 1.35rem !important; }
-
+  /* Keep every navigation category single-column on very small screens too. */
+  .modes-list.primary-nav,
+  .modes-list,
   .top-nav .secondary-nav,
   .secondary-nav {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 
+  .modes-list li a,
   .top-nav .secondary-nav li a,
   .secondary-nav li a {
     font-size: 1.35rem !important;
