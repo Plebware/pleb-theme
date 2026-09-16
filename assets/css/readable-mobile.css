@@ -1,0 +1,108 @@
+/* ============================================================
+   Plebware Readable Mobile Typography
+   Purpose: improve reading comfort on phones and tablets.
+   Loaded after main.css so these rules are deliberate overrides.
+   ============================================================ */
+
+/* Correct the invalid base declaration in main.css and establish
+   a comfortable default reading size. */
+body {
+  font-size: 1.125rem;
+  line-height: 1.75;
+}
+
+/* Main article/content text. */
+main p,
+main li,
+main blockquote,
+main td,
+main th {
+  font-size: 1.125rem;
+  line-height: 1.75;
+}
+
+/* Keep article excerpts comfortably readable. */
+.excerpt {
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+/* Phone-sized screens: approximately 20 px body text. */
+@media (max-width: 600px) {
+  body {
+    font-size: 1.25rem;
+    line-height: 1.75;
+  }
+
+  main p,
+  main li,
+  main blockquote,
+  main td,
+  main th {
+    font-size: 1.2rem;
+    line-height: 1.75;
+  }
+
+  .excerpt {
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+
+  /* Navigation remains compact enough to fit a phone screen,
+     but is raised from the previous 0.8–0.85rem values. */
+  .modes-list li a {
+    font-size: 0.95rem;
+  }
+
+  .top-nav .secondary-nav li a,
+  .secondary-nav li a {
+    font-size: 0.95rem !important;
+  }
+
+  .systems-links {
+    font-size: 0.9rem;
+  }
+
+  .nav-label {
+    font-size: 0.8rem;
+  }
+
+  .post-date {
+    font-size: 0.9rem;
+  }
+}
+
+/* Extra-small phones: still substantially larger than the old
+   0.75rem navigation/body settings, while avoiding excessive wrap. */
+@media (max-width: 400px) {
+  main p,
+  main li,
+  main blockquote,
+  main td,
+  main th {
+    font-size: 1.15rem;
+  }
+
+  .modes-list li a,
+  .secondary-nav li a {
+    font-size: 0.9rem !important;
+  }
+}
+
+/* Tablets and iPads: use a comfortable reading size without
+   making the larger display look oversized. */
+@media (min-width: 601px) and (max-width: 1024px) {
+  body {
+    font-size: 1.2rem;
+    line-height: 1.75;
+  }
+
+  main p,
+  main li,
+  main blockquote,
+  main td,
+  main th {
+    font-size: 1.2rem;
+    line-height: 1.75;
+  }
+}
