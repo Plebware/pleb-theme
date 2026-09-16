@@ -17,9 +17,16 @@
         // Cache-bust the implementation after every PlebVox deployment.
         loaded = true;
         const script = document.createElement('script');
-        script.src = '/assets/js/plebvox.js?v=20260814-6';
+        script.src = '/assets/js/plebvox.js?v=20260814-7';
         script.async = true;
         script.defer = true;
+        script.onload = function() {
+            const paragraphScript = document.createElement('script');
+            paragraphScript.src = '/assets/js/plebvox-paragraph-highlight.js?v=20260916-1';
+            paragraphScript.async = true;
+            paragraphScript.defer = true;
+            document.head.appendChild(paragraphScript);
+        };
         document.head.appendChild(script);
     }
 
