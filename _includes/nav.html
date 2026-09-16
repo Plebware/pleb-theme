@@ -28,8 +28,22 @@
     <!-- SECONDARY NAVIGATION -->
     <!-- Hamburger menu on all screen sizes -->
     <!-- ======================= -->
-    <button class="secondary-nav-toggle" type="button" aria-expanded="false" aria-controls="secondary-navigation">
-      ☰ Sections
+    {% assign section_name = 'Everyday' %}
+    {% if page.url contains '/author/' %}{% assign section_name = 'Author' %}
+    {% elsif page.url contains '/study/' %}{% assign section_name = 'Study' %}
+    {% elsif page.url contains '/research/' %}{% assign section_name = 'Research' %}
+    {% elsif page.url contains '/graphics/' %}{% assign section_name = 'Graphics' %}
+    {% elsif page.url contains '/music/' %}{% assign section_name = 'Music' %}
+    {% elsif page.url contains '/video/' %}{% assign section_name = 'Video' %}
+    {% elsif page.url contains '/broadcast/' %}{% assign section_name = 'Broadcast' %}
+    {% elsif page.url contains '/ai-helpers/' %}{% assign section_name = 'AI Helpers' %}
+    {% elsif page.url contains '/developer/' %}{% assign section_name = 'Developer' %}
+    {% elsif page.url contains '/accounting/' %}{% assign section_name = 'Accounting' %}
+    {% elsif page.url contains '/leisure/' %}{% assign section_name = 'Leisure' %}
+    {% endif %}
+
+    <button class="secondary-nav-toggle" type="button" aria-expanded="false" aria-controls="secondary-navigation" data-section-name="{{ section_name }}">
+      ☰ {{ section_name }} Sections
     </button>
     <div id="secondary-navigation" class="secondary-navigation-panel" hidden>
 
@@ -227,6 +241,8 @@
       const panel = document.querySelector('#secondary-navigation');
       if (!toggle || !panel) return;
 
+      const sectionName = toggle.getAttribute('data-section-name') || 'Everyday';
+
       toggle.addEventListener('click', function () {
         const open = panel.hasAttribute('hidden');
         if (open) {
@@ -237,7 +253,7 @@
           panel.classList.remove('is-open');
         }
         toggle.setAttribute('aria-expanded', String(open));
-        toggle.textContent = open ? '✕ Close Sections' : '☰ Sections';
+        toggle.textContent = open ? '✕ Close ' + sectionName + ' Sections' : '☰ ' + sectionName + ' Sections';
       });
     });
   </script>
