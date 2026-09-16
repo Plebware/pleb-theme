@@ -31,7 +31,7 @@
     <button class="secondary-nav-toggle" type="button" aria-expanded="false" aria-controls="secondary-navigation">
       ☰ Sections
     </button>
-    <div id="secondary-navigation" class="secondary-navigation-panel">
+    <div id="secondary-navigation" class="secondary-navigation-panel" hidden>
 
     <!-- Everyday -->
     {% if page.url == '/' or page.url contains '/everyday/' %}
@@ -164,22 +164,22 @@
     {% endif %}
 
     <!-- Developer -->
-{% if page.url contains '/developer/' %}
-<ul class="secondary-nav">
-  <li><a href="/developer/plebware/">PlebWare</a></li>
-  <li><a href="/developer/plebmachine/">PlebMachine</a></li>
-  <li><a href="/developer/rainmeter/">Rainmeter</a></li>
-  <li><a href="/developer/total-launcher/">Total Launcher</a></li>
-  <li><a href="/developer/github-pages/">GitHub Pages</a></li>
-  <li><a href="/developer/plebmachine-tech-papers/">Tech Papers</a></li>
-  <li><a href="/developer/plebmachine-guides/">Guides</a></li>
-  <li><a href="/developer/plebmachine-manuals/">Manuals</a></li>
-  <li><a href="/developer/automation/">Automation</a></li>
-  <li><a href="/developer/scripting/">Scripting</a></li>
-  <li><a href="/developer/linux/">Linux</a></li>
-  <li><a href="/developer/conky/">Conky</a></li>
-</ul>
-{% endif %}
+    {% if page.url contains '/developer/' %}
+    <ul class="secondary-nav">
+      <li><a href="/developer/plebware/">PlebWare</a></li>
+      <li><a href="/developer/plebmachine/">PlebMachine</a></li>
+      <li><a href="/developer/rainmeter/">Rainmeter</a></li>
+      <li><a href="/developer/total-launcher/">Total Launcher</a></li>
+      <li><a href="/developer/github-pages/">GitHub Pages</a></li>
+      <li><a href="/developer/plebmachine-tech-papers/">Tech Papers</a></li>
+      <li><a href="/developer/plebmachine-guides/">Guides</a></li>
+      <li><a href="/developer/plebmachine-manuals/">Manuals</a></li>
+      <li><a href="/developer/automation/">Automation</a></li>
+      <li><a href="/developer/scripting/">Scripting</a></li>
+      <li><a href="/developer/linux/">Linux</a></li>
+      <li><a href="/developer/conky/">Conky</a></li>
+    </ul>
+    {% endif %}
 
     <!-- Accounting -->
     {% if page.url contains '/accounting/' %}
@@ -228,7 +228,14 @@
       if (!toggle || !panel) return;
 
       toggle.addEventListener('click', function () {
-        const open = panel.classList.toggle('is-open');
+        const open = panel.hasAttribute('hidden');
+        if (open) {
+          panel.removeAttribute('hidden');
+          panel.classList.add('is-open');
+        } else {
+          panel.setAttribute('hidden', '');
+          panel.classList.remove('is-open');
+        }
         toggle.setAttribute('aria-expanded', String(open));
         toggle.textContent = open ? '✕ Close Sections' : '☰ Sections';
       });
