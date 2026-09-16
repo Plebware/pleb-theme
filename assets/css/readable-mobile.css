@@ -24,10 +24,13 @@ main p, main li, main blockquote, main td, main th {
   font-weight: 700 !important;
 }
 
-/* Secondary navigation is a hamburger menu at every screen size. */
+/* Secondary navigation is a full-width hamburger menu at every screen size. */
 .secondary-nav-toggle {
   display: block !important;
   width: 100% !important;
+  max-width: 100% !important;
+  flex: 0 0 100% !important;
+  clear: both !important;
   box-sizing: border-box !important;
   margin: 0.5rem 0 !important;
   padding: 0.65rem 0.8rem !important;
@@ -41,7 +44,11 @@ main p, main li, main blockquote, main td, main th {
 .secondary-navigation-panel {
   display: none !important;
   width: 100% !important;
+  max-width: 100% !important;
+  flex: 0 0 100% !important;
+  clear: both !important;
   box-sizing: border-box !important;
+  margin: 0 !important;
 }
 
 .secondary-navigation-panel.is-open {
