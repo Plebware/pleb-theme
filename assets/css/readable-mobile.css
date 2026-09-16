@@ -17,6 +17,7 @@ main p, main li, main blockquote, main td, main th {
   line-height: 1.3 !important;
   font-weight: 600 !important;
   padding: 0.45rem 0.5rem !important;
+  text-align: left !important;
 }
 
 /* Primary category titles are deliberately bold. */
@@ -51,6 +52,12 @@ main p, main li, main blockquote, main td, main th {
     width: 100% !important;
     max-width: 100% !important;
     justify-content: stretch !important;
+  }
+
+  .modes-list li,
+  .top-nav .secondary-nav li,
+  .secondary-nav li {
+    text-align: left !important;
   }
 }
 
