@@ -43,8 +43,7 @@ main p, main li, main blockquote, main td, main th {
 .copy-btn { padding: 0.4rem 0.8rem !important; opacity: 1 !important; }
 
 /* On laptops/tablets, let the 12 primary categories use the full
-   navigation width instead of the old 140px-per-column cap. This keeps
-   the text from looking squeezed while preserving four categories per row. */
+   navigation width instead of the old 140px-per-column cap. */
 @media (min-width: 601px) {
   .modes-list.primary-nav,
   .modes-list {
@@ -59,18 +58,21 @@ main p, main li, main blockquote, main td, main th {
   body { font-size: 1.2rem !important; }
   main p, main li, main blockquote, main td, main th { font-size: 1.2rem !important; }
 
-  /* All navigation categories: one full-width category per row on phones.
-     This applies to both the 12 primary modes and secondary categories. */
+  /* Phone navigation: two equal columns using the full available width.
+     No 140px column cap; primary and secondary navigation share the same
+     full-width two-column treatment. */
   .modes-list.primary-nav,
   .modes-list,
   .top-nav .secondary-nav,
   .secondary-nav {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) !important;
-    gap: 0.35rem !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.35rem 0.5rem !important;
     justify-content: stretch !important;
     width: 100% !important;
+    max-width: 100% !important;
     padding: 0.5rem !important;
+    box-sizing: border-box !important;
   }
 
   .modes-list li,
@@ -88,6 +90,7 @@ main p, main li, main blockquote, main td, main th {
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
+    box-sizing: border-box !important;
     font-size: 1.5rem !important;
     line-height: 1.3 !important;
     font-weight: 600 !important;
@@ -112,12 +115,14 @@ main p, main li, main blockquote, main td, main th {
 @media (max-width: 400px) {
   main p, main li, main blockquote, main td, main th { font-size: 1.15rem !important; }
 
-  /* Keep every navigation category single-column on very small screens too. */
+  /* Keep two navigation columns on very small phones too. */
   .modes-list.primary-nav,
   .modes-list,
   .top-nav .secondary-nav,
   .secondary-nav {
-    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   .modes-list li a,
