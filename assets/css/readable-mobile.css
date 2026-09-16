@@ -42,6 +42,19 @@ main p, main li, main blockquote, main td, main th {
 .console-btn .label { font-weight: 600 !important; }
 .copy-btn { padding: 0.4rem 0.8rem !important; opacity: 1 !important; }
 
+/* On laptops/tablets, let the 12 primary categories use the full
+   navigation width instead of the old 140px-per-column cap. This keeps
+   the text from looking squeezed while preserving four categories per row. */
+@media (min-width: 601px) {
+  .modes-list.primary-nav,
+  .modes-list {
+    grid-template-columns: repeat(4, minmax(150px, 1fr)) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    justify-content: stretch !important;
+  }
+}
+
 @media (max-width: 600px) {
   body { font-size: 1.2rem !important; }
   main p, main li, main blockquote, main td, main th { font-size: 1.2rem !important; }
