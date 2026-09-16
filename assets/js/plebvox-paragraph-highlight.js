@@ -10,6 +10,7 @@
     let activeTimer = null;
     let activeParagraph = null;
     let activeUtterance = null;
+    let activeSection = null;
     let boundarySeen = false;
     let fallbackIndex = 0;
 
@@ -44,6 +45,7 @@
             el.classList.remove(HIGHLIGHT_CLASS);
         });
         activeParagraph = null;
+        activeSection = null;
         if (window.CSS && CSS.highlights) {
             try { CSS.highlights.delete(WORD_HIGHLIGHT_NAME); } catch (e) {}
         }
@@ -102,48 +104,44 @@
         return result;
     }
 
-    function findParagraph(index, sectionList) {
-        for (let s = 0; s < sectionList.length; s++) {
-            const section = sectionList[s];
-            if (index >= 0 && index < section.text.length) {
-                for (let i = 0; i < section.mapping.length; i++) {
-                    const item = section.mapping[i];
-                    if (index >= item.start && index < item.end) return item.element;
-                }
-            }
+    function findParagraph(index, section) {
+        if (!section) return null;
+        for (let i = 0; i < section.mapping.length; i++) {
+            const item = section.mapping[i];
+            if (index >= item.start && index < item.end) return item.element;
         }
         return null;
     }
 
     function highlightForIndex(index) {
-        const paragraph = findParagraph(index, sections());
+        const paragraph = findParagraph(index, activeSection);
         if (!paragraph || paragraph === activeParagraph) return;
         if (activeParagraph) activeParagraph.classList.remove(HIGHLIGHT_CLASS);
         activeParagraph = paragraph;
         activeParagraph.classList.add(HIGHLIGHT_CLASS);
     }
 
-    function startFallback(utterance) {
-        if (boundarySeen || !utterance || !utterance.text) return;
-        const sectionList = sections();
-        let target = null;
+    function findSectionForUtterance(utterance, sectionList) {
+        const speech = clean(utterance && utterance.text);
+        if (!speech) return null;
         for (let i = 0; i < sectionList.length; i++) {
-            if (sectionList[i].text === clean(utterance.text) || clean(utterance.text).indexOf(sectionList[i].text) === 0) {
-                target = sectionList[i];
-                break;
-            }
+            if (sectionList[i].text === speech || speech.indexOf(sectionList[i].text) === 0) return sectionList[i];
         }
-        if (!target) return;
-        const starts = wordStarts(target.text);
+        return null;
+    }
+
+    function startFallback(utterance) {
+        if (boundarySeen || !utterance || !activeSection) return;
+        const starts = wordStarts(activeSection.text);
         if (!starts.length) return;
         fallbackIndex = 0;
         highlightForIndex(starts[0]);
 
         function tick() {
-            if (boundarySeen || activeUtterance !== utterance) return;
+            if (boundarySeen || activeUtterance !== utterance || !activeSection) return;
             if (fallbackIndex >= starts.length) return;
             highlightForIndex(starts[fallbackIndex++]);
-            const next = fallbackIndex < starts.length ? starts[fallbackIndex] : target.text.length;
+            const next = fallbackIndex < starts.length ? starts[fallbackIndex] : activeSection.text.length;
             const distance = Math.max(1, next - starts[Math.max(0, fallbackIndex - 1)]);
             const delay = Math.max(180, Math.min(950, Math.round(distance * 115 / 0.7 + 110)));
             activeTimer = setTimeout(tick, delay);
@@ -166,11 +164,16 @@
         activeUtterance = utterance;
         boundarySeen = false;
         clearParagraphHighlight();
+        activeUtterance = utterance;
+        const sectionList = sections();
+        activeSection = findSectionForUtterance(utterance, sectionList);
+
         utterance.addEventListener('start', function () {
             boundarySeen = false;
             clearParagraphHighlight();
-            const first = sections();
-            if (first.length && first[0].mapping.length) highlightForIndex(first[0].mapping[0].start);
+            activeUtterance = utterance;
+            activeSection = findSectionForUtterance(utterance, sections());
+            if (activeSection && activeSection.mapping.length) highlightForIndex(activeSection.mapping[0].start);
             setTimeout(function () {
                 if (!boundarySeen && activeUtterance === utterance) startFallback(utterance);
             }, 900);
