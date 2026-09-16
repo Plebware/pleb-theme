@@ -22,7 +22,7 @@
         script.defer = true;
         script.onload = function() {
             const paragraphScript = document.createElement('script');
-            paragraphScript.src = '/assets/js/plebvox-paragraph-highlight.js?v=20260916-1';
+            paragraphScript.src = '/assets/js/plebvox-paragraph-highlight.js?v=20260916-2';
             paragraphScript.async = true;
             paragraphScript.defer = true;
             document.head.appendChild(paragraphScript);
