@@ -4,6 +4,16 @@
 
     let loaded = false;
 
+    function hidePlebVoxHighlighting() {
+        if (document.getElementById('plebvox-highlight-disabled')) return;
+        const style = document.createElement('style');
+        style.id = 'plebvox-highlight-disabled';
+        style.textContent =
+            '::highlight(plebvox-current-word){background:transparent!important;color:inherit!important;text-shadow:none!important}' +
+            '.plebvox-highlight,.plebvox-paragraph-highlight{background:transparent!important;color:inherit!important;text-shadow:none!important;box-shadow:none!important;padding:0!important;}';
+        document.head.appendChild(style);
+    }
+
     function loadPlebVox() {
         if (loaded) return;
         
@@ -14,18 +24,15 @@
             return;
         }
 
-        // Cache-bust the implementation after every PlebVox deployment.
+        // PlebVox speech remains enabled. Visual highlighting is temporarily
+        // disabled because Android speech boundary timing is unreliable.
         loaded = true;
         const script = document.createElement('script');
-        script.src = '/assets/js/plebvox.js?v=20260814-7';
+        script.src = '/assets/js/plebvox.js?v=20260917-3';
         script.async = true;
         script.defer = true;
         script.onload = function() {
-            const paragraphScript = document.createElement('script');
-            paragraphScript.src = '/assets/js/plebvox-paragraph-highlight.js?v=20260917-1';
-            paragraphScript.async = true;
-            paragraphScript.defer = true;
-            document.head.appendChild(paragraphScript);
+            hidePlebVoxHighlighting();
         };
         document.head.appendChild(script);
     }
