@@ -48,7 +48,7 @@
     </button>
 
     <div id="secondary-navigation" class="secondary-navigation-panel" hidden>
-      {% assign section_prefix = '/' | append: section_slug | append: '/' %}
+      {% assign section_prefix = section_slug | append: '/' %}
       {% assign subcategory_count = 0 %}
 
       <ul class="secondary-nav">
@@ -61,14 +61,15 @@
 
         <!--
           Automatic subcategory discovery.
-          A subcategory is an index page exactly one level below the master
-          category, for example /author/news/ or /research/cybersecurity/.
-          Add the new subcategory's index.md and it appears here automatically.
+          Use the source path rather than the generated URL. This is more
+          reliable with Jekyll because every subcategory is represented by
+          an index.md directly beneath the master-category directory.
+          Example: graphics/site-stickers/index.md
         -->
-        {% assign subcategory_pages = site.pages | sort: 'url' %}
+        {% assign subcategory_pages = site.pages | sort: 'path' %}
         {% for subpage in subcategory_pages %}
-          {% assign url_parts = subpage.url | split: '/' %}
-          {% if subpage.url contains section_prefix and url_parts.size == 4 %}
+          {% assign path_parts = subpage.path | split: '/' %}
+          {% if subpage.path contains section_prefix and path_parts.size == 3 and path_parts[2] == 'index.md' %}
             {% assign subcategory_count = subcategory_count | plus: 1 %}
             <li>
               <a href="{{ subpage.url }}">
