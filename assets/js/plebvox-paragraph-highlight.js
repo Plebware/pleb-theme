@@ -194,10 +194,10 @@
             if (!activeUtterance || !activeSection || activeParagraph !== current) return;
 
             // Move at the predicted paragraph boundary. A later native boundary
-            // can correct the position, but a late/missing Android boundary can no
-            // longer leave the previous paragraph highlighted indefinitely.
+            // can correct the position, but only if it is not stale. See the
+            // monotonic guard in the boundary handler below.
             highlightForIndex(nextItem.start);
-            lastBoundaryIndex = nextItem.start;
+            lastBoundaryIndex = Math.max(lastBoundaryIndex, nextItem.start);
             scheduleNextParagraphBoundary();
         }, delay);
     }
@@ -215,7 +215,7 @@
                 }
             }
         }
-        lastBoundaryIndex = charIndex;
+        lastBoundaryIndex = Math.max(lastBoundaryIndex, charIndex);
         lastBoundaryTime = now;
     }
 
@@ -230,7 +230,10 @@
             if (boundarySeen || activeUtterance !== utterance || !activeSection) return;
             if (fallbackIndex >= starts.length) return;
             const index = starts[fallbackIndex++];
-            highlightForIndex(index);
+            if (index >= lastBoundaryIndex) {
+                highlightForIndex(index);
+                lastBoundaryIndex = index;
+            }
             const next = fallbackIndex < starts.length ? starts[fallbackIndex] : activeSection.text.length;
             const distance = Math.max(1, next - index);
             const delay = Math.max(
@@ -285,12 +288,19 @@
 
         utterance.addEventListener('boundary', function (event) {
             if (typeof event.charIndex !== 'number' || event.charIndex < 0) return;
+
+            // Android speech engines can deliver a boundary event after the
+            // paragraph predictor has already moved the highlight forward.
+            // Never let a late event move the highlight backwards again. The
+            // browser's charIndex is the character position being spoken, but
+            // the event itself is not guaranteed to arrive at that exact moment.
+            if (event.charIndex < lastBoundaryIndex) return;
+
             boundarySeen = true;
             updateTimingModel(event.charIndex);
             highlightForIndex(event.charIndex);
-            // Re-anchor the predictor after every native boundary. This keeps
-            // paragraph transitions close to the real speech position without
-            // depending entirely on Android's event timing.
+            // Re-anchor only on a boundary that is at or ahead of our current
+            // predicted position.
             scheduleNextParagraphBoundary();
         });
 
