@@ -1,4 +1,6 @@
-// assets/js/plebvox.js - PlebVox 3.3
+// assets/js/plebvox.js - PlebVox 3.4
+// Speech cleanup: Unicode symbols, emojis, arrows, pictographs and decorative
+// characters become short pauses instead of being pronounced.
 // Mobile fix: use a timed word-highlighting fallback when SpeechSynthesis
 // does not emit boundary events, while retaining native CSS Highlight API
 // and the existing DOM fallback when boundary events are available.
@@ -21,7 +23,7 @@
             document.head.appendChild(s);
         }
         customHighlightSupported = !!(window.CSS && CSS.highlights && typeof Highlight === 'function');
-        console.log('PlebVox 3.3: CSS Highlight API ' + (customHighlightSupported ? 'available' : 'unavailable; DOM fallback enabled'));
+        console.log('PlebVox 3.4: CSS Highlight API ' + (customHighlightSupported ? 'available' : 'unavailable; DOM fallback enabled'));
     }
 
     function clearFallbackTimer() {
@@ -45,10 +47,19 @@
         });
     }
 
+    // Prepare text for speech without changing the displayed article.
+    // Unicode letters, combining marks and numbers remain readable.
+    // Unicode symbols, emoji/pictographs, arrows and decorative characters
+    // are converted to a single space so the speech engine treats them as
+    // a short natural pause rather than trying to pronounce them.
     function cleanSpeechText(text) {
         let r = (text || '').replace(/\s+/g, ' ');
-        try { r = r.replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\uFE0F\u200D]/gu, ''); } catch (e) {}
-        return r;
+        try {
+            r = r.replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\p{So}\p{Sk}\p{Sc}\p{Sm}\uFE0F\u200D]+/gu, ' ');
+        } catch (e) {
+            r = r.replace(/[\u2190-\u21FF\u2300-\u23FF\u25A0-\u27BF\u{1F000}-\u{1FAFF}\uFE0F\u200D]+/gu, ' ');
+        }
+        return r.replace(/\s+/g, ' ');
     }
 
     function needsSeparator(t) { return !!t && !/[\s(\[{\"'“‘]$/.test(t); }
@@ -518,7 +529,7 @@
         if (!sectionDataList.length) return;
         sectionDataList.forEach(function(section,index){const controls=createSectionControls(section,index);section.controlElement=controls.element;section.startNode.parentNode.insertBefore(controls.element,section.startNode.nextSibling);});
         loadVoices();
-        console.log('PlebVox 3.3: initialized');
+        console.log('PlebVox 3.4: initialized');
     }
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',initPlebVox); else initPlebVox();
