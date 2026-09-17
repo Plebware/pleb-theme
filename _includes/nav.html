@@ -26,202 +26,62 @@
 
     <!-- ======================= -->
     <!-- SECONDARY NAVIGATION -->
-    <!-- Hamburger menu on all screen sizes -->
+    <!-- Automatically discovers one-level subcategory index pages -->
     <!-- ======================= -->
     {% assign section_name = 'Everyday' %}
-    {% if page.url contains '/author/' %}{% assign section_name = 'Author' %}
-    {% elsif page.url contains '/study/' %}{% assign section_name = 'Study' %}
-    {% elsif page.url contains '/research/' %}{% assign section_name = 'Research' %}
-    {% elsif page.url contains '/graphics/' %}{% assign section_name = 'Graphics' %}
-    {% elsif page.url contains '/music/' %}{% assign section_name = 'Music' %}
-    {% elsif page.url contains '/video/' %}{% assign section_name = 'Video' %}
-    {% elsif page.url contains '/broadcast/' %}{% assign section_name = 'Broadcast' %}
-    {% elsif page.url contains '/ai-helpers/' %}{% assign section_name = 'AI Helpers' %}
-    {% elsif page.url contains '/developer/' %}{% assign section_name = 'Developer' %}
-    {% elsif page.url contains '/accounting/' %}{% assign section_name = 'Accounting' %}
-    {% elsif page.url contains '/leisure/' %}{% assign section_name = 'Leisure' %}
+    {% assign section_slug = 'everyday' %}
+    {% if page.url contains '/author/' %}{% assign section_name = 'Author' %}{% assign section_slug = 'author' %}
+    {% elsif page.url contains '/study/' %}{% assign section_name = 'Study' %}{% assign section_slug = 'study' %}
+    {% elsif page.url contains '/research/' %}{% assign section_name = 'Research' %}{% assign section_slug = 'research' %}
+    {% elsif page.url contains '/graphics/' %}{% assign section_name = 'Graphics' %}{% assign section_slug = 'graphics' %}
+    {% elsif page.url contains '/music/' %}{% assign section_name = 'Music' %}{% assign section_slug = 'music' %}
+    {% elsif page.url contains '/video/' %}{% assign section_name = 'Video' %}{% assign section_slug = 'video' %}
+    {% elsif page.url contains '/broadcast/' %}{% assign section_name = 'Broadcast' %}{% assign section_slug = 'broadcast' %}
+    {% elsif page.url contains '/ai-helpers/' %}{% assign section_name = 'AI Helpers' %}{% assign section_slug = 'ai-helpers' %}
+    {% elsif page.url contains '/developer/' %}{% assign section_name = 'Developer' %}{% assign section_slug = 'developer' %}
+    {% elsif page.url contains '/accounting/' %}{% assign section_name = 'Accounting' %}{% assign section_slug = 'accounting' %}
+    {% elsif page.url contains '/leisure/' %}{% assign section_name = 'Leisure' %}{% assign section_slug = 'leisure' %}
     {% endif %}
 
     <button class="secondary-nav-toggle" type="button" aria-expanded="false" aria-controls="secondary-navigation" data-section-name="{{ section_name }}">
       ☰ {{ section_name }} Sections
     </button>
+
     <div id="secondary-navigation" class="secondary-navigation-panel" hidden>
+      {% assign section_prefix = '/' | append: section_slug | append: '/' %}
+      {% assign subcategory_count = 0 %}
 
-    <!-- Everyday -->
-    {% if page.url == '/' or page.url contains '/everyday/' %}
-    <ul class="secondary-nav">
-      <li><a href="/everyday/housekeeping/">Housekeeping</a></li>
-      <li><a href="/everyday/handyman/">Handyman</a></li>
-      <li><a href="/everyday/moonlighting/">Moonlighting</a></li>
-      <li><a href="/everyday/home-cooking/">Home Cooking</a></li>
-      <li><a href="/everyday/personal-care/">Personal Care</a></li>
-      <li><a href="/everyday/fitness-training/">Fitness Training</a></li>
-      <li><a href="/everyday/daily-prayer/">Daily Prayer</a></li>
-      <li><a href="/everyday/daily-budget/">Daily Budget</a></li>
-    </ul>
-    {% endif %}
+      <ul class="secondary-nav">
+        <!-- Master-category index / home link -->
+        {% if section_slug == 'everyday' %}
+          <li class="master-section-link"><a href="/">🏠 {{ section_name }} Home</a></li>
+        {% else %}
+          <li class="master-section-link"><a href="/{{ section_slug }}/">🏠 {{ section_name }} Home</a></li>
+        {% endif %}
 
-    <!-- Author -->
-    {% if page.url contains '/author/' %}
-    <ul class="secondary-nav">
-      <li><a href="/author/comics/">Comics</a></li>
-      <li><a href="/author/fiction/">Fiction</a></li>
-      <li><a href="/author/non-fiction/">Non‑Fiction</a></li>
-      <li><a href="/author/devotions/">Devotionals</a></li>
-      <li><a href="/author/journalistic/">Journalistic</a></li>
-      <li><a href="/author/poetry/">Poetry</a></li>
-      <li><a href="/author/cook-books/">Cook Books</a></li>
-      <li><a href="/author/news/">News</a></li>
-    </ul>
-    {% endif %}
+        <!--
+          Automatic subcategory discovery.
+          A subcategory is an index page exactly one level below the master
+          category, for example /author/news/ or /research/cybersecurity/.
+          Add the new subcategory's index.md and it appears here automatically.
+        -->
+        {% assign subcategory_pages = site.pages | sort: 'url' %}
+        {% for subpage in subcategory_pages %}
+          {% assign url_parts = subpage.url | split: '/' %}
+          {% if subpage.url contains section_prefix and url_parts.size == 4 %}
+            {% assign subcategory_count = subcategory_count | plus: 1 %}
+            <li>
+              <a href="{{ subpage.url }}">
+                <span class="secondary-nav-title">{{ subpage.title | default: subpage.url }}</span>{% if subpage.description %}<span class="secondary-nav-description">{{ subpage.description }}</span>{% endif %}
+              </a>
+            </li>
+          {% endif %}
+        {% endfor %}
 
-    <!-- Study -->
-    {% if page.url contains '/study/' %}
-    <ul class="secondary-nav">
-      <li><a href="/study/pleb-tuition/">Pleb‑Tuition</a></li>
-      <li><a href="/study/how-to-cook/">How to Cook</a></li>
-      <li><a href="/study/theology/">Theology</a></li>
-      <li><a href="/study/web-design/">Web Design</a></li>
-      <li><a href="/study/graphic-design/">Graphic Design</a></li>
-      <li><a href="/study/writing/">Writing</a></li>
-      <li><a href="/study/marketing/">Marketing</a></li>
-      <li><a href="/study/life-skills/">Life Skills</a></li>
-    </ul>
-    {% endif %}
-
-    <!-- Research -->
-    {% if page.url contains '/research/' %}
-    <ul class="secondary-nav">
-      <li><a href="/research/christian-research/">Christian Research</a></li>
-      <li><a href="/research/linux-research/">Linux Research</a></li>
-      <li><a href="/research/plebmachine-research/">PlebMachine Research</a></li>
-      <li><a href="/research/web-browser/">Web Browser</a></li>
-      <li><a href="/research/notebook-lm/">Gemini Notebook Research</a></li>
-      <li><a href="/research/tech-research/">Tech Research</a></li>
-      <li><a href="/research/digital-literacy/">Digital Literacy</a></li>
-      <li><a href="/research/well-being/">Well Being</a></li>
-      <li><a href="/research/sustainability/">Sustainability</a></li>
-      <li><a href="/research/artificial-intelligence/">Artificial Intelligence</a></li>
-      <li><a href="/research/cybersecurity/">Cybersecurity</a></li>
-      <li><a href="/research/digital-society/">Digital Society</a></li>
-    </ul>
-    {% endif %}
-
-    <!-- Graphics -->
-    {% if page.url contains '/graphics/' %}
-    <ul class="secondary-nav">
-      <li><a href="/graphics/gimp-tricks/">GIMP Tricks</a></li>
-      <li><a href="/graphics/inkscape-tricks/">Inkscape Tricks</a></li>
-      <li><a href="/graphics/logo-design/">Logo Design</a></li>
-      <li><a href="/graphics/cover-art/">Cover Art</a></li>
-      <li><a href="/graphics/web-graphics/">Web Graphics</a></li>
-      <li><a href="/graphics/ai-graphics/">AI Art</a></li>
-      <li><a href="/graphics/cartoons/">Cartoons</a></li>
-      <li><a href="/graphics/diagrams/">Diagrams</a></li>
-    </ul>
-    {% endif %}
-
-    <!-- Music -->
-    {% if page.url contains '/music/' %}
-    <ul class="secondary-nav">
-      <li><a href="/music/fl-studio-tips/">FL Studio</a></li>
-      <li><a href="/music/audacity/">Audacity</a></li>
-      <li><a href="/music/mixxx/">MIXXX</a></li>
-      <li><a href="/music/song-lyrics/">Song Lyrics</a></li>
-      <li><a href="/music/sample-packs/">Sample Packs</a></li>
-      <li><a href="/music/sounds/">Sounds</a></li>
-      <li><a href="/music/hypeedit/">HypeEdit</a></li>
-      <li><a href="/music/sound-cloud/">Sound Cloud</a></li>
-    </ul>
-    {% endif %}
-
-    <!-- Video -->
-    {% if page.url contains '/video/' %}
-    <ul class="secondary-nav">
-      <li><a href="/video/shot-cut/">ShotCut</a></li>
-      <li><a href="/video/open-shot/">OpenShot</a></li>
-      <li><a href="/video/youtube-links/">YouTube</a></li>
-      <li><a href="/video/subtitles/">Subtitles</a></li>
-      <li><a href="/video/ai-generated/">AI Generated</a></li>
-      <li><a href="/video/android/">Android</a></li>
-      <li><a href="/video/cam-recorder/">Cam Recorder</a></li>
-      <li><a href="/video/editing-tips/">Editing Tips</a></li>
-    </ul>
-    {% endif %}
-
-    <!-- Broadcast -->
-    {% if page.url contains '/broadcast/' %}
-    <ul class="secondary-nav">
-      <li><a href="/broadcast/obs-studio/">OBS Studio</a></li>
-      <li><a href="/broadcast/videocast-schedule/">Videocast</a></li>
-      <li><a href="/broadcast/podcast-schedule/">Podcast</a></li>
-      <li><a href="/broadcast/facebook-broadcasts/">Facebook</a></li>
-      <li><a href="/broadcast/plebcasts/">PlebCasts</a></li>
-      <li><a href="/broadcast/youtube/">YouTube</a></li>
-      <li><a href="/broadcast/twitch-tv/">Twitch TV</a></li>
-      <li><a href="/broadcast/kick/">Kick</a></li>
-    </ul>
-    {% endif %}
-
-    <!-- AI Helpers -->
-    {% if page.url contains '/ai-helpers/' %}
-    <ul class="secondary-nav">
-      <li><a href="/ai-helpers/ai-reviews/">AI Reviews</a></li>
-      <li><a href="/ai-helpers/ai-prompts/">AI Prompts</a></li>
-      <li><a href="/ai-helpers/ai-use/">AI Use</a></li>
-      <li><a href="/ai-helpers/ai-writing/">AI Writing</a></li>
-      <li><a href="/ai-helpers/ai-coding/">AI Coding</a></li>
-      <li><a href="/ai-helpers/ai-research/">AI Research</a></li>
-      <li><a href="/ai-helpers/local-ai/">Local AI</a></li>
-      <li><a href="/ai-helpers/ai-android/">AI Android</a></li>
-    </ul>
-    {% endif %}
-
-    <!-- Developer -->
-    {% if page.url contains '/developer/' %}
-    <ul class="secondary-nav">
-      <li><a href="/developer/plebware/">PlebWare</a></li>
-      <li><a href="/developer/plebmachine/">PlebMachine</a></li>
-      <li><a href="/developer/rainmeter/">Rainmeter</a></li>
-      <li><a href="/developer/total-launcher/">Total Launcher</a></li>
-      <li><a href="/developer/github-pages/">GitHub Pages</a></li>
-      <li><a href="/developer/plebmachine-tech-papers/">Tech Papers</a></li>
-      <li><a href="/developer/plebmachine-guides/">Guides</a></li>
-      <li><a href="/developer/plebmachine-manuals/">Manuals</a></li>
-      <li><a href="/developer/automation/">Automation</a></li>
-      <li><a href="/developer/scripting/">Scripting</a></li>
-      <li><a href="/developer/linux/">Linux</a></li>
-      <li><a href="/developer/conky/">Conky</a></li>
-    </ul>
-    {% endif %}
-
-    <!-- Accounting -->
-    {% if page.url contains '/accounting/' %}
-    <ul class="secondary-nav">
-      <li><a href="/accounting/spreadsheet-accounting/">Spreadsheet</a></li>
-      <li><a href="/accounting/gnucash-tips/">GNU Cash</a></li>
-      <li><a href="/accounting/budgeting/">Budgeting</a></li>
-      <li><a href="/accounting/invoicing/">Invoicing</a></li>
-      <li><a href="/accounting/tax/">Tax</a></li>
-      <li><a href="/accounting/payroll/">Payroll</a></li>
-      <li><a href="/accounting/reports/">Reports</a></li>
-      <li><a href="/accounting/investments/">Investments</a></li>
-    </ul>
-    {% endif %}
-
-    <!-- Leisure -->
-    {% if page.url contains '/leisure/' %}
-    <ul class="secondary-nav">
-      <li><a href="/leisure/game-reviews/">Game Reviews</a></li>
-      <li><a href="/leisure/game-tips/">Game Tips</a></li>
-      <li><a href="/leisure/youtube-guides/">YouTube Guides</a></li>
-      <li><a href="/leisure/crunchyroll-guides/">Crunchyroll Guides</a></li>
-      <li><a href="/leisure/netflix-guide/">Netflix Guide</a></li>
-      <li><a href="/leisure/the-joy-of-cooking/">The Joy of Cooking</a></li>
-      <li><a href="/leisure/gardening/">Gardening</a></li>
-      <li><a href="/leisure/radio/">Radio</a></li>
-    </ul>
-    {% endif %}
+        {% if subcategory_count == 0 %}
+          <li class="secondary-nav-empty">No subcategories published yet.</li>
+        {% endif %}
+      </ul>
     </div>
 
     <!-- Legacy systems links -->
