@@ -1,11 +1,17 @@
 // PlebVox paragraph highlighting overlay.
-// Keeps the existing speech engine but replaces word-by-word visual highlighting
-// with a single highlighted paragraph at a time.
+// Highlights the paragraph (or list item / heading) currently being spoken.
+// Uses native speech boundary events when available, with an adaptive timing
+// predictor so paragraph changes do not wait for a late Android boundary event.
 (function () {
     'use strict';
 
     const HIGHLIGHT_CLASS = 'plebvox-paragraph-highlight';
     const WORD_HIGHLIGHT_NAME = 'plebvox-current-word';
+    const DEFAULT_MS_PER_CHAR_AT_RATE_07 = 115;
+    const MIN_PREDICT_DELAY = 120;
+    const MAX_PREDICT_DELAY = 1800;
+    const PREDICTOR_SMOOTHING = 0.35;
+
     let originalSpeak = null;
     let activeTimer = null;
     let activeParagraph = null;
@@ -13,16 +19,23 @@
     let activeSection = null;
     let boundarySeen = false;
     let fallbackIndex = 0;
+    let lastBoundaryIndex = 0;
+    let lastBoundaryTime = 0;
+    let msPerChar = DEFAULT_MS_PER_CHAR_AT_RATE_07;
+    let utteranceStartedAt = 0;
 
     function clean(text) {
         let value = (text || '').replace(/\s+/g, ' ');
-        try { value = value.replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\uFE0F\u200D]/gu, ''); } catch (e) {}
+        try {
+            value = value.replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\uFE0F\u200D]/gu, '');
+        } catch (e) {}
         return value.trim();
     }
 
     function isWordChar(ch) {
         if (!ch) return false;
-        try { return /[\p{L}\p{N}\p{M}_]/u.test(ch); } catch (e) { return /[A-Za-z0-9_]/.test(ch); }
+        try { return /[\p{L}\p{N}\p{M}_]/u.test(ch); }
+        catch (e) { return /[A-Za-z0-9_]/.test(ch); }
     }
 
     function wordStarts(text) {
@@ -36,11 +49,15 @@
         return result;
     }
 
-    function clearParagraphHighlight() {
+    function clearPredictionTimer() {
         if (activeTimer) {
             clearTimeout(activeTimer);
             activeTimer = null;
         }
+    }
+
+    function clearParagraphHighlight() {
+        clearPredictionTimer();
         document.querySelectorAll('.' + HIGHLIGHT_CLASS).forEach(function (el) {
             el.classList.remove(HIGHLIGHT_CLASS);
         });
@@ -82,8 +99,11 @@
         const result = [];
         let start = null;
         markers.forEach(function (m) {
-            if (m.type === 'PLEBVOX:START') start = m.node;
-            else if (m.type === 'PLEBVOX:END' && start) {
+            if (m.type === 'PLEBVOX:START') {
+                start = m.node;
+                return;
+            }
+            if (m.type === 'PLEBVOX:END' && start) {
                 const paragraphs = paragraphsInSection(start, m.node);
                 if (paragraphs.length) {
                     let text = '';
@@ -110,15 +130,28 @@
             const item = section.mapping[i];
             if (index >= item.start && index < item.end) return item.element;
         }
+        // A boundary can land exactly on the separating space between speech units.
+        // Treat that space as belonging to the following unit, so the visual change
+        // happens immediately rather than waiting for the next word boundary.
+        for (let i = 0; i < section.mapping.length - 1; i++) {
+            if (index >= section.mapping[i].end && index < section.mapping[i + 1].start) {
+                return section.mapping[i + 1].element;
+            }
+        }
         return null;
     }
 
+    function paragraphForIndex(index) {
+        return findParagraph(index, activeSection);
+    }
+
     function highlightForIndex(index) {
-        const paragraph = findParagraph(index, activeSection);
-        if (!paragraph || paragraph === activeParagraph) return;
+        const paragraph = paragraphForIndex(index);
+        if (!paragraph || paragraph === activeParagraph) return false;
         if (activeParagraph) activeParagraph.classList.remove(HIGHLIGHT_CLASS);
         activeParagraph = paragraph;
         activeParagraph.classList.add(HIGHLIGHT_CLASS);
+        return true;
     }
 
     function findSectionForUtterance(utterance, sectionList) {
@@ -128,6 +161,62 @@
             if (sectionList[i].text === speech || speech.indexOf(sectionList[i].text) === 0) return sectionList[i];
         }
         return null;
+    }
+
+    function rateAdjustedMsPerChar() {
+        // PlebVox's normal rate is 0.7. Keep the predictor proportional to
+        // speech rate while avoiding extreme values from unusual browser settings.
+        const rate = Math.max(0.5, Math.min(2.0, window.plebvoxSpeechRate || 0.7));
+        return DEFAULT_MS_PER_CHAR_AT_RATE_07 * (0.7 / rate);
+    }
+
+    function scheduleNextParagraphBoundary() {
+        clearPredictionTimer();
+        if (!activeUtterance || !activeSection || !activeParagraph) return;
+
+        const current = activeParagraph;
+        const item = activeSection.mapping.find(function (entry) {
+            return entry.element === current;
+        });
+        if (!item) return;
+
+        const nextItem = activeSection.mapping[activeSection.mapping.indexOf(item) + 1];
+        if (!nextItem) return;
+
+        const currentSpeechIndex = Math.max(item.start, Math.min(item.end, lastBoundaryIndex));
+        const remainingChars = Math.max(1, item.end - currentSpeechIndex);
+        const delay = Math.max(
+            MIN_PREDICT_DELAY,
+            Math.min(MAX_PREDICT_DELAY, Math.round(remainingChars * msPerChar))
+        );
+
+        activeTimer = setTimeout(function () {
+            if (!activeUtterance || !activeSection || activeParagraph !== current) return;
+
+            // Move at the predicted paragraph boundary. A later native boundary
+            // can correct the position, but a late/missing Android boundary can no
+            // longer leave the previous paragraph highlighted indefinitely.
+            highlightForIndex(nextItem.start);
+            lastBoundaryIndex = nextItem.start;
+            scheduleNextParagraphBoundary();
+        }, delay);
+    }
+
+    function updateTimingModel(charIndex) {
+        const now = performance.now();
+        if (lastBoundaryTime && charIndex > lastBoundaryIndex) {
+            const chars = charIndex - lastBoundaryIndex;
+            const elapsed = now - lastBoundaryTime;
+            if (elapsed > 40 && elapsed < 5000) {
+                const observed = elapsed / chars;
+                if (observed >= 20 && observed <= 500) {
+                    msPerChar = (msPerChar * (1 - PREDICTOR_SMOOTHING)) +
+                        (observed * PREDICTOR_SMOOTHING);
+                }
+            }
+        }
+        lastBoundaryIndex = charIndex;
+        lastBoundaryTime = now;
     }
 
     function startFallback(utterance) {
@@ -140,13 +229,17 @@
         function tick() {
             if (boundarySeen || activeUtterance !== utterance || !activeSection) return;
             if (fallbackIndex >= starts.length) return;
-            highlightForIndex(starts[fallbackIndex++]);
+            const index = starts[fallbackIndex++];
+            highlightForIndex(index);
             const next = fallbackIndex < starts.length ? starts[fallbackIndex] : activeSection.text.length;
-            const distance = Math.max(1, next - starts[Math.max(0, fallbackIndex - 1)]);
-            const delay = Math.max(180, Math.min(950, Math.round(distance * 115 / 0.7 + 110)));
+            const distance = Math.max(1, next - index);
+            const delay = Math.max(
+                MIN_PREDICT_DELAY,
+                Math.min(MAX_PREDICT_DELAY, Math.round(distance * msPerChar))
+            );
             activeTimer = setTimeout(tick, delay);
         }
-        activeTimer = setTimeout(tick, 180);
+        activeTimer = setTimeout(tick, MIN_PREDICT_DELAY);
     }
 
     function installStyle() {
@@ -167,29 +260,47 @@
         activeUtterance = utterance;
         const sectionList = sections();
         activeSection = findSectionForUtterance(utterance, sectionList);
+        msPerChar = rateAdjustedMsPerChar();
+        lastBoundaryIndex = 0;
+        lastBoundaryTime = 0;
+        utteranceStartedAt = 0;
 
         utterance.addEventListener('start', function () {
             boundarySeen = false;
             clearParagraphHighlight();
             activeUtterance = utterance;
             activeSection = findSectionForUtterance(utterance, sections());
-            if (activeSection && activeSection.mapping.length) highlightForIndex(activeSection.mapping[0].start);
+            msPerChar = rateAdjustedMsPerChar();
+            lastBoundaryIndex = 0;
+            lastBoundaryTime = performance.now();
+            utteranceStartedAt = lastBoundaryTime;
+            if (activeSection && activeSection.mapping.length) {
+                highlightForIndex(activeSection.mapping[0].start);
+                scheduleNextParagraphBoundary();
+            }
             setTimeout(function () {
                 if (!boundarySeen && activeUtterance === utterance) startFallback(utterance);
-            }, 900);
+            }, 700);
         });
+
         utterance.addEventListener('boundary', function (event) {
             if (typeof event.charIndex !== 'number' || event.charIndex < 0) return;
             boundarySeen = true;
-            if (activeTimer) clearTimeout(activeTimer);
+            updateTimingModel(event.charIndex);
             highlightForIndex(event.charIndex);
+            // Re-anchor the predictor after every native boundary. This keeps
+            // paragraph transitions close to the real speech position without
+            // depending entirely on Android's event timing.
+            scheduleNextParagraphBoundary();
         });
+
         utterance.addEventListener('end', function () {
             if (activeUtterance === utterance) {
                 clearParagraphHighlight();
                 activeUtterance = null;
             }
         });
+
         utterance.addEventListener('error', function () {
             if (activeUtterance === utterance) {
                 clearParagraphHighlight();
@@ -206,7 +317,7 @@
             attach(utterance);
             return originalSpeak(utterance);
         };
-        console.log('PlebVox paragraph highlighting enabled');
+        console.log('PlebVox adaptive paragraph highlighting enabled');
     }
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install);
