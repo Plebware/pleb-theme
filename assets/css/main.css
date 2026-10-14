@@ -816,3 +816,65 @@ body.dark-theme .read-aloud-highlight {
     background-color: #f9a825 !important;
     color: #000 !important;
 }
+
+
+/* Context-aware article return link and first-visit dialog */
+.plebware-return-dialog {
+  color: var(--text);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  width: min(92vw, 32rem);
+  max-width: 32rem;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.24);
+}
+
+.plebware-return-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.plebware-return-dialog h2 {
+  margin-top: 0;
+}
+
+.plebware-return-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.plebware-return-actions .footer-btn {
+  width: auto;
+  max-width: 100%;
+}
+
+.plebware-dialog-close {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.55rem 0.9rem;
+  background: var(--secondary-nav-bg);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.plebware-dialog-close:hover,
+.plebware-dialog-close:focus-visible {
+  border-color: var(--brand);
+}
+
+@media (max-width: 600px) {
+  .plebware-return-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .plebware-return-actions .footer-btn,
+  .plebware-dialog-close {
+    width: 100%;
+    text-align: center;
+  }
+}
