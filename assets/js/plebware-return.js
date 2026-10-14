@@ -7,12 +7,14 @@
   var dialog = document.getElementById('plebware-return-dialog');
   var closeButton = dialog ? dialog.querySelector('.plebware-dialog-close') : null;
   var storageKey = 'plebware.article-return-stack.v1';
+  var sourceParameter = 'pleb_from';
   var firstVisitMessage = "You haven't viewed any other PlebWare articles in this tab yet. Try Search or All Articles to continue exploring.";
 
   function internalUrl(value) {
     try {
       var url = new URL(value, window.location.href);
       if (url.origin !== window.location.origin) return null;
+      url.searchParams.delete(sourceParameter);
       url.hash = '';
       return url.href;
     } catch (error) {
@@ -39,38 +41,50 @@
     }
   }
 
+  var pageUrl = new URL(window.location.href);
+  var incomingSource = internalUrl(pageUrl.searchParams.get(sourceParameter) || '');
+  if (pageUrl.searchParams.has(sourceParameter)) {
+    pageUrl.searchParams.delete(sourceParameter);
+    window.history.replaceState(window.history.state, '', pageUrl.pathname + pageUrl.search + pageUrl.hash);
+  }
+
   var currentUrl = internalUrl(window.location.href);
   var stack = readStack();
 
-  // A new/direct tab has no earlier page in its own history. This also
-  // prevents a browser-created tab from reusing a copied opener-tab stack.
+  // A directly opened tab starts clean, but a validated internal source link
+  // can safely provide the article that opened this page, including new tabs.
   if (window.history.length <= 1) stack = [];
 
-  // Avoid returning to this same article after a reload or browser Back.
   while (stack.length && stack[stack.length - 1].href === currentUrl) {
     stack.pop();
+  }
+
+  if (incomingSource && incomingSource !== currentUrl) {
+    var last = stack[stack.length - 1];
+    if (!last || last.href !== incomingSource) {
+      stack.push({ href: incomingSource, title: 'Previous PlebWare article' });
+    }
   }
   writeStack(stack);
 
   document.addEventListener('click', function (event) {
     var anchor = event.target && event.target.closest ? event.target.closest('a[href]') : null;
     if (!anchor || anchor === returnLink || anchor.hasAttribute('download')) return;
-    if (anchor.target && anchor.target.toLowerCase() === '_blank') return;
-    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (event.button !== 0) return;
 
     var destination = internalUrl(anchor.href);
     if (!destination || destination === currentUrl) return;
 
-    var nextStack = readStack();
-    var last = nextStack[nextStack.length - 1];
-    if (!last || last.href !== currentUrl) {
-      var heading = document.querySelector('article h1');
-      nextStack.push({
-        href: currentUrl,
-        title: heading ? heading.textContent.trim() : document.title
-      });
+    // Carry the source article in the link itself. This works for same-tab
+    // navigation, target=_blank, and Ctrl/Cmd-click without sharing tab storage.
+    try {
+      var destinationUrl = new URL(anchor.href, window.location.href);
+      if (destinationUrl.origin !== window.location.origin) return;
+      destinationUrl.searchParams.set(sourceParameter, currentUrl);
+      anchor.href = destinationUrl.href;
+    } catch (error) {
+      // Leave unusual or invalid links untouched.
     }
-    writeStack(nextStack);
   }, true);
 
   returnLink.addEventListener('click', function (event) {
