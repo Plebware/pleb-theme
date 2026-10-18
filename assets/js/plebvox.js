@@ -496,6 +496,9 @@
         const title = document.createElement('div');
         title.textContent = '🔊 PlebVox — Part ' + section.number;
         title.style.cssText = 'font-weight:700;font-size:1rem;color:var(--text,#000);margin-bottom:.5rem;text-align:center;';
+        const note = document.createElement('p');
+        note.textContent = 'A little patience, please. Please allow a few seconds for the audio to prepare before playback begins. Thank you for your patience!';
+        note.style.cssText = 'font-size:.85rem;line-height:1.45;color:var(--text-secondary,#666);margin:0 auto .65rem;max-width:38rem;text-align:center;';
         const bc = document.createElement('div');
         bc.style.cssText = 'display:flex;justify-content:center;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem;';
         function btn(t, l, css, d) { const b = document.createElement('button'); b.textContent=t; b.setAttribute('aria-label',l); b.style.cssText=css+'display:'+d+';'; return b; }
@@ -518,7 +521,7 @@
         const vs=document.createElement('select'); vs.id=vid; vs.className='plebvox-voice-select'; vs.setAttribute('aria-label','Select reading voice'); vs.style.cssText='max-width:240px;padding:.25rem;';
         vs.addEventListener('change',function(){const found=availableVoices.find(v=>v.name===this.value);if(found)selectedVoice=found;});
         const statusVoice=document.createElement('div'); statusVoice.className='plebvox-voice-status'; statusVoice.setAttribute('aria-live','polite'); statusVoice.style.cssText='font-size:.75rem;margin-top:.35rem;';
-        row.append(sl,speed,vl,vs); container.append(title,bc,row,statusVoice); populateVoiceSelector(vs);
+        row.append(sl,speed,vl,vs); container.append(title,note,bc,row,statusVoice); populateVoiceSelector(vs);
         return {element:container,playBtn:play,pauseBtn:pause,resumeBtn:resume,stopBtn:stop,statusText:status};
     }
 
