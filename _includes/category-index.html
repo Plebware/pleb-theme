@@ -3,6 +3,11 @@
   Discovers one-level subcategory index.md pages and shows the
   three newest posts from each subcategory.
 
+  Posts are matched inside the loop so the current subcategory path
+  is evaluated directly. This avoids relying on a dynamically scoped
+  variable inside the where_exp expression and prevents cross-category
+  matches. The shared include is used by all mode indexes.
+
   Usage:
     {% include category-index.html section_slug="graphics" %}
 {% endcomment %}
@@ -16,14 +21,20 @@
   {% if subpage.path contains section_prefix and path_parts.size == 3 and path_parts[0] == section_slug and path_parts[2] == 'index.md' %}
 
     {% assign subcategory_path = subpage.path | remove: '/index.md' | append: '/' %}
-    {% assign subcategory_posts = site.posts | where_exp: "post", "post.path contains subcategory_path" | sort: 'date' | reverse %}
+    {% assign subcategory_posts = '' | split: '' %}
+    {% for post in site.posts %}
+      {% if post.path contains subcategory_path %}
+        {% assign subcategory_posts = subcategory_posts | push: post %}
+      {% endif %}
+    {% endfor %}
+    {% assign subcategory_posts = subcategory_posts | sort: 'date' | reverse %}
 
 ## <a href="{{ subpage.url | relative_url }}">{{ subpage.title | default: path_parts[1] | escape }}</a>
 
 {% if subcategory_posts.size > 0 %}
 <ul>
 {% for post in subcategory_posts limit: 3 %}
-  <li><a href="{{ post.url | relative_url }}">{{ post.title }}</a> – {{ post.date | date: "%Y-%m-%d" }}</li>
+  <li><a href="{{ post.url | relative_url }}">{{ post.title | escape }}</a> – {{ post.date | date: "%Y-%m-%d" }}</li>
 {% endfor %}
 </ul>
 {% else %}
