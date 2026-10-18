@@ -66,7 +66,7 @@
           an index.md directly beneath the master-category directory.
           Example: graphics/site-stickers/index.md
         -->
-        {% assign subcategory_pages = site.pages | sort: 'path' %}
+        {% assign subcategory_pages = site.pages | sort_natural: 'title' %}
         {% for subpage in subcategory_pages %}
           {% assign path_parts = subpage.path | split: '/' %}
           {% if subpage.path contains section_prefix and path_parts.size == 3 and path_parts[2] == 'index.md' %}
