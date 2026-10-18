@@ -28,7 +28,7 @@
         // disabled because Android speech boundary timing is unreliable.
         loaded = true;
         const script = document.createElement('script');
-        script.src = '/assets/js/plebvox.js?v=20260917-3';
+        script.src = '/assets/js/plebvox.js?v=20261018-1';
         script.async = true;
         script.defer = true;
         script.onload = function() {
