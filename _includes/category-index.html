@@ -3,10 +3,11 @@
   Discovers one-level subcategory index.md pages and shows the
   three newest posts from each subcategory.
 
-  Posts are matched inside the loop so the current subcategory path
-  is evaluated directly. This avoids relying on a dynamically scoped
-  variable inside the where_exp expression and prevents cross-category
-  matches. The shared include is used by all mode indexes.
+  Subcategory headings are sorted by their visible page titles, so
+  numbered names such as "01 — Name" and "02 — Name" appear in
+  ascending order. Posts are matched inside the loop so the current
+  subcategory path is evaluated directly. The shared include is used
+  by all mode indexes.
 
   Usage:
     {% include category-index.html section_slug="graphics" %}
@@ -14,7 +15,7 @@
 
 {% assign section_slug = include.section_slug %}
 {% assign section_prefix = section_slug | append: '/' %}
-{% assign subcategory_pages = site.pages | sort: 'path' %}
+{% assign subcategory_pages = site.pages | sort: 'title' %}
 
 {% for subpage in subcategory_pages %}
   {% assign path_parts = subpage.path | split: '/' %}
