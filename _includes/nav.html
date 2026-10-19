@@ -65,11 +65,15 @@
           reliable with Jekyll because every subcategory is represented by
           an index.md directly beneath the master-category directory.
           Example: graphics/site-stickers/index.md
+
+          Match the first path segment exactly. A substring check alone
+          incorrectly treats names such as "ai-research" as belonging to
+          the separate "research" section.
         -->
         {% assign subcategory_pages = site.pages | sort_natural: 'title' %}
         {% for subpage in subcategory_pages %}
           {% assign path_parts = subpage.path | split: '/' %}
-          {% if subpage.path contains section_prefix and path_parts.size == 3 and path_parts[2] == 'index.md' %}
+          {% if path_parts[0] == section_slug and path_parts.size == 3 and path_parts[2] == 'index.md' %}
             {% assign subcategory_count = subcategory_count | plus: 1 %}
             <li>
               <a href="{{ subpage.url }}">
