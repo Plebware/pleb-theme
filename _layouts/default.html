@@ -40,6 +40,30 @@
   <meta property="og:type" content="{% if page.layout == 'post' %}article{% else %}website{% endif %}">
   <meta property="og:site_name" content="{{ site.title | escape }}">
 
+  {% if page.url == "/" %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Plebware",
+    "url": "https://plebware.github.io",
+    "description": "Human-centered computer usability and workspace framework designed for efficiency on Linux.",
+    "author": {
+      "@type": "Person",
+      "name": "Otto Brinkmeier",
+      "alternateName": "Otto Wilhelm Friedrich Brinkmeier",
+      "jobTitle": "Developer & Author"
+    },
+    "foundingDate": "2010",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Linux",
+    "sameAs": [
+      "https://archive.org"
+    ]
+  }
+  </script>
+  {% endif %}
+
   {% if page.layout == "post" %}
   <script type="application/ld+json">
   {
