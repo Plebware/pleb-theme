@@ -54,7 +54,7 @@
         : 'Human Verified Image — PlebWare reviewed content';
       image.loading = 'lazy';
       image.decoding = 'async';
-      image.style.width = '30%';
+      image.style.width = '60%';
       image.style.maxWidth = '100%';
       image.style.height = 'auto';
       image.style.display = 'inline-block';
