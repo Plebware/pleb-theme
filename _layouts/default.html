@@ -157,6 +157,7 @@
 <!-- ============================================================ -->
 <footer>
   <div class="footer-buttons">
+    <a id="plebware-return-link" href="/all-posts/" class="footer-btn">↩ Return to the article I came from</a>
     <a href="/search/" class="footer-btn">🔎 Search</a>
     <a href="/" class="footer-btn">🏠 Home (Everyday)</a>
     <a href="/all-posts/" class="footer-btn">📚 All Articles</a>
@@ -173,10 +174,22 @@
   </div>
 </footer>
 
+  <dialog id="plebware-return-dialog" class="plebware-return-dialog" aria-labelledby="plebware-return-dialog-title">
+    <h2 id="plebware-return-dialog-title">No earlier PlebWare page yet</h2>
+    <p>You haven't visited another PlebWare page in this tab yet. If you arrived from Google or opened this page directly, there may be no earlier page to return to.</p>
+    <p>You can keep exploring from here:</p>
+    <div class="plebware-return-actions">
+      <a href="/search/" class="footer-btn">🔎 Search PlebWare</a>
+      <a href="/all-posts/" class="footer-btn">📚 Browse All Articles</a>
+      <button type="button" class="plebware-dialog-close">Stay on this page</button>
+    </div>
+  </dialog>
+
   <!-- ============================================================ -->
   <!-- SCRIPTS                                                       -->
   <!-- ============================================================ -->
   <script src="{{ '/assets/js/theme.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/plebware-return.js' | relative_url }}" defer></script>
 <!-- Before the closing </body> tag -->
 <script src="/assets/js/code-copy.js" defer></script>
 <script src="{{ '/assets/js/reviewed-marker.js' | relative_url }}" defer></script>
