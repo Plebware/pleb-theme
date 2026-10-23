@@ -10,7 +10,6 @@ layout: default
   {{ content }}
   
   <div class="post-navigation">
-    <p><a id="plebware-return-link" href="/all-posts/">↩ Return to the article I came from</a></p>
     {% if page.previous.url %}
       <p>Previous: <a href="{{ page.previous.url }}">{{ page.previous.title }}</a></p>
     {% endif %}
@@ -20,16 +19,4 @@ layout: default
   </div>
 </article>
 
-<dialog id="plebware-return-dialog" class="plebware-return-dialog" aria-labelledby="plebware-return-dialog-title">
-  <h2 id="plebware-return-dialog-title">No earlier PlebWare article yet</h2>
-  <p>You haven't viewed any other PlebWare articles in this tab yet. If you arrived from Google or opened this article directly, there may be no earlier PlebWare article to return to.</p>
-  <p>You can keep exploring from here:</p>
-  <div class="plebware-return-actions">
-    <a href="/search/" class="footer-btn">🔎 Search PlebWare</a>
-    <a href="/all-posts/" class="footer-btn">📚 Browse All Articles</a>
-    <button type="button" class="plebware-dialog-close">Stay on this article</button>
-  </div>
-</dialog>
-
-<script src="{{ '/assets/js/plebware-return.js' | relative_url }}" defer></script>
 
