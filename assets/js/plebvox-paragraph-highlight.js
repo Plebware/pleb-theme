@@ -71,8 +71,22 @@
     function paragraphsInSection(start, end) {
         const result = [];
         let node = start ? start.nextSibling : null;
+        let insideExcludedBlock = false;
         while (node && node !== end) {
-            if (node.nodeType === Node.ELEMENT_NODE) {
+            if (node.nodeType === Node.COMMENT_NODE) {
+                const marker = (node.textContent || '').trim();
+                if (marker === 'SCORE TABLE — EXCLUDED FROM PLEBVOX READ-ALOUD') {
+                    insideExcludedBlock = true;
+                    node = node.nextSibling;
+                    continue;
+                }
+                if (marker === 'END SCORE TABLE') {
+                    insideExcludedBlock = false;
+                    node = node.nextSibling;
+                    continue;
+                }
+            }
+            if (!insideExcludedBlock && node.nodeType === Node.ELEMENT_NODE) {
                 const candidates = node.matches('p, li, blockquote, h1, h2, h3, h4, h5, h6')
                     ? [node]
                     : Array.from(node.querySelectorAll('p, li, blockquote, h1, h2, h3, h4, h5, h6'));
