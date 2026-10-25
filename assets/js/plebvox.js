@@ -68,11 +68,29 @@
         return node && node.nodeType === Node.ELEMENT_NODE && typeof node.className === 'string' && node.className.indexOf('plebvox-control-') === 0;
     }
 
+    // Skip explicitly excluded blocks (for example, score tables) when collecting
+    // narration content. The markers must surround the complete block in the DOM.
     function collectSectionNodes(startNode, endNode) {
         const nodes = [];
         let n = startNode ? startNode.nextSibling : null;
+        let insideExcludedBlock = false;
         while (n && n !== endNode) {
-            if (n.nodeType !== Node.COMMENT_NODE && !isPlebVoxControl(n)) nodes.push(n);
+            if (n.nodeType === Node.COMMENT_NODE) {
+                const marker = (n.textContent || '').trim();
+                if (marker === 'SCORE TABLE — EXCLUDED FROM PLEBVOX READ-ALOUD') {
+                    insideExcludedBlock = true;
+                    n = n.nextSibling;
+                    continue;
+                }
+                if (marker === 'END SCORE TABLE') {
+                    insideExcludedBlock = false;
+                    n = n.nextSibling;
+                    continue;
+                }
+            }
+            if (!insideExcludedBlock && n.nodeType !== Node.COMMENT_NODE && !isPlebVoxControl(n)) {
+                nodes.push(n);
+            }
             n = n.nextSibling;
         }
         return nodes;
