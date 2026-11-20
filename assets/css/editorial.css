@@ -604,39 +604,55 @@ main .content img {
 .page-everyday-preview .site-banner { display: none; }
 
 
-/* Larger, more legible landing-page imagery. */
+/* Responsive landing-page imagery.
+   Images scale with their parent column and preserve their proportions.
+   No fixed pixel heights: the layout determines the available width. */
+.pw-hero-media {
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  max-height: none;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
 .pw-hero-media img {
-  max-height: 360px;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  max-height: none;
+  aspect-ratio: auto;
+  object-fit: contain;
+}
+.pw-feature {
+  display: block;
+  min-width: 0;
 }
 .pw-feature img {
-  height: 220px;
-  max-height: 220px;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: none;
+  aspect-ratio: 16 / 10;
+  object-fit: contain;
 }
 @media (max-width: 640px) {
   .pw-hero-media {
-    height: 300px;
-    max-height: 300px;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
   }
-  .pw-hero-media img {
-    max-height: 300px;
+  .pw-feature-grid {
+    grid-template-columns: 1fr;
   }
   .pw-feature {
     display: block;
   }
   .pw-feature img {
     width: 100%;
-    height: 190px;
-    max-height: 190px;
+    height: auto;
+    max-height: none;
     aspect-ratio: 16 / 9;
-    object-fit: contain;
-  }
-}
-@media (max-width: 370px) {
-  .pw-hero-media {
-    height: 250px;
-    max-height: 250px;
-  }
-  .pw-hero-media img {
-    max-height: 250px;
   }
 }
