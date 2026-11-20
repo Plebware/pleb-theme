@@ -1,26 +1,34 @@
-<nav class="top-nav">
+<nav class="top-nav" aria-label="Main navigation">
   <div class="nav-container">
-    <div class="nav-brand">
-      <a href="/" aria-label="PlebWare Home">🔑 PlebWare</a>
-      <a class="nav-search" href="/search/">🔎 Search</a>
+    <div class="nav-topline">
+      <div class="nav-brand"><a href="/" aria-label="PlebWare Home">🔑 PlebWare</a></div>
+      <div class="nav-primary-actions">
+        <a href="/">🏠 Home</a>
+        <a href="/everyday/">🌿 Everyday</a>
+        <a href="/search/">🔎 Search</a>
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch dark/light mode">🌙</button>
+      </div>
     </div>
-    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch dark/light mode">🌙</button>
 
-    <ul class="modes-list primary-nav" aria-label="PlebWare destinations">
-      <li><a href="/">🏠 Home</a></li>
-      <li><a href="/everyday/">🌿 Everyday</a></li>
-      <li><a href="/author/">🪶 Author</a></li>
-      <li><a href="/study/">📚 Study</a></li>
-      <li><a href="/research/">🔬 Research</a></li>
-      <li><a href="/graphics/">🎨 Graphics</a></li>
-      <li><a href="/music/">🎵 Music</a></li>
-      <li><a href="/video/">🎬 Video</a></li>
-      <li><a href="/broadcast/">📡 Broadcast</a></li>
-      <li><a href="/ai-helpers/">🤖 AI Helpers</a></li>
-      <li><a href="/developer/">💻 Developer</a></li>
-      <li><a href="/accounting/">💰 Accounting</a></li>
-      <li><a href="/leisure/">🎮 Leisure</a></li>
-    </ul>
+    <button class="mode-nav-toggle" type="button" aria-expanded="false" aria-controls="mode-navigation">
+      ☰ Explore the 12 modes
+    </button>
+    <div id="mode-navigation" class="mode-navigation-panel" hidden>
+      <ul class="modes-list primary-nav" aria-label="PlebWare knowledge modes">
+        <li><a href="/everyday/">🌿 Everyday</a></li>
+        <li><a href="/author/">🪶 Author</a></li>
+        <li><a href="/study/">📚 Study</a></li>
+        <li><a href="/research/">🔬 Research</a></li>
+        <li><a href="/graphics/">🎨 Graphics</a></li>
+        <li><a href="/music/">🎵 Music</a></li>
+        <li><a href="/video/">🎬 Video</a></li>
+        <li><a href="/broadcast/">📡 Broadcast</a></li>
+        <li><a href="/ai-helpers/">🤖 AI Helpers</a></li>
+        <li><a href="/developer/">💻 Developer</a></li>
+        <li><a href="/accounting/">💰 Accounting</a></li>
+        <li><a href="/leisure/">🎮 Leisure</a></li>
+      </ul>
+    </div>
 
     {% assign section_name = '' %}
     {% assign section_slug = '' %}
@@ -61,27 +69,37 @@
     {% endif %}
 
     <div class="nav-separator"></div>
-    <ul class="systems-links">
-      <li><span class="nav-label">⚙️ Systems</span></li>
-      <li><a href="https://plebware.github.io/PlebMachine/">PlebMachine</a></li>
-      <li><a href="https://plebware.github.io/PlebCircle/">PlebCircle</a></li>
-      <li><a href="https://plebware.github.io/otto/">Otto Archive</a></li>
-      <li><a href="https://plebware.github.io/juelz-plebcore/">juelz-plebcore</a></li>
-    </ul>
+    <details class="systems-menu">
+      <summary>⚙️ Systems and archives</summary>
+      <ul class="systems-links">
+        <li><a href="https://plebware.github.io/PlebMachine/">PlebMachine</a></li>
+        <li><a href="https://plebware.github.io/PlebCircle/">PlebCircle</a></li>
+        <li><a href="https://plebware.github.io/otto/">Otto Archive</a></li>
+        <li><a href="https://plebware.github.io/juelz-plebcore/">juelz-plebcore</a></li>
+      </ul>
+    </details>
   </div>
+
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const toggle = document.querySelector('.secondary-nav-toggle');
-      const panel = document.querySelector('#secondary-navigation');
-      if (!toggle || !panel) return;
-      const sectionName = toggle.getAttribute('data-section-name') || 'Sections';
-      toggle.addEventListener('click', function () {
-        const open = panel.hasAttribute('hidden');
-        if (open) { panel.removeAttribute('hidden'); panel.classList.add('is-open'); }
-        else { panel.setAttribute('hidden', ''); panel.classList.remove('is-open'); }
-        toggle.setAttribute('aria-expanded', String(open));
-        toggle.textContent = open ? '✕ Close ' + sectionName + ' Sections' : '☰ ' + sectionName + ' Sections';
-      });
+      function connectToggle(buttonSelector, panelSelector, openText, closeText) {
+        const button = document.querySelector(buttonSelector);
+        const panel = document.querySelector(panelSelector);
+        if (!button || !panel) return;
+        button.addEventListener('click', function () {
+          const opening = panel.hasAttribute('hidden');
+          if (opening) { panel.removeAttribute('hidden'); panel.classList.add('is-open'); }
+          else { panel.setAttribute('hidden', ''); panel.classList.remove('is-open'); }
+          button.setAttribute('aria-expanded', String(opening));
+          button.textContent = opening ? closeText : openText;
+        });
+      }
+      connectToggle('.mode-nav-toggle', '#mode-navigation', '☰ Explore the 12 modes', '✕ Close mode menu');
+      const secondary = document.querySelector('.secondary-nav-toggle');
+      if (secondary) {
+        const name = secondary.getAttribute('data-section-name') || 'Sections';
+        connectToggle('.secondary-nav-toggle', '#secondary-navigation', '☰ ' + name + ' Sections', '✕ Close ' + name + ' Sections');
+      }
     });
   </script>
 </nav>
