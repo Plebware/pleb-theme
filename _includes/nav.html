@@ -1,16 +1,14 @@
 <nav class="top-nav">
   <div class="nav-container">
     <div class="nav-brand">
-      <a href="https://plebware.github.io/">📁 Plebware</a>
-      <li><a href="/search/">🔎 Search</a></li>
+      <a href="/" aria-label="PlebWare Home">🔑 PlebWare</a>
+      <a class="nav-search" href="/search/">🔎 Search</a>
     </div>
-    <button id="theme-toggle" class="theme-toggle" aria-label="Switch dark/light mode">🌙</button>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch dark/light mode">🌙</button>
 
-    <!-- ======================= -->
-    <!-- PRIMARY ROW (12 modes)  -->
-    <!-- ======================= -->
-    <ul class="modes-list primary-nav">
-      <li><a href="https://plebware.github.io/">🏠 Everyday</a></li>
+    <ul class="modes-list primary-nav" aria-label="PlebWare destinations">
+      <li><a href="/">🏠 Home</a></li>
+      <li><a href="/everyday/">🌿 Everyday</a></li>
       <li><a href="/author/">🪶 Author</a></li>
       <li><a href="/study/">📚 Study</a></li>
       <li><a href="/research/">🔬 Research</a></li>
@@ -24,13 +22,11 @@
       <li><a href="/leisure/">🎮 Leisure</a></li>
     </ul>
 
-    <!-- ======================= -->
-    <!-- SECONDARY NAVIGATION -->
-    <!-- Automatically discovers one-level subcategory index pages -->
-    <!-- ======================= -->
-    {% assign section_name = 'Everyday' %}
-    {% assign section_slug = 'everyday' %}
-    {% if page.url contains '/author/' %}{% assign section_name = 'Author' %}{% assign section_slug = 'author' %}
+    {% assign section_name = '' %}
+    {% assign section_slug = '' %}
+    {% if page.url contains '/everyday/' or page.url == '/everyday-default/' %}
+      {% assign section_name = 'Everyday' %}{% assign section_slug = 'everyday' %}
+    {% elsif page.url contains '/author/' %}{% assign section_name = 'Author' %}{% assign section_slug = 'author' %}
     {% elsif page.url contains '/study/' %}{% assign section_name = 'Study' %}{% assign section_slug = 'study' %}
     {% elsif page.url contains '/research/' %}{% assign section_name = 'Research' %}{% assign section_slug = 'research' %}
     {% elsif page.url contains '/graphics/' %}{% assign section_name = 'Graphics' %}{% assign section_slug = 'graphics' %}
@@ -43,53 +39,27 @@
     {% elsif page.url contains '/leisure/' %}{% assign section_name = 'Leisure' %}{% assign section_slug = 'leisure' %}
     {% endif %}
 
+    {% if section_slug != '' %}
     <button class="secondary-nav-toggle" type="button" aria-expanded="false" aria-controls="secondary-navigation" data-section-name="{{ section_name }}">
       ☰ {{ section_name }} Sections
     </button>
-
     <div id="secondary-navigation" class="secondary-navigation-panel" hidden>
-      {% assign section_prefix = section_slug | append: '/' %}
       {% assign subcategory_count = 0 %}
-
       <ul class="secondary-nav">
-        <!-- Master-category index / home link -->
-        {% if section_slug == 'everyday' %}
-          <li class="master-section-link"><a href="/">🏠 {{ section_name }} Home</a></li>
-        {% else %}
-          <li class="master-section-link"><a href="/{{ section_slug }}/">🏠 {{ section_name }} Home</a></li>
-        {% endif %}
-
-        <!--
-          Automatic subcategory discovery.
-          Use the source path rather than the generated URL. This is more
-          reliable with Jekyll because every subcategory is represented by
-          an index.md directly beneath the master-category directory.
-          Example: graphics/site-stickers/index.md
-
-          Match the first path segment exactly. A substring check alone
-          incorrectly treats names such as "ai-research" as belonging to
-          the separate "research" section.
-        -->
+        <li class="master-section-link"><a href="/{{ section_slug }}/">🏠 {{ section_name }} Home</a></li>
         {% assign subcategory_pages = site.pages | sort_natural: 'title' %}
         {% for subpage in subcategory_pages %}
           {% assign path_parts = subpage.path | split: '/' %}
           {% if path_parts[0] == section_slug and path_parts.size == 3 and path_parts[2] == 'index.md' %}
             {% assign subcategory_count = subcategory_count | plus: 1 %}
-            <li>
-              <a href="{{ subpage.url }}">
-                <span class="secondary-nav-title">{{ subpage.title | default: subpage.url }}</span>{% if subpage.description %}<span class="secondary-nav-description">{{ subpage.description }}</span>{% endif %}
-              </a>
-            </li>
+            <li><a href="{{ subpage.url | relative_url }}"><span class="secondary-nav-title">{{ subpage.title | default: subpage.url }}</span>{% if subpage.description %}<span class="secondary-nav-description">{{ subpage.description }}</span>{% endif %}</a></li>
           {% endif %}
         {% endfor %}
-
-        {% if subcategory_count == 0 %}
-          <li class="secondary-nav-empty">No subcategories published yet.</li>
-        {% endif %}
+        {% if subcategory_count == 0 %}<li class="secondary-nav-empty">No subcategories published yet.</li>{% endif %}
       </ul>
     </div>
+    {% endif %}
 
-    <!-- Legacy systems links -->
     <div class="nav-separator"></div>
     <ul class="systems-links">
       <li><span class="nav-label">⚙️ Systems</span></li>
@@ -99,24 +69,16 @@
       <li><a href="https://plebware.github.io/juelz-plebcore/">juelz-plebcore</a></li>
     </ul>
   </div>
-
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const toggle = document.querySelector('.secondary-nav-toggle');
       const panel = document.querySelector('#secondary-navigation');
       if (!toggle || !panel) return;
-
-      const sectionName = toggle.getAttribute('data-section-name') || 'Everyday';
-
+      const sectionName = toggle.getAttribute('data-section-name') || 'Sections';
       toggle.addEventListener('click', function () {
         const open = panel.hasAttribute('hidden');
-        if (open) {
-          panel.removeAttribute('hidden');
-          panel.classList.add('is-open');
-        } else {
-          panel.setAttribute('hidden', '');
-          panel.classList.remove('is-open');
-        }
+        if (open) { panel.removeAttribute('hidden'); panel.classList.add('is-open'); }
+        else { panel.setAttribute('hidden', ''); panel.classList.remove('is-open'); }
         toggle.setAttribute('aria-expanded', String(open));
         toggle.textContent = open ? '✕ Close ' + sectionName + ' Sections' : '☰ ' + sectionName + ' Sections';
       });
