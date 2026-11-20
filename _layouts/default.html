@@ -16,6 +16,7 @@
   <!-- Styles -->
   <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
   <link rel="stylesheet" href="{{ '/assets/css/readable-mobile.css' | relative_url }}">
+  <link rel="stylesheet" href="{{ '/assets/css/editorial.css' | relative_url }}">
   <link rel="alternate" type="application/rss+xml" title="{{ site.title | escape }}" href="{{ '/feed.xml' | relative_url }}">
 
   <!-- Favicon -->
@@ -84,7 +85,7 @@
   </script>
   {% endif %}
 </head>
-<body>
+<body class="{% if page.url == '/' %}page-home{% elsif page.url == '/default/' %}page-home page-home-preview{% elsif page.url == '/everyday/' %}page-everyday{% elsif page.url == '/everyday-default/' %}page-everyday page-everyday-preview{% endif %}">
 
   <!-- ============================================================ -->
   <!-- DYNAMIC BANNER IMAGE                                           -->
@@ -108,7 +109,9 @@
       {% assign page_path = page.url | split: '/' %}
       {% assign mode = page_path[1] %}
 
-      {% if mode == '' or mode == 'everyday' %}
+      {% if page.url == '/default/' %}
+        {% assign banner_name = 'plebwarebanner.webp' %}
+      {% elsif mode == '' or mode == 'everyday' %}
         {% assign banner_name = 'everyday-banner.webp' %}
       {% elsif mode == 'author' %}
         {% assign banner_name = 'author-banner.webp' %}
@@ -159,7 +162,8 @@
   <div class="footer-buttons">
     <a id="plebware-return-link" href="/all-posts/" class="footer-btn">↩ Return to the article I came from</a>
     <a href="/search/" class="footer-btn">🔎 Search</a>
-    <a href="/" class="footer-btn">🏠 Home (Everyday)</a>
+    <a href="/" class="footer-btn">🏠 Home</a>
+    <a href="/everyday/" class="footer-btn">🌿 Everyday</a>
     <a href="/all-posts/" class="footer-btn">📚 All Articles</a>
     <a href="/about/manifesto/" class="footer-btn">📜 Founding Manifesto</a>
   </div>
