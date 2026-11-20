@@ -1,6 +1,7 @@
 /* PlebWare editorial landing pages.
    Scoped to the new Home and Everyday landing pages; article layouts stay readable. */
 
+.page-home-preview .site-banner { display: none; }
 .page-home main,
 .page-everyday main {
   width: min(100%, 1240px);
@@ -281,9 +282,15 @@ body.dark-theme .pw-home {
 
 @media (prefers-reduced-motion: reduce) {
   .pw-home *, .pw-home *::before, .pw-home *::after {
-    scroll-behaviour: auto !important;
+    scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
+}
+
+.pw-home a:focus-visible,
+.pw-home button:focus-visible {
+  outline: 3px solid var(--pw-accent);
+  outline-offset: 4px;
 }
