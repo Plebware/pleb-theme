@@ -602,3 +602,41 @@ main .content img {
 
 /* Preview pages use their own compact hero instead of the legacy banner. */
 .page-everyday-preview .site-banner { display: none; }
+
+
+/* Larger, more legible landing-page imagery. */
+.pw-hero-media img {
+  max-height: 360px;
+}
+.pw-feature img {
+  height: 220px;
+  max-height: 220px;
+}
+@media (max-width: 640px) {
+  .pw-hero-media {
+    height: 300px;
+    max-height: 300px;
+  }
+  .pw-hero-media img {
+    max-height: 300px;
+  }
+  .pw-feature {
+    display: block;
+  }
+  .pw-feature img {
+    width: 100%;
+    height: 190px;
+    max-height: 190px;
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
+  }
+}
+@media (max-width: 370px) {
+  .pw-hero-media {
+    height: 250px;
+    max-height: 250px;
+  }
+  .pw-hero-media img {
+    max-height: 250px;
+  }
+}
