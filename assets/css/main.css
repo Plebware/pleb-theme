@@ -473,13 +473,10 @@ footer {
   }
 }
 
-/* Force header background consistency */
+/* Keep the navigation shell themed without flattening dropdown surfaces. */
 .top-nav,
 .top-nav .nav-container,
-.top-nav .nav-brand,
-.top-nav .theme-toggle,
-.top-nav ul,
-.top-nav li {
+.top-nav .nav-brand {
   background-color: var(--nav-bg) !important;
 }
 
@@ -487,13 +484,13 @@ footer {
   background-color: transparent !important;
 }
 
-.theme-toggle:hover {
-  background: var(--brand) !important;
-  color: var(--nav-bg) !important;
+.top-nav .theme-toggle {
+  background-color: var(--nav-bg) !important;
 }
 
-.top-nav * {
-  background-color: transparent !important;
+.top-nav .theme-toggle:hover {
+  background: var(--brand) !important;
+  color: var(--nav-bg) !important;
 }
 
 .top-nav {
