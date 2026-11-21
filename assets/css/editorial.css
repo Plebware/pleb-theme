@@ -760,7 +760,7 @@ main .content img {
 }
 
 
-/* Portrait featured-topic carousel: consistent artwork frame for the 12-mode set. */
+/* Portrait featured-topic carousel: fluid sizing based on available screen space. */
 .pw-topic-carousel {
   width: min(100%, 760px);
   margin-inline: auto;
@@ -781,25 +781,27 @@ main .content img {
   object-position: center;
 }
 .pw-carousel-arrow {
-  width: 76px;
-  height: 76px;
-  min-width: 76px;
-  min-height: 76px;
-  font-size: 3.6rem;
+  width: clamp(2.75rem, 6vw, 4.75rem);
+  height: clamp(2.75rem, 6vw, 4.75rem);
+  min-width: clamp(2.75rem, 6vw, 4.75rem);
+  min-height: clamp(2.75rem, 6vw, 4.75rem);
+  font-size: clamp(2rem, 4vw, 3.6rem);
   border-width: 3px;
 }
-.pw-carousel-prev { left: 16px; }
-.pw-carousel-next { right: 16px; }
+.pw-carousel-prev { left: 2%; }
+.pw-carousel-next { right: 2%; }
 
 @media (max-width: 640px) {
-  /* Keep the portrait artwork compact on phones; don't let it dominate the screen. */
+  /* The frame follows the available viewport width instead of a device-specific pixel width. */
   .pw-topic-carousel {
-    width: min(100%, 300px);
-    border-radius: 13px;
+    width: 88%;
+    max-width: 100%;
+    border-radius: 3vw;
   }
   .pw-topic-stage {
+    width: 100%;
     aspect-ratio: 4 / 5;
-    max-height: 375px;
+    max-height: 68svh;
   }
   .pw-topic-stage img {
     width: 100%;
@@ -807,42 +809,34 @@ main .content img {
     object-fit: contain;
   }
   .pw-carousel-arrow {
-    width: 48px;
-    height: 48px;
-    min-width: 48px;
-    min-height: 48px;
-    font-size: 2.35rem;
+    width: clamp(2.5rem, 11vw, 3.5rem);
+    height: clamp(2.5rem, 11vw, 3.5rem);
+    min-width: clamp(2.5rem, 11vw, 3.5rem);
+    min-height: clamp(2.5rem, 11vw, 3.5rem);
+    font-size: clamp(1.9rem, 7vw, 2.7rem);
     border-width: 2px;
   }
-  .pw-carousel-prev { left: 7px; }
-  .pw-carousel-next { right: 7px; }
+  .pw-carousel-prev { left: 2%; }
+  .pw-carousel-next { right: 2%; }
   .pw-topic-caption {
-    padding: .7rem .8rem;
-    gap: .25rem;
+    padding: 3% 4%;
+    gap: 1vw;
   }
   .pw-topic-caption .pw-eyebrow {
-    font-size: .68rem !important;
+    font-size: clamp(.62rem, 2.2vw, .76rem) !important;
   }
   .pw-topic-caption h3 {
-    font-size: 1.05rem;
+    font-size: clamp(1rem, 4vw, 1.2rem);
   }
   .pw-topic-caption p {
-    font-size: .86rem !important;
+    font-size: clamp(.82rem, 3vw, 1rem) !important;
     line-height: 1.4 !important;
   }
   .pw-topic-hint {
-    font-size: .75rem;
+    font-size: clamp(.7rem, 2.6vw, .82rem);
   }
 }
 
 @media (max-width: 360px) {
-  .pw-topic-carousel { width: min(100%, 280px); }
-  .pw-topic-stage { max-height: 350px; }
-  .pw-carousel-arrow {
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    min-height: 44px;
-    font-size: 2.1rem;
-  }
+  .pw-topic-carousel { width: 92%; }
 }
