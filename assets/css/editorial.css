@@ -758,3 +758,48 @@ main .content img {
   .pw-topic-hint { white-space: normal; }
   .pw-ecosystem-links { grid-template-columns: 1fr; }
 }
+
+
+/* Portrait featured-topic carousel: consistent artwork frame for the 12-mode set. */
+.pw-topic-carousel {
+  width: min(100%, 760px);
+  margin-inline: auto;
+}
+.pw-topic-stage {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  max-height: none;
+}
+.pw-topic-image-link {
+  width: 100%;
+  height: 100%;
+}
+.pw-topic-stage img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+.pw-carousel-arrow {
+  width: 76px;
+  height: 76px;
+  min-width: 76px;
+  min-height: 76px;
+  font-size: 3.6rem;
+  border-width: 3px;
+}
+.pw-carousel-prev { left: 16px; }
+.pw-carousel-next { right: 16px; }
+@media (max-width: 640px) {
+  .pw-topic-carousel { width: min(100%, 560px); }
+  .pw-topic-stage { aspect-ratio: 4 / 5; }
+  .pw-carousel-arrow {
+    width: 68px;
+    height: 68px;
+    min-width: 68px;
+    min-height: 68px;
+    font-size: 3.2rem;
+  }
+  .pw-carousel-prev { left: 10px; }
+  .pw-carousel-next { right: 10px; }
+}
