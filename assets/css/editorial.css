@@ -527,18 +527,18 @@ main .content img {
   }
   .pw-hero-media {
     aspect-ratio: 16 / 9;
-    max-height: 230px;
+    max-height: 145px;
     border-radius: 14px;
   }
   .pw-hero-media img {
-    max-height: 230px;
+    max-height: 145px;
     border-radius: inherit;
   }
   .pw-feature-grid {
     grid-template-columns: 1fr;
   }
   .pw-feature img {
-    max-height: 190px;
+    max-height: 150px;
     aspect-ratio: 16 / 9;
   }
   .pw-image-frame {
@@ -546,15 +546,15 @@ main .content img {
   }
 }
 @media (max-width: 370px) {
-  .pw-hero-media { max-height: 190px; }
-  .pw-hero-media img { max-height: 190px; }
-  .pw-feature img { max-height: 170px; }
+  .pw-hero-media { max-height: 130px; }
+  .pw-hero-media img { max-height: 130px; }
+  .pw-feature img { max-height: 150px; }
 }
 
 /* Single-image featured-topic carousel.
    The stage owns the dimensions; the image can never enlarge the stage. */
 .pw-topic-carousel {
-  width: min(100%, 760px);
+  width: min(100%, 620px);
   max-width: 100%;
   margin: 1.5rem auto 0;
   overflow: hidden;
@@ -567,7 +567,7 @@ main .content img {
   display: grid;
   place-items: center;
   width: 100%;
-  height: clamp(240px, 42vw, 480px);
+  height: clamp(210px, 28vw, 320px);
   overflow: hidden;
   background: var(--pw-soft);
   touch-action: pan-y;
@@ -659,12 +659,12 @@ main .content img {
 
 @media (max-width: 640px) {
   .pw-topic-carousel {
-    width: 100%;
+    width: min(100%, 520px);
     max-width: 100%;
     border-radius: 16px;
   }
   .pw-topic-stage {
-    height: clamp(180px, 32svh, 280px);
+    height: clamp(135px, 22svh, 165px);
   }
   .pw-carousel-arrow {
     width: 3rem;
