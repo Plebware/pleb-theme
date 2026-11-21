@@ -16,7 +16,9 @@
   <!-- Styles -->
   <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
   <link rel="stylesheet" href="{{ '/assets/css/readable-mobile.css' | relative_url }}">
+{% unless page.url == '/default/' %}
   <link rel="stylesheet" href="{{ '/assets/css/editorial.css' | relative_url }}">
+{% endunless %}
   <link rel="alternate" type="application/rss+xml" title="{{ site.title | escape }}" href="{{ '/feed.xml' | relative_url }}">
 
   <!-- Favicon -->
