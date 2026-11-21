@@ -452,7 +452,7 @@ main .content img {
 /* Landing-page hero artwork. */
 .pw-hero-media {
   display: flex;
-  width: 88%;
+  width: 80%;
   min-width: 0;
   aspect-ratio: 16 / 9;
   align-items: center;
@@ -527,7 +527,6 @@ main .content img {
     max-height: 68vh;
   }
   .pw-hero-media {
-    width: 96%;
     aspect-ratio: 16 / 9;
     max-height: none;
     border-radius: 1rem;
@@ -547,14 +546,11 @@ main .content img {
     max-width: 100%;
   }
 }
-@media (max-width: 370px) {
-  .pw-hero-media { width: 98%; }
-}
 
 /* Single-image featured-topic carousel.
    The stage owns the dimensions; the image can never enlarge the stage. */
 .pw-topic-carousel {
-  width: 78%;
+  width: min(70%, 56vh);
   max-width: 100%;
   margin: 1.5rem auto 0;
   overflow: hidden;
@@ -568,7 +564,7 @@ main .content img {
   place-items: center;
   width: 100%;
   height: auto;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 4 / 5;
   overflow: hidden;
   background: var(--pw-soft);
   touch-action: pan-y;
@@ -660,13 +656,12 @@ main .content img {
 
 @media (max-width: 640px) {
   .pw-topic-carousel {
-    width: 96%;
     max-width: 100%;
     border-radius: 1rem;
   }
   .pw-topic-stage {
     height: auto;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 4 / 5;
   }
   .pw-carousel-arrow {
     width: 3rem;
@@ -693,10 +688,6 @@ main .content img {
   .pw-ecosystem-links { grid-template-columns: 1fr; }
 }
 
-@media (min-width: 641px) and (max-width: 1024px) {
-  .pw-topic-carousel { width: 88%; }
-  .pw-hero-media { width: 94%; }
-}
 
 /* Navigation dropdowns: explicit surfaces and readable links in both themes.
    These selectors intentionally override the legacy .top-nav * reset. */
