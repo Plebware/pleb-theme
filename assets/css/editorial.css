@@ -660,9 +660,10 @@ main .content img {
 
 
 /* Single-image featured-topic carousel.
-   One authoritative rule set; responsive sizing is handled in one media query. */
+   The stage owns the dimensions; the image can never enlarge the stage. */
 .pw-topic-carousel {
   width: min(100%, 760px);
+  max-width: 100%;
   margin: 1.5rem auto 0;
   overflow: hidden;
   border: 1px solid var(--pw-line);
@@ -674,7 +675,7 @@ main .content img {
   display: grid;
   place-items: center;
   width: 100%;
-  aspect-ratio: 4 / 5;
+  height: clamp(240px, 42vw, 480px);
   overflow: hidden;
   background: var(--pw-soft);
   touch-action: pan-y;
@@ -702,18 +703,18 @@ main .content img {
   top: 50%;
   z-index: 2;
   display: grid;
-  width: clamp(2.75rem, 6vw, 4rem);
-  height: clamp(2.75rem, 6vw, 4rem);
-  min-width: clamp(2.75rem, 6vw, 4rem);
-  min-height: clamp(2.75rem, 6vw, 4rem);
+  width: 3.25rem;
+  height: 3.25rem;
+  min-width: 3.25rem;
+  min-height: 3.25rem;
   place-items: center;
   transform: translateY(-50%);
   border: 2px solid rgba(255,255,255,.9);
   border-radius: 50%;
-  background: rgba(16, 31, 29, .88);
+  background: rgba(16, 31, 29, .9);
   color: #fff;
   font: inherit;
-  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-size: 2.4rem;
   font-weight: 500;
   line-height: 1;
   cursor: pointer;
@@ -766,47 +767,73 @@ main .content img {
 
 @media (max-width: 640px) {
   .pw-topic-carousel {
-    width: 70vw;
+    width: 100%;
     max-width: 100%;
-    border-radius: 3vw;
+    border-radius: 16px;
   }
   .pw-topic-stage {
-    width: 100%;
-    aspect-ratio: 4 / 5;
-    max-height: 60svh;
-  }
-  .pw-topic-stage img {
-    width: 100%;
-    height: 100%;
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
+    height: clamp(180px, 32svh, 280px);
   }
   .pw-carousel-arrow {
-    width: clamp(2.5rem, 11vw, 3.25rem);
-    height: clamp(2.5rem, 11vw, 3.25rem);
-    min-width: clamp(2.5rem, 11vw, 3.25rem);
-    min-height: clamp(2.5rem, 11vw, 3.25rem);
-    font-size: clamp(1.9rem, 7vw, 2.5rem);
+    width: 3rem;
+    height: 3rem;
+    min-width: 3rem;
+    min-height: 3rem;
+    font-size: 2.2rem;
   }
   .pw-topic-caption {
     align-items: flex-start;
     flex-direction: column;
     gap: .35rem;
-    padding: 3% 4%;
+    padding: .85rem 1rem;
   }
   .pw-topic-caption .pw-eyebrow {
-    font-size: clamp(.62rem, 2.2vw, .76rem) !important;
+    font-size: clamp(.68rem, 2.6vw, .78rem) !important;
   }
   .pw-topic-caption h3 { font-size: clamp(1rem, 4vw, 1.2rem); }
   .pw-topic-caption p {
-    font-size: clamp(.82rem, 3vw, 1rem) !important;
+    font-size: clamp(.84rem, 3.2vw, 1rem) !important;
     line-height: 1.4 !important;
   }
-  .pw-topic-hint { font-size: clamp(.7rem, 2.6vw, .82rem); white-space: normal; }
+  .pw-topic-hint { font-size: .76rem; white-space: normal; }
   .pw-ecosystem-links { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 360px) {
-  .pw-topic-carousel { width: 70vw; }
+/* Navigation dropdowns: explicit surfaces and readable links in both themes.
+   These selectors intentionally override the legacy .top-nav * reset. */
+.top-nav .mode-navigation-panel,
+.top-nav .secondary-navigation-panel {
+  background-color: var(--nav-bg) !important;
+  color: var(--nav-text) !important;
+  border-color: var(--border) !important;
+}
+.top-nav .mode-navigation-panel .modes-list,
+.top-nav .secondary-navigation-panel .secondary-nav {
+  background-color: var(--secondary-nav-bg) !important;
+  border-color: var(--border) !important;
+}
+.top-nav .mode-navigation-panel .modes-list li a,
+.top-nav .secondary-navigation-panel .secondary-nav li a {
+  color: var(--link) !important;
+  background-color: transparent !important;
+  border-color: var(--border) !important;
+}
+.top-nav .mode-navigation-panel .modes-list li a:hover,
+.top-nav .mode-navigation-panel .modes-list li a:focus-visible,
+.top-nav .secondary-navigation-panel .secondary-nav li a:hover,
+.top-nav .secondary-navigation-panel .secondary-nav li a:focus-visible {
+  color: var(--link-hover) !important;
+  background-color: var(--nav-bg) !important;
+  outline-offset: 2px;
+}
+.top-nav .secondary-navigation-panel .secondary-nav-title {
+  color: var(--link) !important;
+}
+.top-nav .secondary-navigation-panel .secondary-nav-description,
+.top-nav .secondary-navigation-panel .secondary-nav-empty {
+  color: var(--nav-text) !important;
+}
+
+@media (max-width: 640px) {
+  .pw-topic-stage { height: clamp(180px, 32svh, 280px); }
 }
