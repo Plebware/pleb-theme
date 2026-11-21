@@ -1,13 +1,8 @@
 {% comment %}
-  PlebWare automatic master-category index.
+  Shared PlebWare mode directory.
   Discovers one-level subcategory index.md pages and shows the
-  three newest posts from each subcategory.
-
-  Subcategory headings are sorted by their visible page titles, so
-  numbered names such as "01 — Name" and "02 — Name" appear in
-  ascending order. Posts are matched inside the loop so the current
-  subcategory path is evaluated directly. The shared include is used
-  by all mode indexes.
+  three newest articles from each subcategory.
+  Used by all twelve mode landing pages.
 
   Usage:
     {% include category-index.html section_slug="graphics" %}
@@ -17,30 +12,42 @@
 {% assign section_prefix = section_slug | append: '/' %}
 {% assign subcategory_pages = site.pages | sort: 'title' %}
 
-{% for subpage in subcategory_pages %}
-  {% assign path_parts = subpage.path | split: '/' %}
-  {% if subpage.path contains section_prefix and path_parts.size == 3 and path_parts[0] == section_slug and path_parts[2] == 'index.md' %}
+<div class="pw-category-directory" data-category="{{ section_slug }}">
+  <div class="pw-category-grid">
+    {% for subpage in subcategory_pages %}
+      {% assign path_parts = subpage.path | split: '/' %}
+      {% if subpage.path contains section_prefix and path_parts.size == 3 and path_parts[0] == section_slug and path_parts[2] == 'index.md' %}
 
-    {% assign subcategory_path = subpage.path | remove: '/index.md' | append: '/' %}
-    {% assign subcategory_posts = '' | split: '' %}
-    {% for post in site.posts %}
-      {% if post.path contains subcategory_path %}
-        {% assign subcategory_posts = subcategory_posts | push: post %}
+        {% assign subcategory_path = subpage.path | remove: '/index.md' | append: '/' %}
+        {% assign subcategory_posts = '' | split: '' %}
+        {% for post in site.posts %}
+          {% if post.path contains subcategory_path %}
+            {% assign subcategory_posts = subcategory_posts | push: post %}
+          {% endif %}
+        {% endfor %}
+        {% assign subcategory_posts = subcategory_posts | sort: 'date' | reverse %}
+
+        <article class="pw-category-card">
+          <h2 class="pw-category-title">
+            <a href="{{ subpage.url | relative_url }}">{{ subpage.title | default: path_parts[1] | escape }}</a>
+          </h2>
+
+          {% if subcategory_posts.size > 0 %}
+            <ul class="pw-category-articles">
+              {% for post in subcategory_posts limit: 3 %}
+                <li>
+                  <a href="{{ post.url | relative_url }}">{{ post.title | escape }}</a>
+                  <time datetime="{{ post.date | date: '%Y-%m-%d' }}">{{ post.date | date: "%d %b %Y" }}</time>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="pw-category-empty">No articles published in this subject yet.</p>
+          {% endif %}
+
+          <a class="pw-category-browse" href="{{ subpage.url | relative_url }}">Explore this subject <span aria-hidden="true">→</span></a>
+        </article>
       {% endif %}
     {% endfor %}
-    {% assign subcategory_posts = subcategory_posts | sort: 'date' | reverse %}
-
-## <a href="{{ subpage.url | relative_url }}">{{ subpage.title | default: path_parts[1] | escape }}</a>
-
-{% if subcategory_posts.size > 0 %}
-<ul>
-{% for post in subcategory_posts limit: 3 %}
-  <li><a href="{{ post.url | relative_url }}">{{ post.title | escape }}</a> – {{ post.date | date: "%Y-%m-%d" }}</li>
-{% endfor %}
-</ul>
-{% else %}
-<p><em>No articles yet.</em></p>
-{% endif %}
-
-  {% endif %}
-{% endfor %}
+  </div>
+</div>
