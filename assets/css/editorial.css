@@ -452,13 +452,14 @@ main .content img {
 /* Landing-page hero artwork. */
 .pw-hero-media {
   display: flex;
-  width: 100%;
+  width: 88%;
   min-width: 0;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 9;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border-radius: 20px;
+  margin-inline: auto;
+  border-radius: 1.25rem;
   background: var(--pw-paper);
 }
 .pw-hero-media img {
@@ -466,7 +467,7 @@ main .content img {
   width: 100%;
   height: 100%;
   max-width: 100%;
-  max-height: 340px;
+  max-height: 100%;
   object-fit: contain;
   object-position: center;
   border-radius: inherit;
@@ -483,7 +484,7 @@ main .content img {
   width: 100%;
   max-width: 100%;
   height: auto;
-  max-height: 240px;
+  max-height: 100%;
   aspect-ratio: 16 / 10;
   object-fit: contain;
   background: var(--pw-soft);
@@ -526,19 +527,20 @@ main .content img {
     max-height: 68vh;
   }
   .pw-hero-media {
+    width: 96%;
     aspect-ratio: 16 / 9;
-    max-height: 145px;
-    border-radius: 14px;
+    max-height: none;
+    border-radius: 1rem;
   }
   .pw-hero-media img {
-    max-height: 145px;
+    max-height: 100%;
     border-radius: inherit;
   }
   .pw-feature-grid {
     grid-template-columns: 1fr;
   }
   .pw-feature img {
-    max-height: 150px;
+    max-height: 100%;
     aspect-ratio: 16 / 9;
   }
   .pw-image-frame {
@@ -546,20 +548,18 @@ main .content img {
   }
 }
 @media (max-width: 370px) {
-  .pw-hero-media { max-height: 130px; }
-  .pw-hero-media img { max-height: 130px; }
-  .pw-feature img { max-height: 150px; }
+  .pw-hero-media { width: 98%; }
 }
 
 /* Single-image featured-topic carousel.
    The stage owns the dimensions; the image can never enlarge the stage. */
 .pw-topic-carousel {
-  width: min(100%, 620px);
+  width: 78%;
   max-width: 100%;
   margin: 1.5rem auto 0;
   overflow: hidden;
   border: 1px solid var(--pw-line);
-  border-radius: 22px;
+  border-radius: 1.375rem;
   background: var(--pw-paper);
 }
 .pw-topic-stage {
@@ -567,7 +567,8 @@ main .content img {
   display: grid;
   place-items: center;
   width: 100%;
-  height: clamp(210px, 28vw, 320px);
+  height: auto;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   background: var(--pw-soft);
   touch-action: pan-y;
@@ -659,12 +660,13 @@ main .content img {
 
 @media (max-width: 640px) {
   .pw-topic-carousel {
-    width: min(100%, 520px);
+    width: 96%;
     max-width: 100%;
-    border-radius: 16px;
+    border-radius: 1rem;
   }
   .pw-topic-stage {
-    height: clamp(135px, 22svh, 165px);
+    height: auto;
+    aspect-ratio: 16 / 9;
   }
   .pw-carousel-arrow {
     width: 3rem;
@@ -689,6 +691,11 @@ main .content img {
   }
   .pw-topic-hint { font-size: .76rem; white-space: normal; }
   .pw-ecosystem-links { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .pw-topic-carousel { width: 88%; }
+  .pw-hero-media { width: 94%; }
 }
 
 /* Navigation dropdowns: explicit surfaces and readable links in both themes.
