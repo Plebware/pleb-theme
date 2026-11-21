@@ -794,7 +794,7 @@ main .content img {
 @media (max-width: 640px) {
   /* The frame follows the available viewport width instead of a device-specific pixel width. */
   .pw-topic-carousel {
-    width: 88%;
+    width: 70%;
     max-width: 100%;
     border-radius: 3vw;
   }
@@ -838,5 +838,5 @@ main .content img {
 }
 
 @media (max-width: 360px) {
-  .pw-topic-carousel { width: 92%; }
+  .pw-topic-carousel { width: 70%; }
 }
