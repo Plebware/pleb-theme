@@ -660,7 +660,7 @@ main .content img {
 
 /* Single-image featured topic carousel for the homepage preview. */
 .pw-topic-carousel {
-  width: min(100%, 900px);
+  width: min(100%, 1000px);
   margin: 1.5rem auto 0;
   overflow: hidden;
   border: 1px solid var(--pw-line);
@@ -678,9 +678,11 @@ main .content img {
   touch-action: pan-y;
 }
 .pw-topic-image-link {
-  display: block;
+  display: flex;
   width: 100%;
   height: 100%;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
 }
 .pw-topic-stage img {
@@ -688,30 +690,37 @@ main .content img {
   width: 100%;
   height: 100%;
   max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
+  object-position: center;
 }
 .pw-carousel-arrow {
   position: absolute;
   top: 50%;
   z-index: 2;
   display: grid;
-  width: clamp(42px, 6vw, 56px);
-  height: clamp(42px, 6vw, 56px);
+  width: 68px;
+  height: 68px;
+  min-width: 68px;
+  min-height: 68px;
   place-items: center;
   transform: translateY(-50%);
-  border: 1px solid rgba(255,255,255,.7);
+  border: 2px solid rgba(255,255,255,.9);
   border-radius: 50%;
-  background: rgba(16, 31, 29, .78);
+  background: rgba(16, 31, 29, .88);
   color: #fff;
   font: inherit;
-  font-size: 2rem;
+  font-size: 3.1rem;
+  font-weight: 500;
   line-height: 1;
   cursor: pointer;
-  box-shadow: 0 3px 14px rgba(0,0,0,.22);
+  box-shadow: 0 4px 18px rgba(0,0,0,.3);
+  -webkit-tap-highlight-color: transparent;
 }
 .pw-carousel-arrow:hover { background: var(--pw-accent); }
-.pw-carousel-prev { left: clamp(8px, 2vw, 18px); }
-.pw-carousel-next { right: clamp(8px, 2vw, 18px); }
+.pw-carousel-arrow:active { transform: translateY(-50%) scale(.94); }
+.pw-carousel-prev { left: 14px; }
+.pw-carousel-next { right: 14px; }
 .pw-topic-caption {
   display: flex;
   align-items: center;
@@ -736,6 +745,15 @@ main .content img {
 @media (max-width: 640px) {
   .pw-topic-carousel { border-radius: 16px; }
   .pw-topic-stage { aspect-ratio: 4 / 3; }
+  .pw-carousel-arrow {
+    width: 60px;
+    height: 60px;
+    min-width: 60px;
+    min-height: 60px;
+    font-size: 2.8rem;
+  }
+  .pw-carousel-prev { left: 8px; }
+  .pw-carousel-next { right: 8px; }
   .pw-topic-caption { align-items: flex-start; flex-direction: column; gap: .35rem; }
   .pw-topic-hint { white-space: normal; }
   .pw-ecosystem-links { grid-template-columns: 1fr; }
