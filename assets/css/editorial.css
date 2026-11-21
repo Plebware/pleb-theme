@@ -851,3 +851,100 @@ body.dark-theme .pw-category-directory {
 @media (prefers-reduced-motion: reduce) {
   .pw-category-card { transition: none; }
 }
+
+
+
+/* PlebVox controls use the same rounded editorial button language as PlebWare. */
+.plebvox-controls {
+  margin: 1rem 0;
+  padding: clamp(.85rem, 2vw, 1.1rem);
+  border: 1px solid var(--pw-line, var(--border, #d9e4df));
+  border-radius: 18px;
+  background: var(--pw-paper, var(--card-bg, #fff));
+  color: var(--pw-ink, var(--text, #172b35));
+  text-align: center;
+}
+.plebvox-controls > div:first-child {
+  margin-bottom: .55rem !important;
+  color: inherit !important;
+  font-weight: 800 !important;
+}
+.plebvox-controls > p {
+  max-width: 38rem;
+  margin: 0 auto .8rem !important;
+  color: var(--pw-muted, var(--text-secondary, #667)) !important;
+  font-size: .86rem !important;
+  line-height: 1.5 !important;
+}
+.plebvox-button-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: .55rem;
+  flex-wrap: wrap;
+  margin-bottom: .65rem;
+}
+.plebvox-controls .plebvox-button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  padding: .65rem 1.05rem;
+  border: 2px solid var(--pw-accent, var(--link, #176b63));
+  border-radius: 999px;
+  background: var(--pw-accent, var(--link, #176b63));
+  color: #fff !important;
+  font: inherit;
+  font-size: .9rem;
+  font-weight: 800;
+  line-height: 1.2;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(20,75,65,.10);
+  transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.plebvox-controls .plebvox-button:hover {
+  transform: translateY(-2px);
+  background: var(--pw-accent-dark, #104c47);
+  box-shadow: 0 7px 16px rgba(20,75,65,.16);
+}
+.plebvox-controls .plebvox-button-secondary,
+.plebvox-controls .plebvox-button-quiet {
+  background: transparent;
+  color: var(--pw-accent, var(--link, #176b63)) !important;
+  box-shadow: none;
+}
+.plebvox-controls .plebvox-button-secondary:hover,
+.plebvox-controls .plebvox-button-quiet:hover {
+  background: var(--pw-soft, var(--secondary-nav-bg, #edf4f1));
+  color: var(--pw-accent, var(--link, #176b63)) !important;
+}
+.plebvox-controls .plebvox-button:focus-visible,
+.plebvox-controls select:focus-visible,
+.plebvox-controls input:focus-visible {
+  outline: 3px solid var(--pw-accent, var(--link, #176b63));
+  outline-offset: 3px;
+}
+.plebvox-controls .plebvox-status {
+  min-width: 60px;
+  margin-left: .35rem;
+  color: var(--pw-muted, var(--text-secondary, #667));
+  font-size: .8rem;
+}
+.plebvox-controls .plebvox-voice-select {
+  max-width: min(240px, 100%);
+  padding: .45rem .65rem;
+  border: 1px solid var(--pw-line, var(--border, #d9e4df));
+  border-radius: 999px;
+  background: var(--pw-paper, var(--card-bg, #fff));
+  color: var(--pw-ink, var(--text, #172b35));
+}
+.plebvox-controls input[type="range"] { accent-color: var(--pw-accent, var(--link, #176b63)); }
+@media (max-width: 520px) {
+  .plebvox-button-row { gap: .45rem; }
+  .plebvox-controls .plebvox-button { min-height: 42px; padding: .6rem .85rem; font-size: .86rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .plebvox-controls .plebvox-button { transition: none; }
+}
