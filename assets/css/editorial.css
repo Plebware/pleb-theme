@@ -82,14 +82,6 @@ body.dark-theme .pw-home {
   color: var(--pw-muted);
   font-size: clamp(1.05rem, 1.5vw, 1.24rem) !important;
 }
-.pw-hero-media { min-width: 0; }
-.pw-hero-media img {
-  width: 100%;
-  aspect-ratio: 5 / 4;
-  object-fit: cover;
-  border-radius: 20px;
-  box-shadow: 0 18px 42px rgba(18, 42, 36, 0.16);
-}
 
 .pw-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
 .pw-button {
@@ -141,7 +133,6 @@ body.dark-theme .pw-home {
   transition: transform 160ms ease, box-shadow 160ms ease;
 }
 .pw-feature:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(20, 45, 38, 0.1); }
-.pw-feature img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
 .pw-feature-copy { padding: 1.1rem 1.15rem 1.25rem; }
 .pw-feature-copy h3 { margin: 0 0 0.4rem; color: var(--pw-ink); }
 .pw-feature-copy p { margin: 0; color: var(--pw-muted); }
@@ -249,15 +240,11 @@ body.dark-theme .pw-home {
   }
   .pw-hero h1 { font-size: clamp(2.45rem, 12vw, 3.65rem); }
   .pw-hero-lead { font-size: 1.05rem !important; }
-  .pw-hero-media { order: -1; }
-  .pw-hero-media img { aspect-ratio: 16 / 9; border-radius: 14px; }
   .pw-actions { display: grid; grid-template-columns: 1fr; }
   .pw-button { width: 100%; min-height: 52px; }
   .pw-section { margin: 2.4rem 0; }
   .pw-section-head { align-items: start; flex-direction: column; }
   .pw-feature-grid { grid-template-columns: 1fr; gap: 0.85rem; }
-  .pw-feature { display: grid; grid-template-columns: 37% 1fr; align-items: stretch; }
-  .pw-feature img { height: 100%; min-height: 142px; aspect-ratio: auto; }
   .pw-feature-copy { padding: 0.9rem; }
   .pw-feature-copy h3 { font-size: 1.05rem; }
   .pw-feature-copy p { font-size: 0.88rem !important; }
@@ -276,8 +263,6 @@ body.dark-theme .pw-home {
 @media (max-width: 370px) {
   .pw-mode-grid { grid-template-columns: 1fr; }
   .pw-mode-card { min-height: 76px; }
-  .pw-feature { grid-template-columns: 1fr; }
-  .pw-feature img { min-height: 0; aspect-ratio: 16 / 9; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -433,28 +418,22 @@ body.dark-theme .pw-home {
 
 
 /* ------------------------------------------------------------
-   Responsive image containment.
-   Keep images inside their layout; preserve the complete artwork.
+   Shared image containment for landing pages and articles.
+   Each component has one sizing rule; the image never sets its own frame.
    ------------------------------------------------------------ */
-
-/* Never let content images create horizontal page overflow. */
 main,
 main * {
   min-width: 0;
 }
-
 main img,
 main picture,
 main video,
 main svg {
   max-width: 100%;
 }
-
 main img {
   height: auto;
 }
-
-/* Article and ordinary content images: readable, contained, centred. */
 main > img,
 main article img,
 main .post-content img,
@@ -470,45 +449,47 @@ main .content img {
   object-fit: contain;
 }
 
-/* Landing-page hero: a bounded window, never an oversized photograph. */
+/* Landing-page hero artwork. */
 .pw-hero-media {
   display: flex;
+  width: 100%;
   min-width: 0;
+  aspect-ratio: 4 / 3;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   border-radius: 20px;
   background: var(--pw-paper);
 }
-
 .pw-hero-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 340px;
+  object-fit: contain;
+  object-position: center;
+  border-radius: inherit;
+  box-shadow: none;
+}
+
+/* Feature artwork: consistent cards with complete images visible. */
+.pw-feature {
+  display: block;
+  min-width: 0;
+}
+.pw-feature img {
   display: block;
   width: 100%;
   max-width: 100%;
   height: auto;
-  max-height: 340px;
-  aspect-ratio: 5 / 4;
-  object-fit: contain;
-  border-radius: 20px;
-  box-shadow: none;
-}
-
-/* Feature cards show complete artwork rather than cutting off edges. */
-.pw-feature {
-  min-width: 0;
-}
-
-.pw-feature img {
-  display: block;
-  width: 100%;
-  height: 180px;
-  max-height: 180px;
+  max-height: 240px;
   aspect-ratio: 16 / 10;
   object-fit: contain;
   background: var(--pw-soft);
 }
 
-/* Explicit reusable image frames for future Everyday and gallery pages. */
+/* Reusable image frames for galleries and future landing pages. */
 .pw-image-frame {
   display: flex;
   width: 100%;
@@ -518,7 +499,6 @@ main .content img {
   overflow: hidden;
   background: var(--pw-soft);
 }
-
 .pw-image-frame img {
   display: block;
   width: 100%;
@@ -527,27 +507,14 @@ main .content img {
   max-height: 100%;
   object-fit: contain;
 }
+.pw-image-landscape { aspect-ratio: 16 / 9; }
+.pw-image-card { aspect-ratio: 4 / 3; }
+.pw-image-square { aspect-ratio: 1 / 1; }
+.pw-image-portrait { aspect-ratio: 3 / 4; }
+.pw-image-original { height: auto; aspect-ratio: auto; }
 
-.pw-image-landscape {
-  aspect-ratio: 16 / 9;
-}
-
-.pw-image-card {
-  aspect-ratio: 4 / 3;
-}
-
-.pw-image-square {
-  aspect-ratio: 1 / 1;
-}
-
-.pw-image-portrait {
-  aspect-ratio: 3 / 4;
-}
-
-.pw-image-original {
-  height: auto;
-  aspect-ratio: auto;
-}
+/* Preview pages replace the legacy banner with their own hero. */
+.page-everyday-preview .site-banner { display: none; }
 
 @media (max-width: 640px) {
   main > img,
@@ -558,106 +525,31 @@ main .content img {
   main .content img {
     max-height: 68vh;
   }
-
   .pw-hero-media {
+    aspect-ratio: 16 / 9;
     max-height: 230px;
     border-radius: 14px;
   }
-
   .pw-hero-media img {
-    width: 100%;
     max-height: 230px;
-    aspect-ratio: 16 / 9;
-    border-radius: 14px;
-  }
-
-  .pw-feature img {
-    height: 132px;
-    max-height: 132px;
-    aspect-ratio: 4 / 3;
-  }
-
-  .pw-image-frame {
-    max-width: 100%;
-  }
-}
-
-/* Very narrow screens still get a complete image, never sideways scrolling. */
-@media (max-width: 370px) {
-  .pw-hero-media {
-    max-height: 190px;
-  }
-
-  .pw-hero-media img {
-    max-height: 190px;
-  }
-
-  .pw-feature img {
-    height: auto;
-    max-height: 190px;
-    aspect-ratio: 16 / 9;
-  }
-}
-
-
-/* Preview pages use their own compact hero instead of the legacy banner. */
-.page-everyday-preview .site-banner { display: none; }
-
-
-/* Responsive landing-page imagery.
-   Images scale with their parent column and preserve their proportions.
-   No fixed pixel heights: the layout determines the available width. */
-.pw-hero-media {
-  width: 100%;
-  min-width: 0;
-  height: auto;
-  max-height: none;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-}
-.pw-hero-media img {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  height: 100%;
-  max-height: none;
-  aspect-ratio: auto;
-  object-fit: contain;
-}
-.pw-feature {
-  display: block;
-  min-width: 0;
-}
-.pw-feature img {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  height: auto;
-  max-height: none;
-  aspect-ratio: 16 / 10;
-  object-fit: contain;
-}
-@media (max-width: 640px) {
-  .pw-hero-media {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 9;
+    border-radius: inherit;
   }
   .pw-feature-grid {
     grid-template-columns: 1fr;
   }
-  .pw-feature {
-    display: block;
-  }
   .pw-feature img {
-    width: 100%;
-    height: auto;
-    max-height: none;
+    max-height: 190px;
     aspect-ratio: 16 / 9;
   }
+  .pw-image-frame {
+    max-width: 100%;
+  }
 }
-
-
+@media (max-width: 370px) {
+  .pw-hero-media { max-height: 190px; }
+  .pw-hero-media img { max-height: 190px; }
+  .pw-feature img { max-height: 170px; }
+}
 
 /* Single-image featured-topic carousel.
    The stage owns the dimensions; the image can never enlarge the stage. */
@@ -834,6 +726,3 @@ main .content img {
   color: var(--nav-text) !important;
 }
 
-@media (max-width: 640px) {
-  .pw-topic-stage { height: clamp(180px, 32svh, 280px); }
-}
