@@ -108,7 +108,9 @@
       {% assign page_path = page.url | split: '/' %}
       {% assign mode = page_path[1] %}
 
-      {% if mode == '' or mode == 'everyday' %}
+      {% if page.url == '/' %}
+        {% assign banner_name = 'plebwarebanner.webp' %}
+      {% elsif mode == '' or mode == 'everyday' or mode == 'everyday-default' %}
         {% assign banner_name = 'everyday-banner.webp' %}
       {% elsif mode == 'author' %}
         {% assign banner_name = 'author-banner.webp' %}
