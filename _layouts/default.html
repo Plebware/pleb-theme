@@ -9,7 +9,11 @@
   {%- assign canonical_url = page.url | absolute_url -%}
   {%- assign social_image = '/assets/images/twitter-card.webp' | absolute_url -%}
 
-  <title>{{ page_title | escape }} – {{ site.title | escape }}</title>
+  {% if page.url == "/" %}
+  <title>{{ site.title | escape }}</title>
+  {% else %}
+  <title>{{ page_title | escape }} – {{ site.short_title | default: site.title | escape }}</title>
+  {% endif %}
   <meta name="description" content="{{ clean_description | escape }}">
   <link rel="canonical" href="{{ canonical_url | escape }}">
 
